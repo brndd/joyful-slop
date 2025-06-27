@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "type": "shell",
+    "command": "go",
+    "options": {
+        "cwd": "${workspaceFolder}",
+    },
+    "presentation": {
+        "reveal": "never",
+        "revealProblems": "onProblem",
+    },
+    "tasks": [
+        {
+            "label": "Build Project",
+            "args": [
+                "build",
+                "-o",
+                "build/",
+                "./cmd/joyful",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true,
+            },
+        },
+    ],
+}

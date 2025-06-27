@@ -5,11 +5,20 @@ import (
 	"syscall"
 	"time"
 
+	"git.annabunches.net/annabunches/joyful/internal/virtualdevice"
 	"github.com/holoplot/go-evdev"
 )
 
 func main() {
+	// Check for and destroy any existing joyful devices
+	virtualdevice.CleanupStaleVirtualDevices()
+
+	// STUB: parse virtual device config
+
+	// STUB: parse mapping config
+
 	// Define virtual device
+	// TODO: create virtual devices from config
 	vDevice, err := evdev.CreateDevice(
 		"joyful-joystick",
 		evdev.InputID{
@@ -36,6 +45,12 @@ func main() {
 		fmt.Printf("Failed to create vDevice: %s", err.Error())
 	}
 
+	location, err := vDevice.PhysicalLocation()
+	if err != nil {
+		fmt.Printf("Couldn't get virtual device location: %s\n", err.Error())
+	}
+	fmt.Printf("Device created as %s. Press Ctrl+C to quit and destroy the device.\n", location)
+
 	var value int32 = 1
 	for {
 		eventTime := syscall.NsecToTimeval(int64(time.Now().Nanosecond()))
@@ -53,7 +68,7 @@ func main() {
 			value = 0
 		}
 
-		time.Sleep(1000)
+		time.Sleep(1 * time.Second)
 	}
 }
 
