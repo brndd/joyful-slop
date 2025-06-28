@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"time"
 
+	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"git.annabunches.net/annabunches/joyful/internal/virtualdevice"
 	"github.com/holoplot/go-evdev"
 )
@@ -38,7 +38,7 @@ func main() {
 			},
 		},
 	)
-	fatalIfError(err, "Failed to create virtual device")
+	logger.FatalIfError(err, "Failed to create virtual device")
 
 	buffer := virtualdevice.NewEventBuffer(vDevice)
 
@@ -49,7 +49,7 @@ func main() {
 	fmt.Printf("Virtual device created as %s.\n", name)
 
 	pDevice, err := evdev.Open("/dev/input/event12")
-	fatalIfError(err, "Couldn't open physical device")
+	logger.FatalIfError(err, "Couldn't open physical device")
 
 	name, err = pDevice.Name()
 	if err != nil {
@@ -63,7 +63,7 @@ func main() {
 		last := combo
 
 		event, err := pDevice.ReadOne()
-		logIfError(err, "Error while reading event")
+		logger.LogIfError(err, "Error while reading event")
 
 		// FIXME: test code
 		for event.Code != evdev.SYN_REPORT {
@@ -103,7 +103,7 @@ func main() {
 			}
 
 			event, err = pDevice.ReadOne()
-			logIfError(err, "Error while reading event")
+			logger.LogIfError(err, "Error while reading event")
 		}
 
 		if combo > last && combo == 3 {
@@ -143,21 +143,4 @@ func jsButtons() []evdev.EvCode {
 	}
 
 	return buttons
-}
-
-func logIfError(err error, msg string) {
-	if err == nil {
-		return
-	}
-
-	fmt.Printf("%s: %s\n", msg, err.Error())
-}
-
-func fatalIfError(err error, msg string) {
-	if err == nil {
-		return
-	}
-
-	logIfError(err, msg)
-	os.Exit(1)
 }
