@@ -16,8 +16,9 @@ type PhysicalDeviceConfig struct {
 }
 
 type VirtualDeviceConfig struct {
-	NumButtons int `yaml:"num_buttons"`
-	NumAxes    int `yaml:"num_axes"`
+	Name	string `yaml:"name"`
+	Buttons int `yaml:"buttons"`
+	Axes    int `yaml:"axes"`
 }
 
 type RuleConfig struct {

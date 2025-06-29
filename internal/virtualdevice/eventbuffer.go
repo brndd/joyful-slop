@@ -10,13 +10,13 @@ import (
 
 type EventBuffer struct {
 	events []*evdev.InputEvent
-	device *evdev.InputDevice
+	Device *evdev.InputDevice
 }
 
 func NewEventBuffer(device *evdev.InputDevice) *EventBuffer {
 	return &EventBuffer{
 		events: make([]*evdev.InputEvent, 0),
-		device: device,
+		Device: device,
 	}
 }
 
@@ -29,10 +29,10 @@ func (buffer *EventBuffer) SendEvents() {
 
 	for i := 0; i < len(buffer.events); i++ {
 		buffer.events[i].Time = eventTime
-		buffer.device.WriteOne(buffer.events[i])
+		buffer.Device.WriteOne(buffer.events[i])
 	}
 
-	buffer.device.WriteOne(&evdev.InputEvent{
+	buffer.Device.WriteOne(&evdev.InputEvent{
 		Time:  eventTime,
 		Type:  evdev.EV_SYN,
 		Code:  evdev.SYN_REPORT,

@@ -4,61 +4,34 @@ import (
 	"fmt"
 	"time"
 
+	"git.annabunches.net/annabunches/joyful/internal/config"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"git.annabunches.net/annabunches/joyful/internal/virtualdevice"
 	"github.com/holoplot/go-evdev"
 )
 
 func main() {
-	// STUB: parse virtual device config
+	// parse configs
+	parser := &config.ConfigParser{}
+	parser.Parse("~/.config/joyful") // TODO: make ~ work here
 
-	// STUB: parse mapping config
-
-	// Define virtual device
-	// TODO: create virtual devices from config
-	vDevice, err := evdev.CreateDevice(
-		"joyful-joystick",
-		evdev.InputID{
-			BusType: 0x03,
-			Vendor:  0x4711,
-			Product: 0x0816,
-			Version: 1,
-		},
-		map[evdev.EvType][]evdev.EvCode{
-			evdev.EV_KEY: jsButtons(),
-			evdev.EV_ABS: {
-				evdev.ABS_X,
-				evdev.ABS_Y,
-				evdev.ABS_Z,
-				evdev.ABS_RX,
-				evdev.ABS_RY,
-				evdev.ABS_RZ,
-				evdev.ABS_THROTTLE,
-				evdev.ABS_WHEEL,
-			},
-		},
-	)
-	logger.FatalIfError(err, "Failed to create virtual device")
-
-	buffer := virtualdevice.NewEventBuffer(vDevice)
-
-	name, err := vDevice.Name()
-	if err != nil {
-		name = "Unknown"
+	vDevices := parser.CreateVirtualDevices()
+ 	vBuffers := make(map[string]*virtualdevice.EventBuffer)
+	for name, device := range vDevices {
+		vBuffers[name] = virtualdevice.NewEventBuffer(device)
 	}
-	fmt.Printf("Virtual device created as %s.\n", name)
 
 	pDevice, err := evdev.Open("/dev/input/event12")
 	logger.FatalIfError(err, "Couldn't open physical device")
 
-	name, err = pDevice.Name()
+	name, err := pDevice.Name()
 	if err != nil {
 		name = "Unknown"
 	}
 	fmt.Printf("Connected to physical device %s\n", name)
 
 	var combo int32 = 0
-
+	buffer := vBuffers["test"]
 	for {
 		last := combo
 
@@ -126,21 +99,4 @@ func main() {
 
 		time.Sleep(1 * time.Millisecond)
 	}
-}
-
-func jsButtons() []evdev.EvCode {
-	buttons := make([]evdev.EvCode, 80)
-	i := 0
-
-	for code := 0x120; code <= 0x12f; code++ {
-		buttons[i] = evdev.EvCode(code)
-		i++
-	}
-
-	for code := 0x2c0; code <= 0x2ff; code++ {
-		buttons[i] = evdev.EvCode(code)
-		i++
-	}
-
-	return buttons
 }
