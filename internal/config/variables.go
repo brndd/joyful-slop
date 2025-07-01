@@ -60,3 +60,11 @@ var (
 		evdev.BTN_TRIGGER_HAPPY40,
 	}
 )
+
+const (
+	DeviceTypePhysical = "physical"
+	DeviceTypeVirtual  = "virtual"
+
+	RuleTypeSimple = "simple"
+	RuleTypeCombo  = "combo"
+)

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"git.annabunches.net/annabunches/joyful/internal/config"
@@ -10,18 +12,36 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
-func main() {
-	// parse configs
+func readConfig() *config.ConfigParser {
 	parser := &config.ConfigParser{}
-	parser.Parse("~/.config/joyful") // TODO: make ~ work here
+	homeDir, err := os.UserHomeDir()
+	logger.FatalIfError(err, "Can't get user home directory, so can't find configuration.")
+	err = parser.Parse(filepath.Join(homeDir, ".config/joyful"))
+	logger.FatalIfError(err, "")
+	return parser
+}
 
-	vDevices := parser.CreateVirtualDevices()
- 	vBuffers := make(map[string]*virtualdevice.EventBuffer)
+func initVirtualDevices(config *config.ConfigParser) map[string]*virtualdevice.EventBuffer {
+	vDevices := config.CreateVirtualDevices()
+	vBuffers := make(map[string]*virtualdevice.EventBuffer)
 	for name, device := range vDevices {
 		vBuffers[name] = virtualdevice.NewEventBuffer(device)
 	}
+	return vBuffers
+}
 
-	pDevice, err := evdev.Open("/dev/input/event12")
+func main() {
+	// parse configs
+	config := readConfig()
+
+	// Initialize virtual devices and event buffers
+	vBuffers := initVirtualDevices(config)
+
+	// Initialize physical devices
+	// pDevices := config.ConnectPhysicalDevices()
+
+	// TEST CODE
+	pDevice, err := evdev.Open("/dev/input/event11")
 	logger.FatalIfError(err, "Couldn't open physical device")
 
 	name, err := pDevice.Name()
@@ -31,14 +51,13 @@ func main() {
 	fmt.Printf("Connected to physical device %s\n", name)
 
 	var combo int32 = 0
-	buffer := vBuffers["test"]
+	buffer := vBuffers["main"]
 	for {
 		last := combo
 
 		event, err := pDevice.ReadOne()
 		logger.LogIfError(err, "Error while reading event")
 
-		// FIXME: test code
 		for event.Code != evdev.SYN_REPORT {
 			if event.Type == evdev.EV_KEY {
 				switch event.Code {
@@ -95,8 +114,8 @@ func main() {
 		}
 
 		buffer.SendEvents()
-		// FIXME: end test code
 
 		time.Sleep(1 * time.Millisecond)
 	}
+	// END TEST CODE
 }

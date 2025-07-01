@@ -9,12 +9,20 @@ func Log(msg string) {
 	fmt.Println(msg)
 }
 
+func LogError(err error, msg string) {
+	if msg == "" {
+		fmt.Printf("%s\n", err.Error())
+	} else {
+		fmt.Printf("%s: %s\n", msg, err.Error())
+	}
+}
+
 func LogIfError(err error, msg string) {
 	if err == nil {
 		return
 	}
 
-	fmt.Printf("%s: %s\n", msg, err.Error())
+	LogError(err, msg)
 }
 
 func FatalIfError(err error, msg string) {
@@ -22,6 +30,6 @@ func FatalIfError(err error, msg string) {
 		return
 	}
 
-	LogIfError(err, msg)
+	LogError(err, msg)
 	os.Exit(1)
 }
