@@ -11,11 +11,12 @@ type Config struct {
 }
 
 type DeviceConfig struct {
-	Name    string `yaml:"name"`
-	Type    string `yaml:"type"`
-	Uuid    string `yaml:"uuid,omitempty"`
-	Buttons int    `yaml:"buttons,omitempty"`
-	Axes    int    `yaml:"axes,omitempty"`
+	Name       string `yaml:"name"`
+	Type       string `yaml:"type"`
+	DeviceName string `yaml:"device_name,omitempty"`
+	Uuid       string `yaml:"uuid,omitempty"`
+	Buttons    int    `yaml:"buttons,omitempty"`
+	Axes       int    `yaml:"axes,omitempty"`
 }
 
 type RuleConfig struct {

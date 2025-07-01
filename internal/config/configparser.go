@@ -73,8 +73,9 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 			continue
 		}
 
-		vDevice, err := evdev.CreateDevice(
-			fmt.Sprintf("joyful-%s", deviceConfig.Name),
+		name := fmt.Sprintf("joyful-%s", deviceConfig.Name)
+		device, err := evdev.CreateDevice(
+			name,
 			// TODO: who knows what these should actually be
 			evdev.InputID{
 				BusType: 0x03,
@@ -93,7 +94,8 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 			continue
 		}
 
-		deviceMap[deviceConfig.Name] = vDevice
+		deviceMap[deviceConfig.Name] = device
+		logger.Log(fmt.Sprintf("Created virtual device '%s'", name))
 	}
 
 	return deviceMap
@@ -116,14 +118,16 @@ func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevi
 			continue
 		}
 
-		vDevice, err := evdev.Open("/dev/input/foo")
-
+		device, err := evdev.OpenByName(deviceConfig.DeviceName)
 		if err != nil {
-			logger.LogIfError(err, "Failed to open physical device")
+			logger.LogError(err, "Failed to open physical device, skipping. Confirm the device name with 'evtest'")
 			continue
 		}
 
-		deviceMap[deviceConfig.Name] = vDevice
+		// TODO: grab exclusive access to device
+
+		logger.Log(fmt.Sprintf("Connected to '%s' as '%s'", deviceConfig.DeviceName, deviceConfig.Name))
+		deviceMap[deviceConfig.Name] = device
 	}
 
 	return deviceMap
