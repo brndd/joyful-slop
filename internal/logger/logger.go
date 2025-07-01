@@ -9,6 +9,10 @@ func Log(msg string) {
 	fmt.Println(msg)
 }
 
+func Logf(msg string, params ...interface{}) {
+	fmt.Printf(msg, params...)
+}
+
 func LogError(err error, msg string) {
 	if msg == "" {
 		fmt.Printf("%s\n", err.Error())

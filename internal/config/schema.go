@@ -22,7 +22,8 @@ type DeviceConfig struct {
 type RuleConfig struct {
 	Name   string            `yaml:"name,omitempty"`
 	Type   string            `yaml:"type"`
-	Input  []RuleInputConfig `yaml:"input"`
+	Input  RuleInputConfig   `yaml:"input,omitempty"`
+	Inputs []RuleInputConfig `yaml:"inputs,omitempty"`
 	Output RuleOutputConfig  `yaml:"output"`
 }
 
