@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"git.annabunches.net/annabunches/joyful/internal/config"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
@@ -63,38 +63,56 @@ func main() {
 	// Initialize rules
 	rules := config.BuildRules(pDevices, getVirtualDevices(vBuffers))
 
-	// TEST CODE
-	testDriver(vBuffers, pDevices, rules)
+	// Listen for events and map them forever
+	mapEvents(vBuffers, pDevices, rules)
 }
 
-func testDriver(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[string]*evdev.InputDevice, rules []mappingrules.MappingRule) {
-	pDevice := pDevices["right-stick"]
-	buffer := vBuffers["main"]
-	for {
-		// Get the first event for this report
-		event, err := pDevice.ReadOne()
-		logger.LogIfError(err, "Error while reading event")
+type ChannelEvent struct {
+	Device *evdev.InputDevice
+	Event  *evdev.InputEvent
+}
 
-		for event.Code != evdev.SYN_REPORT {
+func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[string]*evdev.InputDevice, rules []mappingrules.MappingRule) {
+	// start listening for events on all devices
+	eventChannel := make(chan *ChannelEvent, 1000)
+	for _, device := range pDevices {
+		go eventWatcher(device, eventChannel)
+	}
+
+	fmt.Println("Joyful Running! Press Ctrl+C to quit.")
+	for {
+		// Get an event (blocks if necessary)
+		wrapper := <-eventChannel
+
+		switch wrapper.Event.Type {
+		case evdev.EV_SYN:
+			// We've received a SYN_REPORT, so now we send all of our pending events
+			for _, buffer := range vBuffers {
+				buffer.SendEvents()
+			}
+
+		case evdev.EV_KEY:
+		case evdev.EV_ABS:
+			// We have a matchable event type. Check all the events
 			for _, rule := range rules {
-				event := rule.MatchEvent(pDevice, event)
-				if event == nil {
+				outputEvent := rule.MatchEvent(wrapper.Device, wrapper.Event)
+				if outputEvent == nil {
 					continue
 				}
 
-				buffer.AddEvent(event)
+				vBuffers[rule.OutputName()].AddEvent(outputEvent)
 			}
-
-			// Get the next event
-			event, err = pDevice.ReadOne()
-			logger.LogIfError(err, "Error while reading event")
 		}
-
-		// We've received a SYN_REPORT, so now we can send all of our events
-		// TODO: how shall we handle this when dealing with multiple devices?
-		buffer.SendEvents()
-
-		time.Sleep(1 * time.Millisecond)
 	}
-	// END TEST CODE
+}
+
+func eventWatcher(device *evdev.InputDevice, channel chan *ChannelEvent) {
+	for {
+		event, err := device.ReadOne()
+		if err != nil {
+			logger.LogError(err, "Error while reading event")
+			continue
+		}
+		channel <- &ChannelEvent{Device: device, Event: event}
+	}
 }

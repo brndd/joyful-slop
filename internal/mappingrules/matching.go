@@ -78,3 +78,11 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	}
 	return nil
 }
+
+func (rule *SimpleMappingRule) OutputName() string {
+	return rule.Output.DeviceName
+}
+
+func (rule *ComboMappingRule) OutputName() string {
+	return rule.Output.DeviceName
+}

@@ -64,6 +64,7 @@ func makeRuleTarget(targetConfig RuleTargetConfig, devs map[string]*evdev.InputD
 	ruleTarget.Type = eventType
 	ruleTarget.Code = eventCode
 	ruleTarget.Inverted = targetConfig.Inverted
+	ruleTarget.DeviceName = targetConfig.Device
 
 	return ruleTarget, nil
 }
@@ -83,8 +84,7 @@ func decodeRuleTargetValues(target RuleTargetConfig) (evdev.EvType, evdev.EvCode
 		if !ok {
 			return 0, 0, fmt.Errorf("skipping rule due to invalid button code '%s'", target.Button)
 		}
-	}
-	if target.Axis != "" {
+	} else if target.Axis != "" {
 		eventType = evdev.EV_ABS
 		eventCode, ok = evdev.ABSFromString[target.Axis]
 		if !ok {

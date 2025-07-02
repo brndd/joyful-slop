@@ -4,6 +4,7 @@ import "github.com/holoplot/go-evdev"
 
 type MappingRule interface {
 	MatchEvent(*evdev.InputDevice, *evdev.InputEvent) *evdev.InputEvent
+	OutputName() string
 }
 
 // A Simple Mapping Rule can map a button to a button or an axis to an axis.
@@ -22,8 +23,9 @@ type ComboMappingRule struct {
 }
 
 type RuleTarget struct {
-	Device   *evdev.InputDevice
-	Type     evdev.EvType
-	Code     evdev.EvCode
-	Inverted bool
+	DeviceName string
+	Device     *evdev.InputDevice
+	Type       evdev.EvType
+	Code       evdev.EvCode
+	Inverted   bool
 }
