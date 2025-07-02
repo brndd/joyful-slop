@@ -108,8 +108,6 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 // This function assumes you have already called Parse() on the config directory.
 //
 // This function should only be called once.
-//
-// STUB: this function does not yet function.
 func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevice {
 	deviceMap := make(map[string]*evdev.InputDevice)
 
