@@ -27,16 +27,16 @@ func valueFromTarget(rule RuleTarget, event *evdev.InputEvent) int32 {
 				value = 0
 			}
 		case evdev.EV_ABS:
-			// TODO: how would we invert axes?
+			logger.Logf("STUB: Inverting axes is not yet implemented.")
 		default:
-			logger.Logf("Inverted rule for unknown event type '%d'. Not inverting value\n", event.Type)
+			logger.Logf("Inverted rule for unknown event type '%d'. Not inverting value", event.Type)
 		}
 	}
 
 	return value
 }
 
-func (rule SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
+func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
 	if device != rule.Input.Device ||
 		event.Code != rule.Input.Code {
 		return nil
@@ -45,7 +45,7 @@ func (rule SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	return eventFromTarget(rule.Output, valueFromTarget(rule.Input, event))
 }
 
-func (rule ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
+func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
 	// Check each of the inputs, and if we find a match, proceed
 	var match *RuleTarget
 	for _, input := range rule.Inputs {
@@ -63,12 +63,13 @@ func (rule ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.
 	inputValue := valueFromTarget(*match, event)
 	oldState := rule.State
 	if inputValue == 0 {
-		rule.State--
+		rule.State = max(rule.State-1, 0)
 	}
 	if inputValue == 1 {
 		rule.State++
 	}
 	targetState := len(rule.Inputs)
+
 	if oldState == targetState-1 && rule.State == targetState {
 		return eventFromTarget(rule.Output, 1)
 	}

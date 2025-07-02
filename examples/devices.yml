@@ -1,0 +1,11 @@
+devices:
+  - name: main
+    type: virtual
+    buttons: 56
+    axes: 8
+  - name: right-stick
+    type: physical
+    device_name: VIRPIL Controls 20220407 R-VPC Stick MT-50CM2
+  - name: left-stick
+    type: physical
+    device_name: VIRPIL Controls 20220407 L-VPC Stick MT-50CM2

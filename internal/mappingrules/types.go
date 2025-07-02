@@ -10,12 +10,14 @@ type MappingRule interface {
 type SimpleMappingRule struct {
 	Input  RuleTarget
 	Output RuleTarget
+	Name   string
 }
 
 // A Combo Mapping Rule can require multiple physical button presses for a single output button
 type ComboMappingRule struct {
 	Inputs []RuleTarget
 	Output RuleTarget
+	Name   string
 	State  int
 }
 

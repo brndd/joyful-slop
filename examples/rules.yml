@@ -1,0 +1,70 @@
+rules:
+  # A simple 1:1 mapping of 2 inputs
+  - name: basic mapping
+    type: simple
+    input:
+      device: right-stick
+      button: BTN_BASE6
+    output:
+      device: main
+      button: BTN_BASE6
+  # A couple of axis mappings
+  - name: x axis
+    type: simple
+    input:
+      device: right-stick
+      axis: ABS_X
+    output:
+      device: main
+      axis: ABS_X
+  - name: y axis
+    type: simple
+    input:
+      device: right-stick
+      axis: ABS_Y
+    output:
+      device: main
+      axis: ABS_Y
+  # 3-stage trigger for a VPC Constellation Alpha
+  # This only sends a trigger input when the
+  # flip trigger is pulled all the way in *and* the inner trigger
+  # is activated
+  - name: 3 stage trigger
+    type: combo
+    inputs:
+      - device: right-stick
+        button: BTN_TRIGGER
+        inverted: true
+      - device: right-stick
+        button: BTN_THUMB
+      - device: right-stick
+        button: BTN_THUMB2
+    output:
+      device: main
+      button: BTN_TRIGGER
+  # Of course, BTN_TRIGGER above is unnecessary, because on the Constellation Alpha
+  # it's impossible to press BTN_THUMB without disabling BTN_TRIGGER. So this is a
+  # simpler form of the same rule for the left stick
+  - name: 2 stage trigger
+    type: combo
+    inputs:
+      - device: left-stick
+        button: BTN_THUMB
+      - device: left-stick
+        button: BTN_THUMB2
+    output:
+      device: main
+      button: BTN_THUMB
+  # You can use the same input in multiple rules. Be careful with this!
+  # In this example we use the same 2-stage guard, but trigger an additional output
+  # when the final stage of the VPC's trigger is depressed
+  - name: alternate 2 stage trigger
+    type: combo
+    inputs:
+      - device: left-stick
+        button: BTN_THUMB
+      - device: left-stick
+        button: BTN_TOP
+    output:
+      device: main
+      button: BTN_THUMB2

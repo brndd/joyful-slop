@@ -10,7 +10,7 @@ func Log(msg string) {
 }
 
 func Logf(msg string, params ...interface{}) {
-	fmt.Printf(msg, params...)
+	fmt.Printf(msg+"\n", params...)
 }
 
 func LogError(err error, msg string) {

@@ -21,6 +21,7 @@ func makeSimpleRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, 
 	return &mappingrules.SimpleMappingRule{
 		Input:  input,
 		Output: output,
+		Name:   ruleConfig.Name,
 	}, nil
 }
 
@@ -42,6 +43,7 @@ func makeComboRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, v
 	return &mappingrules.ComboMappingRule{
 		Inputs: inputs,
 		Output: output,
+		Name:   ruleConfig.Name,
 	}, nil
 }
 
@@ -61,6 +63,7 @@ func makeRuleTarget(targetConfig RuleTargetConfig, devs map[string]*evdev.InputD
 	}
 	ruleTarget.Type = eventType
 	ruleTarget.Code = eventCode
+	ruleTarget.Inverted = targetConfig.Inverted
 
 	return ruleTarget, nil
 }
