@@ -118,7 +118,7 @@ func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevi
 
 		device, err := evdev.OpenByName(deviceConfig.DeviceName)
 		if err != nil {
-			logger.LogError(err, "Failed to open physical device, skipping. Confirm the device name with 'evtest'")
+			logger.LogError(err, "Failed to open physical device, skipping. Confirm the device name with 'evlist'. Watch out for spaces.")
 			continue
 		}
 
