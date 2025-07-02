@@ -1,27 +1,11 @@
-package rules
+package mappingrules
 
 import (
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"github.com/holoplot/go-evdev"
 )
 
-type KeyMappingRule interface {
-	MatchEvent(*evdev.InputDevice, *evdev.InputEvent)
-}
-
-// A Simple Mapping Rule can map a button to a button or an axis to an axis.
-type SimpleMappingRule struct {
-	Input  RuleTarget
-	Output RuleTarget
-}
-
-// A Combo Mapping Rule can require multiple physical button presses for a single output button
-type ComboMappingRule struct {
-	Input  []RuleTarget
-	Output RuleTarget
-	State  int
-}
-
+// eventFromTarget creates an outputtable event from a RuleTarget
 func eventFromTarget(output RuleTarget, value int32) *evdev.InputEvent {
 	return &evdev.InputEvent{
 		Type:  output.Type,
@@ -30,6 +14,7 @@ func eventFromTarget(output RuleTarget, value int32) *evdev.InputEvent {
 	}
 }
 
+// valueFromTarget determines the value to output from an input specification,given a RuleTarget's constraints
 func valueFromTarget(rule RuleTarget, event *evdev.InputEvent) int32 {
 	// how we process inverted rules depends on the event type
 	value := event.Value
@@ -51,7 +36,7 @@ func valueFromTarget(rule RuleTarget, event *evdev.InputEvent) int32 {
 	return value
 }
 
-func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
+func (rule SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
 	if device != rule.Input.Device ||
 		event.Code != rule.Input.Code {
 		return nil
@@ -60,10 +45,10 @@ func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evde
 	return eventFromTarget(rule.Output, valueFromTarget(rule.Input, event))
 }
 
-func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
+func (rule ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
 	// Check each of the inputs, and if we find a match, proceed
 	var match *RuleTarget
-	for _, input := range rule.Input {
+	for _, input := range rule.Inputs {
 		if device == input.Device &&
 			event.Code == input.Code {
 			match = &input
@@ -83,7 +68,7 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	if inputValue == 1 {
 		rule.State++
 	}
-	targetState := len(rule.Input)
+	targetState := len(rule.Inputs)
 	if oldState == targetState-1 && rule.State == targetState {
 		return eventFromTarget(rule.Output, 1)
 	}

@@ -1,15 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"maps"
 	"os"
 	"path/filepath"
-	"slices"
 	"time"
 
 	"git.annabunches.net/annabunches/joyful/internal/config"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
+	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
 	"git.annabunches.net/annabunches/joyful/internal/virtualdevice"
 	"github.com/holoplot/go-evdev"
 )
@@ -23,7 +21,7 @@ func readConfig() *config.ConfigParser {
 	return parser
 }
 
-func initVirtualDevices(config *config.ConfigParser) map[string]*virtualdevice.EventBuffer {
+func initVirtualBuffers(config *config.ConfigParser) map[string]*virtualdevice.EventBuffer {
 	vDevices := config.CreateVirtualDevices()
 	if len(vDevices) == 0 {
 		logger.Log("Warning: no virtual devices found in configuration. No rules will work.")
@@ -34,6 +32,14 @@ func initVirtualDevices(config *config.ConfigParser) map[string]*virtualdevice.E
 		vBuffers[name] = virtualdevice.NewEventBuffer(device)
 	}
 	return vBuffers
+}
+
+func getVirtualDevices(buffers map[string]*virtualdevice.EventBuffer) map[string]*evdev.InputDevice {
+	devices := make(map[string]*evdev.InputDevice)
+	for name, buffer := range buffers {
+		devices[name] = buffer.Device
+	}
+	return devices
 }
 
 func initPhysicalDevices(config *config.ConfigParser) map[string]*evdev.InputDevice {
@@ -48,82 +54,44 @@ func main() {
 	// parse configs
 	config := readConfig()
 
-	// Initialize virtual devices and event buffers
-	vBuffers := initVirtualDevices(config)
+	// Initialize virtual devices with event buffers
+	vBuffers := initVirtualBuffers(config)
 
 	// Initialize physical devices
 	pDevices := initPhysicalDevices(config)
 
+	// Initialize rules
+	rules := config.BuildRules(pDevices, getVirtualDevices(vBuffers))
+
 	// TEST CODE
-	testDriver(vBuffers, pDevices)
+	testDriver(vBuffers, pDevices, rules)
 }
 
-func testDriver(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[string]*evdev.InputDevice) {
-	pDevice := slices.Collect(maps.Values(pDevices))[0]
-
-	name, err := pDevice.Name()
-	if err != nil {
-		name = "Unknown"
-	}
-	fmt.Printf("Test Driver using physical device %s\n", name)
-
-	var combo int32 = 0
+func testDriver(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[string]*evdev.InputDevice, rules []mappingrules.MappingRule) {
+	pDevice := pDevices["right-stick"]
 	buffer := vBuffers["main"]
 	for {
-		last := combo
-
+		// Get the first event for this report
 		event, err := pDevice.ReadOne()
 		logger.LogIfError(err, "Error while reading event")
 
 		for event.Code != evdev.SYN_REPORT {
-			if event.Type == evdev.EV_KEY {
-				switch event.Code {
-				case evdev.BTN_TRIGGER:
-					if event.Value == 0 {
-						combo++
-					}
-					if event.Value == 1 {
-						combo--
-					}
-
-				case evdev.BTN_THUMB:
-					if event.Value == 0 {
-						combo--
-					}
-					if event.Value == 1 {
-						combo++
-					}
-
-				case evdev.BTN_THUMB2:
-					if event.Value == 0 {
-						combo--
-					}
-					if event.Value == 1 {
-						combo++
-					}
-
+			for _, rule := range rules {
+				event := rule.MatchEvent(pDevice, event)
+				if event == nil {
+					continue
 				}
+
+				buffer.AddEvent(event)
 			}
 
+			// Get the next event
 			event, err = pDevice.ReadOne()
 			logger.LogIfError(err, "Error while reading event")
 		}
 
-		if combo > last && combo == 3 {
-			buffer.AddEvent(&evdev.InputEvent{
-				Type:  evdev.EV_KEY,
-				Code:  evdev.BTN_TRIGGER,
-				Value: 1,
-			})
-		}
-		if combo < last && combo == 2 {
-			buffer.AddEvent(&evdev.InputEvent{
-				Type:  evdev.EV_KEY,
-				Code:  evdev.BTN_TRIGGER,
-				Value: 0,
-			})
-		}
-
+		// We've received a SYN_REPORT, so now we can send all of our events
+		// TODO: how shall we handle this when dealing with multiple devices?
 		buffer.SendEvents()
 
 		time.Sleep(1 * time.Millisecond)

@@ -20,24 +20,17 @@ type DeviceConfig struct {
 }
 
 type RuleConfig struct {
-	Name   string            `yaml:"name,omitempty"`
-	Type   string            `yaml:"type"`
-	Input  RuleInputConfig   `yaml:"input,omitempty"`
-	Inputs []RuleInputConfig `yaml:"inputs,omitempty"`
-	Output RuleOutputConfig  `yaml:"output"`
+	Name   string             `yaml:"name,omitempty"`
+	Type   string             `yaml:"type"`
+	Input  RuleTargetConfig   `yaml:"input,omitempty"`
+	Inputs []RuleTargetConfig `yaml:"inputs,omitempty"`
+	Output RuleTargetConfig   `yaml:"output"`
 }
 
-type RuleInputConfig struct {
+type RuleTargetConfig struct {
 	Device   string   `yaml:"device"`
 	Button   string   `yaml:"button,omitempty"`
-	Buttons  []string `yaml:"buttons,omitempty"`
 	Axis     string   `yaml:"axis,omitempty"`
 	Inverted bool     `yaml:"inverted,omitempty"`
-}
-
-type RuleOutputConfig struct {
-	Device string `yaml:"device,omitempty"`
-	Button string `yaml:"button,omitempty"`
-	Axis   string `yaml:"axis,omitempty"`
-	Groups string `yaml:"groups,omitempty"`
+	Groups   []string `yaml:"groups,omitempty"`
 }
