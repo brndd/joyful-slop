@@ -9,6 +9,11 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
+// TODO: At some point it would *very likely* make sense to map each rule to all of the physical devices that can
+// trigger it, and return that instead. Something like a map[*evdev.InputDevice][]mappingrule.MappingRule.
+// This would speed up rule matching by only checking relevant rules for a given input event.
+// We could take this further and make it a map[*evdev.InputDevice]map[evdev.InputType]map[evdev.InputCode][]mappingrule.MappingRule
+// For very large rule-bases this may be helpful for staying performant.
 func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDevs map[string]*evdev.InputDevice) []mappingrules.MappingRule {
 	rules := make([]mappingrules.MappingRule, 0)
 
@@ -49,8 +54,8 @@ func makeSimpleRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, 
 		MappingRuleBase: mappingrules.MappingRuleBase{
 			Output: output,
 		},
-		Input:  input,
-		Name:   ruleConfig.Name,
+		Input: input,
+		Name:  ruleConfig.Name,
 	}, nil
 }
 
@@ -74,7 +79,7 @@ func makeComboRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, v
 			Output: output,
 		},
 		Inputs: inputs,
-		State:   0,
+		State:  0,
 		Name:   ruleConfig.Name,
 	}, nil
 }
@@ -94,9 +99,9 @@ func makeLatchedRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice,
 		MappingRuleBase: mappingrules.MappingRuleBase{
 			Output: output,
 		},
-		Input:  input,
-		Name:   ruleConfig.Name,
-		State:  false,
+		Input: input,
+		Name:  ruleConfig.Name,
+		State: false,
 	}, nil
 }
 
