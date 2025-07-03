@@ -67,4 +67,5 @@ const (
 
 	RuleTypeSimple = "simple"
 	RuleTypeCombo  = "combo"
+	RuleTypeLatched = "latched"
 )

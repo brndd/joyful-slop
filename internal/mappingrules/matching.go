@@ -5,6 +5,10 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
+func (rule *MappingRuleBase) OutputName() string {
+	return rule.Output.DeviceName
+}
+
 // eventFromTarget creates an outputtable event from a RuleTarget
 func eventFromTarget(output RuleTarget, value int32) *evdev.InputEvent {
 	return &evdev.InputEvent{
@@ -79,10 +83,21 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	return nil
 }
 
-func (rule *SimpleMappingRule) OutputName() string {
-	return rule.Output.DeviceName
-}
+func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
+	if device != rule.Input.Device ||
+		event.Code != rule.Input.Code ||
+		valueFromTarget(rule.Input, event) == 0 {
+		return nil
+	}
 
-func (rule *ComboMappingRule) OutputName() string {
-	return rule.Output.DeviceName
+	// Input is pressed, so toggle state and emit event
+	var value int32
+	rule.State = !rule.State
+	if rule.State { 
+		value = 1 
+	} else { 
+		value = 0 
+	}
+
+	return eventFromTarget(rule.Output, value)
 }

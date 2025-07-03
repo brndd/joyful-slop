@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"git.annabunches.net/annabunches/joyful/internal/logger"
-	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
 	"github.com/goccy/go-yaml"
 	"github.com/holoplot/go-evdev"
 )
@@ -130,29 +129,6 @@ func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevi
 	}
 
 	return deviceMap
-}
-
-func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDevs map[string]*evdev.InputDevice) []mappingrules.MappingRule {
-	rules := make([]mappingrules.MappingRule, 0)
-
-	for _, ruleConfig := range parser.config.Rules {
-		var newRule mappingrules.MappingRule
-		var err error
-		switch strings.ToLower(ruleConfig.Type) {
-		case RuleTypeSimple:
-			newRule, err = makeSimpleRule(ruleConfig, pDevs, vDevs)
-		case RuleTypeCombo:
-			newRule, err = makeComboRule(ruleConfig, pDevs, vDevs)
-		}
-
-		if err != nil {
-			logger.LogError(err, "")
-			continue
-		}
-		rules = append(rules, newRule)
-	}
-
-	return rules
 }
 
 func makeButtons(numButtons int) []evdev.EvCode {

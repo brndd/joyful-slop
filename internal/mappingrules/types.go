@@ -7,19 +7,30 @@ type MappingRule interface {
 	OutputName() string
 }
 
+type MappingRuleBase struct {
+	Output RuleTarget
+}
+
 // A Simple Mapping Rule can map a button to a button or an axis to an axis.
 type SimpleMappingRule struct {
+	MappingRuleBase
 	Input  RuleTarget
-	Output RuleTarget
 	Name   string
 }
 
 // A Combo Mapping Rule can require multiple physical button presses for a single output button
 type ComboMappingRule struct {
+	MappingRuleBase
 	Inputs []RuleTarget
-	Output RuleTarget
 	Name   string
 	State  int
+}
+
+type LatchedMappingRule struct {
+	MappingRuleBase
+	Input  RuleTarget
+	Name   string
+	State  bool
 }
 
 type RuleTarget struct {
