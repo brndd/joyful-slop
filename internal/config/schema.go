@@ -5,9 +5,8 @@ package config
 
 type Config struct {
 	Devices []DeviceConfig `yaml:"devices"`
-	// TODO: add groups
-	// Groups  []GroupConfig  `yaml:"groups,omitempty"`
-	Rules []RuleConfig `yaml:"rules"`
+	Modes   []string       `yaml:"modes,omitempty"`
+	Rules   []RuleConfig   `yaml:"rules"`
 }
 
 type DeviceConfig struct {
@@ -25,12 +24,12 @@ type RuleConfig struct {
 	Input  RuleTargetConfig   `yaml:"input,omitempty"`
 	Inputs []RuleTargetConfig `yaml:"inputs,omitempty"`
 	Output RuleTargetConfig   `yaml:"output"`
+	Modes  []string           `yaml:"modes,omitempty"`
 }
 
 type RuleTargetConfig struct {
-	Device   string   `yaml:"device"`
-	Button   string   `yaml:"button,omitempty"`
-	Axis     string   `yaml:"axis,omitempty"`
-	Inverted bool     `yaml:"inverted,omitempty"`
-	Groups   []string `yaml:"groups,omitempty"`
+	Device   string `yaml:"device"`
+	Button   string `yaml:"button,omitempty"`
+	Axis     string `yaml:"axis,omitempty"`
+	Inverted bool   `yaml:"inverted,omitempty"`
 }

@@ -1,12 +1,18 @@
 package mappingrules
 
 import (
+	"slices"
+
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"github.com/holoplot/go-evdev"
 )
 
 func (rule *MappingRuleBase) OutputName() string {
 	return rule.Output.DeviceName
+}
+
+func (rule *MappingRuleBase) modeCheck(mode *string) bool {
+	return slices.Contains(rule.Modes, *mode)
 }
 
 // eventFromTarget creates an outputtable event from a RuleTarget
@@ -40,7 +46,11 @@ func valueFromTarget(rule RuleTarget, event *evdev.InputEvent) int32 {
 	return value
 }
 
-func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
+func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+	if !rule.MappingRuleBase.modeCheck(mode) {
+		return nil
+	}
+
 	if device != rule.Input.Device ||
 		event.Code != rule.Input.Code {
 		return nil
@@ -49,7 +59,11 @@ func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evde
 	return eventFromTarget(rule.Output, valueFromTarget(rule.Input, event))
 }
 
-func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
+func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+	if !rule.MappingRuleBase.modeCheck(mode) {
+		return nil
+	}
+
 	// Check each of the inputs, and if we find a match, proceed
 	var match *RuleTarget
 	for _, input := range rule.Inputs {
@@ -83,7 +97,11 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	return nil
 }
 
-func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) *evdev.InputEvent {
+func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+	if !rule.MappingRuleBase.modeCheck(mode) {
+		return nil
+	}
+
 	if device != rule.Input.Device ||
 		event.Code != rule.Input.Code ||
 		valueFromTarget(rule.Input, event) == 0 {
@@ -93,10 +111,10 @@ func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evd
 	// Input is pressed, so toggle state and emit event
 	var value int32
 	rule.State = !rule.State
-	if rule.State { 
-		value = 1 
-	} else { 
-		value = 0 
+	if rule.State {
+		value = 1
+	} else {
+		value = 0
 	}
 
 	return eventFromTarget(rule.Output, value)

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"git.annabunches.net/annabunches/joyful/internal/logger"
@@ -12,54 +13,71 @@ import (
 // TODO: At some point it would *very likely* make sense to map each rule to all of the physical devices that can
 // trigger it, and return that instead. Something like a map[*evdev.InputDevice][]mappingrule.MappingRule.
 // This would speed up rule matching by only checking relevant rules for a given input event.
-// We could take this further and make it a map[*evdev.InputDevice]map[evdev.InputType]map[evdev.InputCode][]mappingrule.MappingRule
+// We could take this further and make it a map[<struct of *inputdevice, type, and code>][]rule
 // For very large rule-bases this may be helpful for staying performant.
 func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDevs map[string]*evdev.InputDevice) []mappingrules.MappingRule {
 	rules := make([]mappingrules.MappingRule, 0)
+	modes := parser.getModes()
 
 	for _, ruleConfig := range parser.config.Rules {
 		var newRule mappingrules.MappingRule
 		var err error
+
+		baseParams, err := setBaseRuleParameters(ruleConfig, vDevs, modes)
+		if err != nil {
+			logger.LogError(err, "couldn't set output parameters, skipping rule")
+			continue
+		}
+
+		logger.Logf("DEBUG: Modes for rule '%s': %v", baseParams.Name, baseParams.Modes)
+
 		switch strings.ToLower(ruleConfig.Type) {
 		case RuleTypeSimple:
-			newRule, err = makeSimpleRule(ruleConfig, pDevs, vDevs)
+			newRule, err = makeSimpleRule(ruleConfig, pDevs, baseParams)
 		case RuleTypeCombo:
-			newRule, err = makeComboRule(ruleConfig, pDevs, vDevs)
+			newRule, err = makeComboRule(ruleConfig, pDevs, baseParams)
 		case RuleTypeLatched:
-			newRule, err = makeLatchedRule(ruleConfig, pDevs, vDevs)
+			newRule, err = makeLatchedRule(ruleConfig, pDevs, baseParams)
 		}
 
 		if err != nil {
 			logger.LogError(err, "")
 			continue
 		}
+
 		rules = append(rules, newRule)
 	}
 
 	return rules
 }
 
-func makeSimpleRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, vDevs map[string]*evdev.InputDevice) (*mappingrules.SimpleMappingRule, error) {
+func setBaseRuleParameters(ruleConfig RuleConfig, vDevs map[string]*evdev.InputDevice, modes []string) (mappingrules.MappingRuleBase, error) {
+	output, err := makeRuleTarget(ruleConfig.Output, vDevs)
+	if err != nil {
+		return mappingrules.MappingRuleBase{}, err
+	}
+	ruleModes := verifyModes(ruleConfig, modes)
+
+	return mappingrules.MappingRuleBase{
+		Output: output,
+		Modes:  ruleModes,
+		Name:   ruleConfig.Name,
+	}, nil
+}
+
+func makeSimpleRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.SimpleMappingRule, error) {
 	input, err := makeRuleTarget(ruleConfig.Input, pDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	output, err := makeRuleTarget(ruleConfig.Output, vDevs)
-	if err != nil {
-		return nil, err
-	}
-
 	return &mappingrules.SimpleMappingRule{
-		MappingRuleBase: mappingrules.MappingRuleBase{
-			Output: output,
-		},
-		Input: input,
-		Name:  ruleConfig.Name,
+		MappingRuleBase: base,
+		Input:           input,
 	}, nil
 }
 
-func makeComboRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, vDevs map[string]*evdev.InputDevice) (*mappingrules.ComboMappingRule, error) {
+func makeComboRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.ComboMappingRule, error) {
 	inputs := make([]mappingrules.RuleTarget, 0)
 	for _, inputConfig := range ruleConfig.Inputs {
 		input, err := makeRuleTarget(inputConfig, pDevs)
@@ -69,39 +87,23 @@ func makeComboRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, v
 		inputs = append(inputs, input)
 	}
 
-	output, err := makeRuleTarget(ruleConfig.Output, vDevs)
-	if err != nil {
-		return nil, err
-	}
-
 	return &mappingrules.ComboMappingRule{
-		MappingRuleBase: mappingrules.MappingRuleBase{
-			Output: output,
-		},
-		Inputs: inputs,
-		State:  0,
-		Name:   ruleConfig.Name,
+		MappingRuleBase: base,
+		Inputs:          inputs,
+		State:           0,
 	}, nil
 }
 
-func makeLatchedRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, vDevs map[string]*evdev.InputDevice) (*mappingrules.LatchedMappingRule, error) {
+func makeLatchedRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.LatchedMappingRule, error) {
 	input, err := makeRuleTarget(ruleConfig.Input, pDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	output, err := makeRuleTarget(ruleConfig.Output, vDevs)
-	if err != nil {
-		return nil, err
-	}
-
 	return &mappingrules.LatchedMappingRule{
-		MappingRuleBase: mappingrules.MappingRuleBase{
-			Output: output,
-		},
-		Input: input,
-		Name:  ruleConfig.Name,
-		State: false,
+		MappingRuleBase: base,
+		Input:           input,
+		State:           false,
 	}, nil
 }
 
@@ -151,4 +153,22 @@ func decodeRuleTargetValues(target RuleTargetConfig) (evdev.EvType, evdev.EvCode
 	}
 
 	return eventType, eventCode, nil
+}
+
+func verifyModes(ruleConfig RuleConfig, modes []string) []string {
+	verifiedModes := make([]string, 0)
+
+	for _, configMode := range ruleConfig.Modes {
+		if !slices.Contains(modes, configMode) {
+			logger.Logf("rule '%s' specifies undefined mode '%s', skipping", ruleConfig.Name, configMode)
+			continue
+		}
+
+		verifiedModes = append(verifiedModes, configMode)
+	}
+	if len(verifiedModes) == 0 {
+		verifiedModes = []string{"main"}
+	}
+
+	return verifiedModes
 }

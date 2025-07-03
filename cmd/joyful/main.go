@@ -34,6 +34,7 @@ func initVirtualBuffers(config *config.ConfigParser) map[string]*virtualdevice.E
 	return vBuffers
 }
 
+// Extracts the evdev devices from a list of virtual buffers and returns them.
 func getVirtualDevices(buffers map[string]*virtualdevice.EventBuffer) map[string]*evdev.InputDevice {
 	devices := make(map[string]*evdev.InputDevice)
 	for name, buffer := range buffers {
@@ -79,6 +80,9 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 		go eventWatcher(device, eventChannel)
 	}
 
+	// initialize the mode variable
+	mode := "main"
+
 	fmt.Println("Joyful Running! Press Ctrl+C to quit.")
 	for {
 		// Get an event (blocks if necessary)
@@ -95,7 +99,7 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 		case evdev.EV_ABS:
 			// We have a matchable event type. Check all the events
 			for _, rule := range rules {
-				outputEvent := rule.MatchEvent(wrapper.Device, wrapper.Event)
+				outputEvent := rule.MatchEvent(wrapper.Device, wrapper.Event, &mode)
 				if outputEvent == nil {
 					continue
 				}

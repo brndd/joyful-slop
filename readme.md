@@ -25,6 +25,7 @@ Joyful might be the tool for you.
 
 * Multiple modes with per-mode behavior.
 * Partial axis mapping: map sections of an axis to different outputs.
+* Highly configurable deadzones
 * Macros - have a single input produce a sequence of button presses with configurable pauses.
 * Sequence combos - Button1, Button2, Button3 -> VirtualButtonA
 
@@ -61,6 +62,10 @@ All `rules` must have a `type` field. Valid values for this field are:
 * `latched` - a single input mapped to a single output, but each time the input is pressed, the output will toggle.
 
 Configuration options for each type vary. See <examples/ruletypes.yml> for an example of each type with all options specified.
+
+### Modes
+
+All rules can have a `modes` field that is a list of strings.
 
 
 ## Technical details

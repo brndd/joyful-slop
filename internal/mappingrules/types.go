@@ -3,34 +3,33 @@ package mappingrules
 import "github.com/holoplot/go-evdev"
 
 type MappingRule interface {
-	MatchEvent(*evdev.InputDevice, *evdev.InputEvent) *evdev.InputEvent
+	MatchEvent(*evdev.InputDevice, *evdev.InputEvent, *string) *evdev.InputEvent
 	OutputName() string
 }
 
 type MappingRuleBase struct {
+	Name   string
 	Output RuleTarget
+	Modes  []string
 }
 
 // A Simple Mapping Rule can map a button to a button or an axis to an axis.
 type SimpleMappingRule struct {
 	MappingRuleBase
-	Input  RuleTarget
-	Name   string
+	Input RuleTarget
 }
 
 // A Combo Mapping Rule can require multiple physical button presses for a single output button
 type ComboMappingRule struct {
 	MappingRuleBase
 	Inputs []RuleTarget
-	Name   string
 	State  int
 }
 
 type LatchedMappingRule struct {
 	MappingRuleBase
-	Input  RuleTarget
-	Name   string
-	State  bool
+	Input RuleTarget
+	State bool
 }
 
 type RuleTarget struct {

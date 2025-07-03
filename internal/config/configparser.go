@@ -3,10 +3,10 @@
 // Example usage:
 //     config := &config.ConfigParser{}
 //     config.Parse(<some directory containing YAML files>)
-//     virtualDevices, err := config.CreateVirtualDevices()
-//     physicalDevices, err := config.ConnectVirtualDevices()
-//     modes, err := config.GetModes()
-//     rules, err := config.BuildRules(physicalDevices, virtualDevices, modes)
+//     virtualDevices := config.CreateVirtualDevices()
+//     physicalDevices := config.ConnectVirtualDevices()
+//     modes := config.GetModes()
+//     rules := config.BuildRules(physicalDevices, virtualDevices, modes)
 //
 // nb: there are methods defined on ConfigParser in other files in this package!
 
@@ -58,7 +58,7 @@ func (parser *ConfigParser) Parse(directory string) error {
 			logger.LogIfError(err, "Error parsing YAML")
 			parser.config.Rules = append(parser.config.Rules, newConfig.Rules...)
 			parser.config.Devices = append(parser.config.Devices, newConfig.Devices...)
-			// parser.config.Groups = append(parser.config.Groups, newConfig.Groups...)
+			parser.config.Modes = append(parser.config.Modes, newConfig.Modes...)
 		}
 	}
 
@@ -67,4 +67,8 @@ func (parser *ConfigParser) Parse(directory string) error {
 	}
 
 	return nil
+}
+
+func (parser *ConfigParser) getModes() []string {
+	return append([]string{"main"}, parser.config.Modes...)
 }
