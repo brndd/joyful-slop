@@ -63,6 +63,7 @@ func main() {
 
 	// Initialize rules
 	rules := config.BuildRules(pDevices, getVirtualDevices(vBuffers))
+	logger.Logf("Created %d mapping rules.", len(rules))
 
 	// Listen for events and map them forever
 	mapEvents(vBuffers, pDevices, rules)
@@ -75,7 +76,7 @@ type ChannelEvent struct {
 
 func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[string]*evdev.InputDevice, rules []mappingrules.MappingRule) {
 	// start listening for events on all devices
-	eventChannel := make(chan *ChannelEvent, 1000)
+	eventChannel := make(chan ChannelEvent, 1000)
 	for _, device := range pDevices {
 		go eventWatcher(device, eventChannel)
 	}
@@ -95,8 +96,13 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 				buffer.SendEvents()
 			}
 
+		// TODO: event types are a little weird, because EvCode constants are reused across
+		// types, but button presses can apparently come across as multiple types.
+		// This isn't a big problem right now, but when we want to support relative axes
+		// and/or keyboards, this could get hairy.
 		case evdev.EV_KEY:
 		case evdev.EV_ABS:
+		case evdev.EV_MSC:
 			// We have a matchable event type. Check all the events
 			for _, rule := range rules {
 				outputEvent := rule.MatchEvent(wrapper.Device, wrapper.Event, &mode)
@@ -106,17 +112,19 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 
 				vBuffers[rule.OutputName()].AddEvent(outputEvent)
 			}
+		default:
+			logger.Logf("DEBUG: Unprocessed event: %d %d %d", wrapper.Event.Type, wrapper.Event.Code, wrapper.Event.Value)
 		}
 	}
 }
 
-func eventWatcher(device *evdev.InputDevice, channel chan *ChannelEvent) {
+func eventWatcher(device *evdev.InputDevice, channel chan<- ChannelEvent) {
 	for {
 		event, err := device.ReadOne()
 		if err != nil {
 			logger.LogError(err, "Error while reading event")
 			continue
 		}
-		channel <- &ChannelEvent{Device: device, Event: event}
+		channel <- ChannelEvent{Device: device, Event: event}
 	}
 }

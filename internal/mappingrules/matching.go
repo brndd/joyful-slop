@@ -12,6 +12,9 @@ func (rule *MappingRuleBase) OutputName() string {
 }
 
 func (rule *MappingRuleBase) modeCheck(mode *string) bool {
+	if len(rule.Modes) == 1 && rule.Modes[0] == "*" {
+		return true
+	}
 	return slices.Contains(rule.Modes, *mode)
 }
 
@@ -49,6 +52,10 @@ func valueFromTarget(rule RuleTarget, event *evdev.InputEvent) int32 {
 func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
 	if !rule.MappingRuleBase.modeCheck(mode) {
 		return nil
+	}
+
+	if event.Type == evdev.EV_KEY {
+		logger.Logf("DEBUG: mode check passed for rule '%s'. Mode '%s' modes '%v'", rule.Name, *mode, rule.Modes)
 	}
 
 	if device != rule.Input.Device ||

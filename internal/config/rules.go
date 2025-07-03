@@ -29,8 +29,6 @@ func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDev
 			continue
 		}
 
-		logger.Logf("DEBUG: Modes for rule '%s': %v", baseParams.Name, baseParams.Modes)
-
 		switch strings.ToLower(ruleConfig.Type) {
 		case RuleTypeSimple:
 			newRule, err = makeSimpleRule(ruleConfig, pDevs, baseParams)
@@ -41,7 +39,7 @@ func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDev
 		}
 
 		if err != nil {
-			logger.LogError(err, "")
+			logger.LogError(err, "failed to build rule")
 			continue
 		}
 
@@ -167,7 +165,7 @@ func verifyModes(ruleConfig RuleConfig, modes []string) []string {
 		verifiedModes = append(verifiedModes, configMode)
 	}
 	if len(verifiedModes) == 0 {
-		verifiedModes = []string{"main"}
+		verifiedModes = []string{"*"}
 	}
 
 	return verifiedModes
