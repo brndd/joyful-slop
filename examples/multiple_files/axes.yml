@@ -1,0 +1,56 @@
+rules:
+  - type: simple
+    input:
+      device: right-stick
+      axis: ABS_X
+    output:
+      device: main
+      axis: ABS_X
+
+  - type: simple
+    input:
+      device: right-stick
+      axis: ABS_Y
+    output:
+      device: main
+      axis: ABS_Y
+
+  - type: simple
+    input:
+      device: right-stick
+      axis: ABS_THROTTLE
+    output:
+      device: main
+      axis: ABS_THROTTLE
+
+  - type: simple
+    input:
+      device: left-stick
+      axis: ABS_X
+    output:
+      device: main
+      axis: ABS_RX
+
+  - type: simple
+    input:
+      device: left-stick
+      axis: ABS_Y
+    output:
+      device: main
+      axis: ABS_RY
+
+  - type: simple
+    input:
+      device: left-stick
+      axis: ABS_THROTTLE
+    output:
+      device: main
+      axis: ABS_RUDDER
+
+  - type: simple
+    input:
+      device: pedals
+      axis: ABS_Z
+    output:
+      device: main
+      axis: ABS_Z

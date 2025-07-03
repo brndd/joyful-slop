@@ -9,3 +9,9 @@ devices:
   - name: left-stick
     type: physical
     device_name: VIRPIL Controls 20220407 L-VPC Stick MT-50CM2
+  - name: pedals
+    type: physical
+    device_name: "CH PRODUCTS CH PRO PEDALS USB "
+  - name: button-box
+    type: physical
+    device_name: Arduino Arduino Joystick

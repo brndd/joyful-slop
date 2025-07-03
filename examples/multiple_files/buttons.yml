@@ -1,0 +1,21 @@
+rules:
+  - name: Trigger
+    type: combo
+    inputs:
+      - device: right-stick
+        button: BTN_THUMB
+      - device: right-stick
+        button: BTN_THUMB2
+    output:
+      device: main
+      button: BTN_TRIGGER
+  - name: Trigger2
+    type: combo
+    inputs:
+      - device: left-stick
+        button: BTN_THUMB
+      - device: left-stick
+        button: BTN_THUMB2
+    output:
+      device: main
+      button: BTN_THUMB
