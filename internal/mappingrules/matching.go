@@ -19,7 +19,17 @@ func (rule *MappingRuleBase) modeCheck(mode *string) bool {
 }
 
 // eventFromTarget creates an outputtable event from a RuleTarget
-func eventFromTarget(output RuleTarget, value int32) *evdev.InputEvent {
+func eventFromTarget(output RuleTarget, value int32, mode *string) *evdev.InputEvent {
+	if len(output.ModeSelect) > 0 {
+		index := 0
+		if currentMode := slices.Index(output.ModeSelect, *mode); currentMode != -1 {
+			// find the next mode
+			index = (currentMode + 1) % len(output.ModeSelect)
+		}
+
+		*mode = output.ModeSelect[index]
+		return nil
+	}
 	return &evdev.InputEvent{
 		Type:  output.Type,
 		Code:  output.Code,
@@ -54,7 +64,7 @@ func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evde
 		return nil
 	}
 
-	if event.Type == evdev.EV_KEY {
+	if event.Type != evdev.EV_ABS {
 		logger.Logf("DEBUG: mode check passed for rule '%s'. Mode '%s' modes '%v'", rule.Name, *mode, rule.Modes)
 	}
 
@@ -63,7 +73,7 @@ func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evde
 		return nil
 	}
 
-	return eventFromTarget(rule.Output, valueFromTarget(rule.Input, event))
+	return eventFromTarget(rule.Output, valueFromTarget(rule.Input, event), mode)
 }
 
 func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
@@ -96,10 +106,10 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	targetState := len(rule.Inputs)
 
 	if oldState == targetState-1 && rule.State == targetState {
-		return eventFromTarget(rule.Output, 1)
+		return eventFromTarget(rule.Output, 1, mode)
 	}
 	if oldState == targetState && rule.State == targetState-1 {
-		return eventFromTarget(rule.Output, 0)
+		return eventFromTarget(rule.Output, 0, mode)
 	}
 	return nil
 }
@@ -124,5 +134,5 @@ func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evd
 		value = 0
 	}
 
-	return eventFromTarget(rule.Output, value)
+	return eventFromTarget(rule.Output, value, mode)
 }

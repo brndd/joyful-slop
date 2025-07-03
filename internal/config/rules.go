@@ -109,6 +109,11 @@ func makeLatchedRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice,
 func makeRuleTarget(targetConfig RuleTargetConfig, devs map[string]*evdev.InputDevice) (mappingrules.RuleTarget, error) {
 	ruleTarget := mappingrules.RuleTarget{}
 
+	if len(targetConfig.ModeSelect) > 0 {
+		ruleTarget.ModeSelect = targetConfig.ModeSelect
+		return ruleTarget, nil
+	}
+
 	device, ok := devs[targetConfig.Device]
 	if !ok {
 		return mappingrules.RuleTarget{}, fmt.Errorf("couldn't build rule due to non-existent device '%s'", targetConfig.Device)

@@ -28,8 +28,9 @@ type RuleConfig struct {
 }
 
 type RuleTargetConfig struct {
-	Device   string `yaml:"device"`
-	Button   string `yaml:"button,omitempty"`
-	Axis     string `yaml:"axis,omitempty"`
-	Inverted bool   `yaml:"inverted,omitempty"`
+	Device     string   `yaml:"device,omitempty"`
+	Button     string   `yaml:"button,omitempty"`
+	Axis       string   `yaml:"axis,omitempty"`
+	Inverted   bool     `yaml:"inverted,omitempty"`
+	ModeSelect []string `yaml:"mode_select,omitempty"`
 }
