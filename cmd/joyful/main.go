@@ -69,7 +69,15 @@ func main() {
 	mapEvents(vBuffers, pDevices, rules)
 }
 
+type ChannelEventType int
+
+const (
+	ChannelEventInput ChannelEventType = iota
+	ChannelEventTimer
+)
+
 type ChannelEvent struct {
+	Type   ChannelEventType
 	Device *evdev.InputDevice
 	Event  *evdev.InputEvent
 }
@@ -89,31 +97,38 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 		// Get an event (blocks if necessary)
 		wrapper := <-eventChannel
 
-		switch wrapper.Event.Type {
-		case evdev.EV_SYN:
-			// We've received a SYN_REPORT, so now we send all of our pending events
-			for _, buffer := range vBuffers {
-				buffer.SendEvents()
-			}
-
-		// TODO: event types are a little weird, because EvCode constants are reused across
-		// types, but button presses can apparently come across as multiple types.
-		// This isn't a big problem right now, but when we want to support relative axes
-		// and/or keyboards, this could get hairy.
-		case evdev.EV_KEY:
-		case evdev.EV_ABS:
-		case evdev.EV_MSC:
-			// We have a matchable event type. Check all the events
-			for _, rule := range rules {
-				outputEvent := rule.MatchEvent(wrapper.Device, wrapper.Event, &mode)
-				if outputEvent == nil {
-					continue
+		switch wrapper.Type {
+		case ChannelEventInput:
+			switch wrapper.Event.Type {
+			case evdev.EV_SYN:
+				// We've received a SYN_REPORT, so now we send all of our pending events
+				for _, buffer := range vBuffers {
+					buffer.SendEvents()
 				}
 
-				vBuffers[rule.OutputName()].AddEvent(outputEvent)
+			// TODO: event types are a little weird, because EvCode constants are reused across
+			// types, but button presses can apparently come across as multiple types.
+			// This isn't a big problem right now, but when we want to support relative axes
+			// and/or keyboards, this could get hairy.
+			case evdev.EV_KEY:
+			case evdev.EV_ABS:
+			case evdev.EV_MSC:
+				// We have a matchable event type. Check all the events
+				for _, rule := range rules {
+					outputEvent := rule.MatchEvent(wrapper.Device, wrapper.Event, &mode)
+					if outputEvent == nil {
+						continue
+					}
+
+					vBuffers[rule.OutputName()].AddEvent(outputEvent)
+				}
+			default:
+				logger.Logf("DEBUG: Unprocessed event: %d %d %d", wrapper.Event.Type, wrapper.Event.Code, wrapper.Event.Value)
 			}
-		default:
-			logger.Logf("DEBUG: Unprocessed event: %d %d %d", wrapper.Event.Type, wrapper.Event.Code, wrapper.Event.Value)
+		case ChannelEventTimer:
+			// Timer events give us the device and event to use directly
+			// TODO: we need a vbuffer map with device keys
+			// vBuffers[wrapper.Device].AddEvent(wrapper.Event)
 		}
 	}
 }

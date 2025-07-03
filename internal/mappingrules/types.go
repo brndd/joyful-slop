@@ -1,6 +1,10 @@
 package mappingrules
 
-import "github.com/holoplot/go-evdev"
+import (
+	"time"
+
+	"github.com/holoplot/go-evdev"
+)
 
 type MappingRule interface {
 	MatchEvent(*evdev.InputDevice, *evdev.InputEvent, *string) *evdev.InputEvent
@@ -30,6 +34,14 @@ type LatchedMappingRule struct {
 	MappingRuleBase
 	Input RuleTarget
 	State bool
+}
+
+// TODO: How are we going to implement this? It needs to operate on a timer...
+type ProportionalAxisMappingRule struct {
+	MappingRuleBase
+	Input     RuleTarget
+	Output    RuleTarget
+	LastEvent time.Time
 }
 
 type RuleTarget struct {
