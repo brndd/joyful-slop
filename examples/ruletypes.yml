@@ -1,0 +1,45 @@
+# 
+devices:
+  - name: flightstick
+    type: physical
+    device_name: Flightstick Name From evlist
+  - name: main
+    type: virtual
+    axes: 8
+    buttons: 80
+rules:
+  # Currently axes can only be simple mappings
+  - type: simple
+    input:
+      device: flightstick
+      axis: ABS_X
+    output:
+      device: main
+      axis: ABS_X
+  # Simple mappings also work for buttons
+  - type: simple
+    input:
+      device: flightstick
+      button: BTN_BASE2
+      inverted: false
+    output:
+      device: main
+      button: BTN_BASE2
+  # A combo rule - BTN_TRIGGER will be active while BTN_THUMB and BTN_THUMB2 are pressed.
+  - type: combo
+    inputs:
+      - device: flightstick
+        button: BTN_THUMB
+      - device: flightstick
+        button: BTN_THUMB2
+    output:
+      device: main
+      button: BTN_TRIGGER
+  # A latched rule - the virtual BTN_BASE3 will toggle each time the physical BTN_BASE3 is pressed.
+  - type: latched
+    input:
+      device: flightstick
+      button: BTN_BASE3
+    output:
+      device: main
+      button: BTN_BASE3
