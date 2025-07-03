@@ -34,7 +34,7 @@ type LatchedMappingRule struct {
 
 type RuleTarget struct {
 	DeviceName string
-	ModeSelect	  []string
+	ModeSelect []string
 	Device     *evdev.InputDevice
 	Type       evdev.EvType
 	Code       evdev.EvCode
