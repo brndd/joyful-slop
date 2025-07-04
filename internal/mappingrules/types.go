@@ -47,6 +47,9 @@ type ProportionalAxisMappingRule struct {
 type RuleTarget interface {
 	NormalizeValue(int32) int32
 	CreateEvent(int32, *string) *evdev.InputEvent
+	GetCode() evdev.EvCode
+	GetDeviceName() string
+	GetDevice() *evdev.InputDevice
 }
 
 type RuleTargetBase struct {

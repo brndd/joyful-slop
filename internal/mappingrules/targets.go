@@ -7,11 +7,31 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
+func (target *RuleTargetBase) GetCode() evdev.EvCode {
+	return target.Code
+}
+
+func (target *RuleTargetBase) GetDeviceName() string {
+	return target.DeviceName
+}
+
+func (target *RuleTargetBase) GetDevice() *evdev.InputDevice {
+	return target.Device
+}
+
 func (target *RuleTargetButton) NormalizeValue(value int32) int32 {
 	if value == 0 {
 		return 1
 	}
 	return 0
+}
+
+func (target *RuleTargetButton) CreateEvent(value int32, mode *string) *evdev.InputEvent {
+	return &evdev.InputEvent{
+		Type:  evdev.EV_KEY,
+		Code:  target.Code,
+		Value: value,
+	}
 }
 
 func (target *RuleTargetAxis) NormalizeValue(value int32) int32 {
@@ -37,25 +57,17 @@ func (target *RuleTargetAxis) NormalizeValue(value int32) int32 {
 	return value
 }
 
-// RuleTargetModeSelect doesn't make sense as an input type
-func (target *RuleTargetModeSelect) NormalizeValue(value int32) int32 {
-	return -1
-}
-
-func (target *RuleTargetButton) CreateEvent(value int32, mode *string) *evdev.InputEvent {
-	return &evdev.InputEvent{
-		Type:  evdev.EV_KEY,
-		Code:  target.Code,
-		Value: value,
-	}
-}
-
 func (target *RuleTargetAxis) CreateEvent(value int32, mode *string) *evdev.InputEvent {
 	return &evdev.InputEvent{
 		Type:  evdev.EV_ABS,
 		Code:  target.Code,
 		Value: value,
 	}
+}
+
+// RuleTargetModeSelect doesn't make sense as an input type
+func (target *RuleTargetModeSelect) NormalizeValue(value int32) int32 {
+	return -1
 }
 
 func (target *RuleTargetModeSelect) CreateEvent(value int32, mode *string) *evdev.InputEvent {

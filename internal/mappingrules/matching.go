@@ -7,7 +7,7 @@ import (
 )
 
 func (rule *MappingRuleBase) OutputName() string {
-	return rule.Output.DeviceName
+	return rule.Output.GetDeviceName()
 }
 
 func (rule *MappingRuleBase) modeCheck(mode *string) bool {
@@ -22,12 +22,12 @@ func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evde
 		return nil
 	}
 
-	if device != rule.Input.Device ||
-		event.Code != rule.Input.Code {
+	if device != rule.Input.GetDevice() ||
+		event.Code != rule.Input.GetCode() {
 		return nil
 	}
 
-	return eventFromTarget(rule.Output, valueFromTarget(rule.Input, event), mode)
+	return rule.Output.CreateEvent(rule.Input.NormalizeValue(event.Value), mode)
 }
 
 func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
@@ -36,11 +36,11 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	}
 
 	// Check each of the inputs, and if we find a match, proceed
-	var match *RuleTarget
+	var match RuleTarget
 	for _, input := range rule.Inputs {
-		if device == input.Device &&
-			event.Code == input.Code {
-			match = &input
+		if device == input.GetDevice() &&
+			event.Code == input.GetCode() {
+			match = input
 		}
 	}
 
@@ -49,7 +49,7 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	}
 
 	// Get the value and add/subtract it from State
-	inputValue := valueFromTarget(*match, event)
+	inputValue := match.NormalizeValue(event.Value)
 	oldState := rule.State
 	if inputValue == 0 {
 		rule.State = max(rule.State-1, 0)
@@ -60,10 +60,10 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	targetState := len(rule.Inputs)
 
 	if oldState == targetState-1 && rule.State == targetState {
-		return eventFromTarget(rule.Output, 1, mode)
+		return rule.Output.CreateEvent(1, mode)
 	}
 	if oldState == targetState && rule.State == targetState-1 {
-		return eventFromTarget(rule.Output, 0, mode)
+		return rule.Output.CreateEvent(0, mode)
 	}
 	return nil
 }
@@ -73,8 +73,8 @@ func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evd
 		return nil
 	}
 
-	if device != rule.Input.Device ||
-		event.Code != rule.Input.Code ||
+	if device != rule.Input.GetDevice() ||
+		event.Code != rule.Input.GetCode() ||
 		rule.Input.NormalizeValue(event.Value) == 0 {
 		return nil
 	}
