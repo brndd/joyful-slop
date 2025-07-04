@@ -11,7 +11,7 @@ func (rule *MappingRuleBase) OutputName() string {
 }
 
 func (rule *MappingRuleBase) modeCheck(mode *string) bool {
-	if len(rule.Modes) == 1 && rule.Modes[0] == "*" {
+	if rule.Modes[0] == "*" {
 		return true
 	}
 	return slices.Contains(rule.Modes, *mode)

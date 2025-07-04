@@ -20,10 +20,13 @@ func (target *RuleTargetBase) GetDevice() *evdev.InputDevice {
 }
 
 func (target *RuleTargetButton) NormalizeValue(value int32) int32 {
-	if value == 0 {
-		return 1
+	if target.Inverted {
+		if value == 0 {
+			return 1
+		}
+		return 0
 	}
-	return 0
+	return value
 }
 
 func (target *RuleTargetButton) CreateEvent(value int32, mode *string) *evdev.InputEvent {
