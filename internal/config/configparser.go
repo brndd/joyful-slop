@@ -69,6 +69,9 @@ func (parser *ConfigParser) Parse(directory string) error {
 	return nil
 }
 
-func (parser *ConfigParser) getModes() []string {
-	return append([]string{"main"}, parser.config.Modes...)
+func (parser *ConfigParser) GetModes() []string {
+	if len(parser.config.Modes) == 0 {
+		return []string{"*"}
+	}
+	return parser.config.Modes
 }

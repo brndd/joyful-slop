@@ -81,7 +81,7 @@ func main() {
 	logger.Logf("registered %d timers", timerCount)
 
 	// initialize the mode variable
-	mode := "main"
+	mode := config.GetModes()[0]
 
 	fmt.Println("Joyful Running! Press Ctrl+C to quit.")
 	for {

@@ -17,7 +17,7 @@ import (
 // For very large rule-bases this may be helpful for staying performant.
 func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDevs map[string]*evdev.InputDevice) []mappingrules.MappingRule {
 	rules := make([]mappingrules.MappingRule, 0)
-	modes := parser.getModes()
+	modes := parser.GetModes()
 
 	for _, ruleConfig := range parser.config.Rules {
 		var newRule mappingrules.MappingRule
