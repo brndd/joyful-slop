@@ -4,18 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"git.annabunches.net/annabunches/joyful/internal/config"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
 	"git.annabunches.net/annabunches/joyful/internal/virtualdevice"
 	"github.com/holoplot/go-evdev"
-)
-
-const (
-	TimerCheckIntervalMs  = 250
-	DeviceCheckIntervalMs = 1
 )
 
 func readConfig() *config.ConfigParser {
@@ -71,25 +65,7 @@ func main() {
 	rules := config.BuildRules(pDevices, getVirtualDevices(vBuffers))
 	logger.Logf("Created %d mapping rules.", len(rules))
 
-	// Listen for events and map them forever
-	mapEvents(vBuffers, pDevices, rules)
-}
-
-type ChannelEventType int
-
-const (
-	ChannelEventInput ChannelEventType = iota
-	ChannelEventTimer
-)
-
-type ChannelEvent struct {
-	Type   ChannelEventType
-	Device *evdev.InputDevice
-	Event  *evdev.InputEvent
-}
-
-func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[string]*evdev.InputDevice, rules []mappingrules.MappingRule) {
-	// start listening for events on all devices
+	// start listening for events on devices and timers
 	eventChannel := make(chan ChannelEvent, 1000)
 	for _, device := range pDevices {
 		go eventWatcher(device, eventChannel)
@@ -137,30 +113,5 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 			// TODO: we need a vbuffer map with device keys
 			// vBuffers[wrapper.Device].AddEvent(wrapper.Event)
 		}
-	}
-}
-
-func eventWatcher(device *evdev.InputDevice, channel chan<- ChannelEvent) {
-	for {
-		event, err := device.ReadOne()
-		if err != nil {
-			logger.LogError(err, "Error while reading event. Disconnecting device.")
-			return
-		}
-		channel <- ChannelEvent{Device: device, Event: event, Type: ChannelEventInput}
-
-		if event.Type == evdev.EV_SYN {
-			time.Sleep(DeviceCheckIntervalMs * time.Millisecond)
-		}
-	}
-}
-
-func timerWatcher(rule *mappingrules.ProportionalAxisMappingRule, channel chan<- ChannelEvent) {
-	for {
-		event := rule.TimerEvent()
-		if event != nil {
-			channel <- ChannelEvent{Device: rule.Output.Device, Event: event, Type: ChannelEventTimer}
-		}
-		time.Sleep(TimerCheckIntervalMs * time.Millisecond)
 	}
 }
