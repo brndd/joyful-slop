@@ -44,11 +44,45 @@ type ProportionalAxisMappingRule struct {
 	LastEvent time.Time
 }
 
-type RuleTarget struct {
+// RuleTargets represent either a device input to match on, or an output to produce.
+// Some RuleTarget types may work via side effects, such as RuleTargetModeSelect.
+type RuleTarget interface {
+	// NormalizeValue takes the raw input value and possibly modifies it based on the Target settings.
+	// (e.g., inverting the value if Inverted == true)
+	NormalizeValue(int32) int32
+
+	// CreateEvent typically takes the (probably normalized) value and returns an event that can be emitted
+	// on a virtual device.
+	//
+	// For RuleTargetModeSelect, this method modifies the active mode and returns nil.
+	//
+	// TODO: should we normalize inside this function to simplify the interface?
+	CreateEvent(int32, *string) *evdev.InputEvent
+
+	GetCode() evdev.EvCode
+	GetDeviceName() string
+	GetDevice() *evdev.InputDevice
+}
+
+type RuleTargetBase struct {
 	DeviceName string
-	ModeSelect []string
 	Device     *evdev.InputDevice
-	Type       evdev.EvType
 	Code       evdev.EvCode
 	Inverted   bool
+}
+
+type RuleTargetButton struct {
+	RuleTargetBase
+}
+
+type RuleTargetAxis struct {
+	RuleTargetBase
+	AxisStart   int32
+	AxisEnd     int32
+	Sensitivity float64
+}
+
+type RuleTargetModeSelect struct {
+	RuleTargetBase
+	ModeSelect []string
 }

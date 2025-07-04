@@ -31,6 +31,8 @@ type RuleTargetConfig struct {
 	Device     string   `yaml:"device,omitempty"`
 	Button     string   `yaml:"button,omitempty"`
 	Axis       string   `yaml:"axis,omitempty"`
+	AxisStart  int32    `yaml:"axis_start,omitempty"`
+	AxisEnd    int32    `yaml:"axis_end,omitempty"`
 	Inverted   bool     `yaml:"inverted,omitempty"`
 	ModeSelect []string `yaml:"mode_select,omitempty"`
 }

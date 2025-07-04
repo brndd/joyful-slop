@@ -20,22 +20,23 @@ Joyful might be the tool for you.
 * Create virtual devices with up to 8 axes and 80 buttons.
 * Make simple 1:1 mappings of buttons and axes: Button1 -> VirtualButtonA
 * Make combination mappings: Button1 + Button2 -> VirtualButtonA
+* Multiple modes with per-mode behavior.
 
 ### Future Features - try them at an unspecified point in the future!
 
-* Multiple modes with per-mode behavior.
 * Partial axis mapping: map sections of an axis to different outputs.
 * Highly configurable deadzones
 * Macros - have a single input produce a sequence of button presses with configurable pauses.
 * Sequence combos - Button1, Button2, Button3 -> VirtualButtonA
+* Proportional axis to button mapping; repeatedly trigger a button with an axis, with frequency controlled by the axis value
 
 ## Configuration
 
 Configuration is currently done via hand-written YAML files in `~/.config/joyful/`. Joyful will read every
 yaml file in this directory and combine them, so you can split your configuration up however you like.
 
-Configuration is divided into two sections: `devices` and `rules`. Each of these is a YAML list.
-The options for each are described in some detail below. See the `examples/` directory for concrete examples.
+Configuration is divided into three sections: `devices`, `modes`, and `rules`. See the `examples/` directory for concrete examples.
+Select options are explained in detail below.
 
 ### Device configuration
 
@@ -65,7 +66,10 @@ Configuration options for each type vary. See <examples/ruletypes.yml> for an ex
 
 ### Modes
 
-All rules can have a `modes` field that is a list of strings.
+The top-level `modes` field is a simple list of strings, defining the different modes available to rules. The initial mode is always
+the first one in the list. (TODO)
+
+All rules can have a `modes` field that is a list of strings. If no `modes` field is present, the rule will be active in all modes.
 
 
 ## Technical details

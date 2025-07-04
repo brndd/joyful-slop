@@ -107,29 +107,45 @@ func makeLatchedRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice,
 
 // makeInputRuleTarget takes an Input declaration from the YAML and returns a fully formed RuleTarget.
 func makeRuleTarget(targetConfig RuleTargetConfig, devs map[string]*evdev.InputDevice) (mappingrules.RuleTarget, error) {
-	ruleTarget := mappingrules.RuleTarget{}
-
 	if len(targetConfig.ModeSelect) > 0 {
-		ruleTarget.ModeSelect = targetConfig.ModeSelect
-		return ruleTarget, nil
+		return &mappingrules.RuleTargetModeSelect{
+			ModeSelect: targetConfig.ModeSelect,
+		}, nil
 	}
 
 	device, ok := devs[targetConfig.Device]
 	if !ok {
-		return mappingrules.RuleTarget{}, fmt.Errorf("couldn't build rule due to non-existent device '%s'", targetConfig.Device)
+		return nil, fmt.Errorf("couldn't build rule due to non-existent device '%s'", targetConfig.Device)
 	}
-	ruleTarget.Device = device
 
 	eventType, eventCode, err := decodeRuleTargetValues(targetConfig)
 	if err != nil {
-		return ruleTarget, err
+		return nil, err
 	}
-	ruleTarget.Type = eventType
-	ruleTarget.Code = eventCode
-	ruleTarget.Inverted = targetConfig.Inverted
-	ruleTarget.DeviceName = targetConfig.Device
 
-	return ruleTarget, nil
+	baseParams := mappingrules.RuleTargetBase{
+		DeviceName: targetConfig.Device,
+		Device:     device,
+		Inverted:   targetConfig.Inverted,
+		Code:       eventCode,
+	}
+
+	switch eventType {
+	case evdev.EV_KEY:
+		return &mappingrules.RuleTargetButton{
+			RuleTargetBase: baseParams,
+		}, nil
+
+	case evdev.EV_ABS:
+		return &mappingrules.RuleTargetAxis{
+			RuleTargetBase: baseParams,
+			AxisStart:      targetConfig.AxisStart,
+			AxisEnd:        targetConfig.AxisEnd,
+		}, nil
+
+	default:
+		return nil, fmt.Errorf("skipping rule due to unsupported event type '%d'", eventType)
+	}
 }
 
 // decodeRuleTargetValues returns the appropriate evdev.EvType and evdev.EvCode values
