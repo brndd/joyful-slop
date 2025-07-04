@@ -44,11 +44,30 @@ type ProportionalAxisMappingRule struct {
 	LastEvent time.Time
 }
 
-type RuleTarget struct {
+type RuleTarget interface {
+	NormalizeValue(int32) int32
+	CreateEvent(int32, *string) *evdev.InputEvent
+}
+
+type RuleTargetBase struct {
 	DeviceName string
-	ModeSelect []string
 	Device     *evdev.InputDevice
-	Type       evdev.EvType
 	Code       evdev.EvCode
 	Inverted   bool
+}
+
+type RuleTargetButton struct {
+	RuleTargetBase
+}
+
+type RuleTargetAxis struct {
+	RuleTargetBase
+	AxisStart   int32
+	AxisEnd     int32
+	Sensitivity float64
+}
+
+type RuleTargetModeSelect struct {
+	RuleTargetBase
+	ModeSelect []string
 }

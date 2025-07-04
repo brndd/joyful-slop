@@ -32,7 +32,11 @@ func timerWatcher(rule *mappingrules.ProportionalAxisMappingRule, channel chan<-
 	for {
 		event := rule.TimerEvent()
 		if event != nil {
-			channel <- ChannelEvent{Device: rule.Output.Device, Event: event, Type: ChannelEventTimer}
+			channel <- ChannelEvent{
+				Device: rule.Output.(*mappingrules.RuleTargetModeSelect).Device,
+				Event:  event,
+				Type:   ChannelEventTimer,
+			}
 		}
 		time.Sleep(TimerCheckIntervalMs * time.Millisecond)
 	}

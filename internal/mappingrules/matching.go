@@ -3,7 +3,6 @@ package mappingrules
 import (
 	"slices"
 
-	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"github.com/holoplot/go-evdev"
 )
 
@@ -16,53 +15,6 @@ func (rule *MappingRuleBase) modeCheck(mode *string) bool {
 		return true
 	}
 	return slices.Contains(rule.Modes, *mode)
-}
-
-// eventFromTarget creates an outputtable event from a RuleTarget
-func eventFromTarget(output RuleTarget, value int32, mode *string) *evdev.InputEvent {
-	// TODO: this could perhaps use some sort of multiclassing... then again, maybe this is fine?
-	if len(output.ModeSelect) > 0 {
-		if value == 0 {
-			return nil
-		}
-		index := 0
-		if currentMode := slices.Index(output.ModeSelect, *mode); currentMode != -1 {
-			// find the next mode
-			index = (currentMode + 1) % len(output.ModeSelect)
-		}
-
-		*mode = output.ModeSelect[index]
-		logger.Logf("Mode changed to '%s'", *mode)
-		return nil
-	}
-
-	return &evdev.InputEvent{
-		Type:  output.Type,
-		Code:  output.Code,
-		Value: value,
-	}
-}
-
-// valueFromTarget determines the value to output from an input specification,given a RuleTarget's constraints
-func valueFromTarget(rule RuleTarget, event *evdev.InputEvent) int32 {
-	// how we process inverted rules depends on the event type
-	value := event.Value
-	if rule.Inverted {
-		switch rule.Type {
-		case evdev.EV_KEY:
-			if value == 0 {
-				value = 1
-			} else {
-				value = 0
-			}
-		case evdev.EV_ABS:
-			logger.Logf("STUB: Inverting axes is not yet implemented.")
-		default:
-			logger.Logf("Inverted rule for unknown event type '%d'. Not inverting value", event.Type)
-		}
-	}
-
-	return value
 }
 
 func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
@@ -123,7 +75,7 @@ func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evd
 
 	if device != rule.Input.Device ||
 		event.Code != rule.Input.Code ||
-		valueFromTarget(rule.Input, event) == 0 {
+		rule.Input.NormalizeValue(event.Value) == 0 {
 		return nil
 	}
 
@@ -136,7 +88,7 @@ func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evd
 		value = 0
 	}
 
-	return eventFromTarget(rule.Output, value, mode)
+	return rule.Output.CreateEvent(value, mode)
 }
 
 func (rule *ProportionalAxisMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
