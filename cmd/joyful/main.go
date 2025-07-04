@@ -4,12 +4,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"git.annabunches.net/annabunches/joyful/internal/config"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
 	"git.annabunches.net/annabunches/joyful/internal/virtualdevice"
 	"github.com/holoplot/go-evdev"
+)
+
+const (
+	TimerCheckIntervalMs = 250
 )
 
 func readConfig() *config.ConfigParser {
@@ -89,6 +94,12 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 		go eventWatcher(device, eventChannel)
 	}
 
+	for _, rule := range rules {
+		if timedRule, ok := rule.(*mappingrules.ProportionalAxisMappingRule); ok {
+			go timerWatcher(timedRule, eventChannel)
+		}
+	}
+
 	// initialize the mode variable
 	mode := "main"
 
@@ -141,5 +152,16 @@ func eventWatcher(device *evdev.InputDevice, channel chan<- ChannelEvent) {
 			continue
 		}
 		channel <- ChannelEvent{Device: device, Event: event}
+		// TODO: should we sleep at all here?
+	}
+}
+
+func timerWatcher(rule *mappingrules.ProportionalAxisMappingRule, channel chan<- ChannelEvent) {
+	for {
+		event := rule.TimerEvent()
+		if event != nil {
+			channel <- ChannelEvent{Device: rule.Output.Device, Event: event}
+		}
+		time.Sleep(TimerCheckIntervalMs * time.Millisecond)
 	}
 }

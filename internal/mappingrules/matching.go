@@ -136,3 +136,15 @@ func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evd
 
 	return eventFromTarget(rule.Output, value, mode)
 }
+
+func (rule *ProportionalAxisMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+	// STUB
+	return nil
+}
+
+// TimerEvent returns an event when enough time has passed (compared to the last recorded axis value)
+// to emit an event.
+func (rule *ProportionalAxisMappingRule) TimerEvent() *evdev.InputEvent {
+	// STUB
+	return nil
+}
