@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	TimerCheckIntervalMs = 250
+	TimerCheckIntervalMs  = 250
+	DeviceCheckIntervalMs = 1
 )
 
 func readConfig() *config.ConfigParser {
@@ -94,11 +95,14 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 		go eventWatcher(device, eventChannel)
 	}
 
+	timerCount := 0
 	for _, rule := range rules {
 		if timedRule, ok := rule.(*mappingrules.ProportionalAxisMappingRule); ok {
 			go timerWatcher(timedRule, eventChannel)
+			timerCount++
 		}
 	}
+	logger.Logf("registered %d timers", timerCount)
 
 	// initialize the mode variable
 	mode := "main"
@@ -106,36 +110,28 @@ func mapEvents(vBuffers map[string]*virtualdevice.EventBuffer, pDevices map[stri
 	fmt.Println("Joyful Running! Press Ctrl+C to quit.")
 	for {
 		// Get an event (blocks if necessary)
-		wrapper := <-eventChannel
+		channelEvent := <-eventChannel
 
-		switch wrapper.Type {
+		switch channelEvent.Type {
 		case ChannelEventInput:
-			switch wrapper.Event.Type {
+			switch channelEvent.Event.Type {
 			case evdev.EV_SYN:
 				// We've received a SYN_REPORT, so now we send all of our pending events
 				for _, buffer := range vBuffers {
 					buffer.SendEvents()
 				}
 
-			// TODO: event types are a little weird, because EvCode constants are reused across
-			// types, but button presses can apparently come across as multiple types.
-			// This isn't a big problem right now, but when we want to support relative axes
-			// and/or keyboards, this could get hairy.
-			case evdev.EV_KEY:
-			case evdev.EV_ABS:
-			case evdev.EV_MSC:
+			case evdev.EV_KEY, evdev.EV_ABS:
 				// We have a matchable event type. Check all the events
 				for _, rule := range rules {
-					outputEvent := rule.MatchEvent(wrapper.Device, wrapper.Event, &mode)
+					outputEvent := rule.MatchEvent(channelEvent.Device, channelEvent.Event, &mode)
 					if outputEvent == nil {
 						continue
 					}
-
 					vBuffers[rule.OutputName()].AddEvent(outputEvent)
 				}
-			default:
-				logger.Logf("DEBUG: Unprocessed event: %d %d %d", wrapper.Event.Type, wrapper.Event.Code, wrapper.Event.Value)
 			}
+
 		case ChannelEventTimer:
 			// Timer events give us the device and event to use directly
 			// TODO: we need a vbuffer map with device keys
@@ -148,11 +144,14 @@ func eventWatcher(device *evdev.InputDevice, channel chan<- ChannelEvent) {
 	for {
 		event, err := device.ReadOne()
 		if err != nil {
-			logger.LogError(err, "Error while reading event")
-			continue
+			logger.LogError(err, "Error while reading event. Disconnecting device.")
+			return
 		}
-		channel <- ChannelEvent{Device: device, Event: event}
-		// TODO: should we sleep at all here?
+		channel <- ChannelEvent{Device: device, Event: event, Type: ChannelEventInput}
+
+		if event.Type == evdev.EV_SYN {
+			time.Sleep(DeviceCheckIntervalMs * time.Millisecond)
+		}
 	}
 }
 
@@ -160,7 +159,7 @@ func timerWatcher(rule *mappingrules.ProportionalAxisMappingRule, channel chan<-
 	for {
 		event := rule.TimerEvent()
 		if event != nil {
-			channel <- ChannelEvent{Device: rule.Output.Device, Event: event}
+			channel <- ChannelEvent{Device: rule.Output.Device, Event: event, Type: ChannelEventTimer}
 		}
 		time.Sleep(TimerCheckIntervalMs * time.Millisecond)
 	}

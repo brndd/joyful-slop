@@ -20,7 +20,11 @@ func (rule *MappingRuleBase) modeCheck(mode *string) bool {
 
 // eventFromTarget creates an outputtable event from a RuleTarget
 func eventFromTarget(output RuleTarget, value int32, mode *string) *evdev.InputEvent {
+	// TODO: this could perhaps use some sort of multiclassing... then again, maybe this is fine?
 	if len(output.ModeSelect) > 0 {
+		if value == 0 {
+			return nil
+		}
 		index := 0
 		if currentMode := slices.Index(output.ModeSelect, *mode); currentMode != -1 {
 			// find the next mode
@@ -28,8 +32,10 @@ func eventFromTarget(output RuleTarget, value int32, mode *string) *evdev.InputE
 		}
 
 		*mode = output.ModeSelect[index]
+		logger.Logf("Mode changed to '%s'", *mode)
 		return nil
 	}
+
 	return &evdev.InputEvent{
 		Type:  output.Type,
 		Code:  output.Code,
@@ -62,10 +68,6 @@ func valueFromTarget(rule RuleTarget, event *evdev.InputEvent) int32 {
 func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
 	if !rule.MappingRuleBase.modeCheck(mode) {
 		return nil
-	}
-
-	if event.Type != evdev.EV_ABS {
-		logger.Logf("DEBUG: mode check passed for rule '%s'. Mode '%s' modes '%v'", rule.Name, *mode, rule.Modes)
 	}
 
 	if device != rule.Input.Device ||
