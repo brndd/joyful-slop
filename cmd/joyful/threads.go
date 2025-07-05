@@ -33,7 +33,7 @@ func timerWatcher(rule *mappingrules.MappingRuleProportionalAxis, channel chan<-
 		event := rule.TimerEvent()
 		if event != nil {
 			channel <- ChannelEvent{
-				Device: rule.Output.(*mappingrules.RuleTargetModeSelect).Device,
+				Device: rule.Output.Device,
 				Event:  event,
 				Type:   ChannelEventTimer,
 			}

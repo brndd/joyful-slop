@@ -2,9 +2,45 @@ package mappingrules
 
 import (
 	"slices"
+	"time"
 
 	"github.com/holoplot/go-evdev"
 )
+
+type MappingRuleBase struct {
+	Name   string
+	Output RuleTarget
+	Modes  []string
+}
+
+// A Simple Mapping Rule can map a button to a button or an axis to an axis.
+type MappingRuleSimple struct {
+	MappingRuleBase
+	Input RuleTarget
+}
+
+// A Combo Mapping Rule can require multiple physical button presses for a single output button
+type MappingRuleCombo struct {
+	MappingRuleBase
+	Inputs []RuleTarget
+	State  int
+}
+
+type MappingRuleLatched struct {
+	MappingRuleBase
+	Input RuleTarget
+	State bool
+}
+
+// TODO: How are we going to implement this? It needs to operate on a timer...
+type MappingRuleProportionalAxis struct {
+	MappingRuleBase
+	Input       *RuleTargetAxis
+	Output      *RuleTargetButton
+	Sensitivity int32
+	LastValue   int32
+	LastEvent   time.Time
+}
 
 func (rule *MappingRuleBase) OutputName() string {
 	return rule.Output.GetDeviceName()
@@ -92,13 +128,38 @@ func (rule *MappingRuleLatched) MatchEvent(device *evdev.InputDevice, event *evd
 }
 
 func (rule *MappingRuleProportionalAxis) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
-	// STUB
+	if !rule.MappingRuleBase.modeCheck(mode) {
+		return nil
+	}
+
+	if device != rule.Input.GetDevice() ||
+		event.Code != rule.Input.GetCode() {
+		return nil
+	}
+
+	// set the last value to the normalized input value
+	rule.LastValue = rule.Input.NormalizeValue(event.Value)
 	return nil
 }
 
 // TimerEvent returns an event when enough time has passed (compared to the last recorded axis value)
 // to emit an event.
 func (rule *MappingRuleProportionalAxis) TimerEvent() *evdev.InputEvent {
-	// STUB
+	// This is tighter coupling than we'd like, but it will do for now.
+	// TODO: maybe it would be better to just be more declarative about event types and their inputs and outputs.
+	if rule.LastValue < rule.Input.AxisStart {
+		rule.LastEvent = time.Now()
+		return nil
+	}
+
+	// calculate target time until next event press
+	//	nextEvent := rule.LastEvent + (rule.LastValue)
+
+	// TODO: figure out what the condition should be
+	if false {
+		// TODO: emit event
+		rule.LastEvent = time.Now()
+	}
+
 	return nil
 }
