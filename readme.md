@@ -17,7 +17,7 @@ Joyful might be the tool for you.
 
 ### Current Features - try them today!
 
-* Create virtual devices with up to 8 axes and 80 buttons.
+* Create virtual devices with up to 8 axes and 56 buttons.
 * Make simple 1:1 mappings of buttons and axes: Button1 -> VirtualButtonA
 * Make combination mappings: Button1 + Button2 -> VirtualButtonA
 * Multiple modes with per-mode behavior.
@@ -29,6 +29,7 @@ Joyful might be the tool for you.
 * Macros - have a single input produce a sequence of button presses with configurable pauses.
 * Sequence combos - Button1, Button2, Button3 -> VirtualButtonA
 * Proportional axis to button mapping; repeatedly trigger a button with an axis, with frequency controlled by the axis value
+* More ways to specify keycodes
 
 ## Configuration
 
@@ -63,6 +64,21 @@ All `rules` must have a `type` field. Valid values for this field are:
 * `latched` - a single input mapped to a single output, but each time the input is pressed, the output will toggle.
 
 Configuration options for each type vary. See <examples/ruletypes.yml> for an example of each type with all options specified.
+
+### Keycodes
+
+Currently, there is only one way to specify a button or axis: using evdev's Keycodes. These look like `ABS_X` for axes and `BTN_TRIGGER`
+for buttons. See <https://github.com/holoplot/go-evdev/blob/master/codes.go> for a full list of these codes, but note that Joyful's virtual devices currently only uses a subset. Specifically, the axes from `ABS_X` to `ABS_RUDDER`, and the buttons from `BTN_JOYSTICK` to `BTN_DEAD`, as well as all of the `BTN_TRIGGER_HAPPY*` codes.
+
+For input, you can figure out what keycodes your device is emitting by running the Linux utility `evtest`. `evtest` works well with `grep`, so if you just want to see button inputs, you can do:
+
+```
+evtest | grep 
+```
+
+The authors of this tool recognize that this is currently a pain in the ass. Easier ways to represent keycodes (as well as outputting additional keycodes) is planned for the future.
+
+We don't have the cycles to develop tool-assisted configuration, but pull requests (or separate projects that produce compatible YAML) are very welcome!
 
 ### Modes
 
