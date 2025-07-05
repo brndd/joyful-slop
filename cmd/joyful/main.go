@@ -21,17 +21,19 @@ func readConfig() *config.ConfigParser {
 	return parser
 }
 
-func initVirtualBuffers(config *config.ConfigParser) map[string]*virtualdevice.EventBuffer {
+func initVirtualBuffers(config *config.ConfigParser) (map[string]*virtualdevice.EventBuffer, map[*evdev.InputDevice]*virtualdevice.EventBuffer) {
 	vDevices := config.CreateVirtualDevices()
 	if len(vDevices) == 0 {
 		logger.Log("Warning: no virtual devices found in configuration. No rules will work.")
 	}
 
-	vBuffers := make(map[string]*virtualdevice.EventBuffer)
+	vBuffersByName := make(map[string]*virtualdevice.EventBuffer)
+	vBuffersByDevice := make(map[*evdev.InputDevice]*virtualdevice.EventBuffer)
 	for name, device := range vDevices {
-		vBuffers[name] = virtualdevice.NewEventBuffer(device)
+		vBuffersByName[name] = virtualdevice.NewEventBuffer(device)
+		vBuffersByDevice[device] = vBuffersByName[name]
 	}
-	return vBuffers
+	return vBuffersByName, vBuffersByDevice
 }
 
 // Extracts the evdev devices from a list of virtual buffers and returns them.
@@ -56,13 +58,13 @@ func main() {
 	config := readConfig()
 
 	// Initialize virtual devices with event buffers
-	vBuffers := initVirtualBuffers(config)
+	vBuffersByName, vBuffersByDevice := initVirtualBuffers(config)
 
 	// Initialize physical devices
 	pDevices := initPhysicalDevices(config)
 
 	// Initialize rules
-	rules := config.BuildRules(pDevices, getVirtualDevices(vBuffers))
+	rules := config.BuildRules(pDevices, getVirtualDevices(vBuffersByName))
 	logger.Logf("Created %d mapping rules.", len(rules))
 
 	// start listening for events on devices and timers
@@ -93,7 +95,7 @@ func main() {
 			switch channelEvent.Event.Type {
 			case evdev.EV_SYN:
 				// We've received a SYN_REPORT, so now we send all of our pending events
-				for _, buffer := range vBuffers {
+				for _, buffer := range vBuffersByName {
 					buffer.SendEvents()
 				}
 
@@ -104,14 +106,13 @@ func main() {
 					if outputEvent == nil {
 						continue
 					}
-					vBuffers[rule.OutputName()].AddEvent(outputEvent)
+					vBuffersByName[rule.OutputName()].AddEvent(outputEvent)
 				}
 			}
 
 		case ChannelEventTimer:
 			// Timer events give us the device and event to use directly
-			// TODO: we need a vbuffer map with device keys
-			// vBuffers[wrapper.Device].AddEvent(wrapper.Event)
+			vBuffersByDevice[channelEvent.Device].AddEvent(channelEvent.Event)
 		}
 	}
 }
