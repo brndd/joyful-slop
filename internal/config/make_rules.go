@@ -25,7 +25,7 @@ func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDev
 
 		baseParams, err := setBaseRuleParameters(ruleConfig, vDevs, modes)
 		if err != nil {
-			logger.LogError(err, "couldn't set output parameters, skipping rule")
+			logger.LogErrorf(err, "couldn't set output parameters, skipping rule '%s'", ruleConfig.Name)
 			continue
 		}
 
