@@ -50,11 +50,27 @@ func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDev
 }
 
 func setBaseRuleParameters(ruleConfig RuleConfig, vDevs map[string]*evdev.InputDevice, modes []string) (mappingrules.MappingRuleBase, error) {
+	// We perform this check here instead of in makeRuleTarget because only Output targets
+	// can meaningfully have ModeSelect; this lets us avoid plumbing the modes in on every
+	// makeRuleTarget call.
+	if len(ruleConfig.Output.ModeSelect) > 0 {
+		err := validateModes(ruleConfig.Output.ModeSelect, modes)
+		if err != nil {
+			return mappingrules.MappingRuleBase{}, err
+		}
+	}
+
 	output, err := makeRuleTarget(ruleConfig.Output, vDevs)
 	if err != nil {
 		return mappingrules.MappingRuleBase{}, err
 	}
-	ruleModes := verifyModes(ruleConfig, modes)
+
+	err = validateModes(ruleConfig.Modes, modes)
+	if err != nil {
+		return mappingrules.MappingRuleBase{}, err
+	}
+
+	ruleModes := ensureModes(ruleConfig.Modes)
 
 	return mappingrules.MappingRuleBase{
 		Output: output,
@@ -174,20 +190,26 @@ func decodeRuleTargetValues(target RuleTargetConfig) (evdev.EvType, evdev.EvCode
 	return eventType, eventCode, nil
 }
 
-func verifyModes(ruleConfig RuleConfig, modes []string) []string {
-	verifiedModes := make([]string, 0)
+// ensureModes either returns the mode list, or if it is empty returns []string{"*"}
+func ensureModes(modes []string) []string {
+	if len(modes) == 0 {
+		return []string{"*"}
+	}
+	return modes
+}
 
-	for _, configMode := range ruleConfig.Modes {
-		if !slices.Contains(modes, configMode) {
-			logger.Logf("rule '%s' specifies undefined mode '%s', skipping", ruleConfig.Name, configMode)
-			continue
+// validateModes checks the provided modes against a larger subset of modes (usually all defined ones)
+// and returns an error if any of the modes are not defined.
+func validateModes(modes []string, allModes []string) error {
+	if len(modes) == 0 {
+		return nil
+	}
+
+	for _, mode := range modes {
+		if !slices.Contains(allModes, mode) {
+			return fmt.Errorf("mode list specifies undefined mode '%s'", mode)
 		}
-
-		verifiedModes = append(verifiedModes, configMode)
-	}
-	if len(verifiedModes) == 0 {
-		verifiedModes = []string{"*"}
 	}
 
-	return verifiedModes
+	return nil
 }

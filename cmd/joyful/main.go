@@ -84,6 +84,7 @@ func main() {
 
 	// initialize the mode variable
 	mode := config.GetModes()[0]
+	logger.Logf("Initial mode set to '%s'", mode)
 
 	fmt.Println("Joyful Running! Press Ctrl+C to quit.")
 	for {
