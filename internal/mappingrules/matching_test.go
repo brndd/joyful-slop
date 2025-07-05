@@ -4,63 +4,91 @@ import (
 	"testing"
 
 	"github.com/holoplot/go-evdev"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestSimpleRuleMatchEvent(t *testing.T) {
-	inputDevice := &evdev.InputDevice{}
-	wrongInputDevice := &evdev.InputDevice{}
-	outputDevice := &evdev.InputDevice{}
+type SimpleMappingRuleTests struct {
+	suite.Suite
+	inputDevice      *evdev.InputDevice
+	wrongInputDevice *evdev.InputDevice
+	outputDevice     *evdev.InputDevice
+	mode             *string
+	sampleRule       *SimpleMappingRule
+	invertedRule     *SimpleMappingRule
+}
 
-	rule := &SimpleMappingRule{
-		MappingRuleBase: MappingRuleBase{
-			Output: &RuleTargetButton{
-				RuleTargetBase{
-					DeviceName: "test_output",
-					Device:     outputDevice,
-					Code:       evdev.BTN_TRIGGER,
-				},
-			},
-			Modes: []string{"*"},
-		},
-		Input: &RuleTargetButton{
-			RuleTargetBase{
-				DeviceName: "test_input",
-				Device:     inputDevice,
-				Code:       evdev.BTN_TRIGGER,
-			},
-		},
-	}
+func (t *SimpleMappingRuleTests) SetupTest() {
+	t.inputDevice = &evdev.InputDevice{}
+	t.wrongInputDevice = &evdev.InputDevice{}
+	t.outputDevice = &evdev.InputDevice{}
 	mode := "*"
+	t.mode = &mode
 
+	// TODO: implement a constructor function...
+	t.sampleRule = &SimpleMappingRule{
+		MappingRuleBase: MappingRuleBase{
+			Output: NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false),
+			Modes:  []string{"*"},
+		},
+		Input: NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, false),
+	}
+
+	t.invertedRule = &SimpleMappingRule{
+		MappingRuleBase: MappingRuleBase{
+			Output: NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false),
+			Modes:  []string{"*"},
+		},
+		Input: NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, true),
+	}
+}
+
+func (t *SimpleMappingRuleTests) TestMatchEvent() {
 	// A matching input event should produce an output event
-	event := rule.MatchEvent(inputDevice, &evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, &mode)
-	outputEvent := &evdev.InputEvent{
+	correctOutput := &evdev.InputEvent{
 		Type:  evdev.EV_KEY,
 		Code:  evdev.BTN_TRIGGER,
 		Value: 1,
 	}
 
-	if event == nil || *event != *outputEvent {
-		t.Errorf("Expected event to match %v, but got %v", outputEvent, event)
-	}
-
-	// if event.Type != outputEvent.Type ||
-	// 	event.Code != outputEvent.Code ||
-	// 	event.Value != outputEvent.Value {
-	// 	t.Errorf("Expected event to match %v, but got %v", outputEvent, event)
-	// }
+	event := t.sampleRule.MatchEvent(
+		t.inputDevice,
+		&evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, t.mode)
+	t.EqualValues(correctOutput, event)
 
 	// An input event from the wrong device should produce a nil event
-	event = rule.MatchEvent(wrongInputDevice, &evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, &mode)
-	if event != nil {
-		t.Errorf("Expected event not to match, but got non-nil event %v", event)
+	event = t.sampleRule.MatchEvent(
+		t.wrongInputDevice,
+		&evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, t.mode)
+	t.Nil(event)
+
+	// An input event from the wrong button should produce a nil event
+	event = t.sampleRule.MatchEvent(
+		t.inputDevice,
+		&evdev.InputEvent{Code: evdev.BTN_TOP, Value: 1}, t.mode)
+	t.Nil(event)
+}
+
+func (t *SimpleMappingRuleTests) TestMatchEventInverted() {
+	// A matching input event should produce an output event
+	correctOutput := &evdev.InputEvent{
+		Type: evdev.EV_KEY,
+		Code: evdev.BTN_TRIGGER,
 	}
 
-	// An input event from the wrong device should produce a nil event
-	event = rule.MatchEvent(wrongInputDevice, &evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, &mode)
-	if event != nil {
-		t.Errorf("Expected event not to match, but got non-nil event %v", event)
-	}
+	// Should get the opposite value out that we send in
+	correctOutput.Value = 0
+	event := t.invertedRule.MatchEvent(
+		t.inputDevice,
+		&evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, t.mode)
+	t.EqualValues(correctOutput, event)
 
-	// TODO: test inversion, and everything else...
+	correctOutput.Value = 1
+	event = t.invertedRule.MatchEvent(
+		t.inputDevice,
+		&evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 0}, t.mode)
+	t.EqualValues(correctOutput, event)
+}
+
+func TestRunnerMatching(t *testing.T) {
+	suite.Run(t, new(SimpleMappingRuleTests))
 }
