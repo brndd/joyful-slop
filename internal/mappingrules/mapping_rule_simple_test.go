@@ -13,8 +13,8 @@ type SimpleMappingRuleTests struct {
 	wrongInputDevice *evdev.InputDevice
 	outputDevice     *evdev.InputDevice
 	mode             *string
-	sampleRule       *SimpleMappingRule
-	invertedRule     *SimpleMappingRule
+	sampleRule       *MappingRuleSimple
+	invertedRule     *MappingRuleSimple
 }
 
 func (t *SimpleMappingRuleTests) SetupTest() {
@@ -25,7 +25,7 @@ func (t *SimpleMappingRuleTests) SetupTest() {
 	t.mode = &mode
 
 	// TODO: implement a constructor function...
-	t.sampleRule = &SimpleMappingRule{
+	t.sampleRule = &MappingRuleSimple{
 		MappingRuleBase: MappingRuleBase{
 			Output: NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false),
 			Modes:  []string{"*"},
@@ -33,7 +33,7 @@ func (t *SimpleMappingRuleTests) SetupTest() {
 		Input: NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, false),
 	}
 
-	t.invertedRule = &SimpleMappingRule{
+	t.invertedRule = &MappingRuleSimple{
 		MappingRuleBase: MappingRuleBase{
 			Output: NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false),
 			Modes:  []string{"*"},

@@ -11,26 +11,26 @@ type MappingRuleBase struct {
 }
 
 // A Simple Mapping Rule can map a button to a button or an axis to an axis.
-type SimpleMappingRule struct {
+type MappingRuleSimple struct {
 	MappingRuleBase
 	Input RuleTarget
 }
 
 // A Combo Mapping Rule can require multiple physical button presses for a single output button
-type ComboMappingRule struct {
+type MappingRuleCombo struct {
 	MappingRuleBase
 	Inputs []RuleTarget
 	State  int
 }
 
-type LatchedMappingRule struct {
+type MappingRuleLatched struct {
 	MappingRuleBase
 	Input RuleTarget
 	State bool
 }
 
 // TODO: How are we going to implement this? It needs to operate on a timer...
-type ProportionalAxisMappingRule struct {
+type MappingRuleProportionalAxis struct {
 	MappingRuleBase
 	Input     RuleTarget
 	Output    RuleTarget

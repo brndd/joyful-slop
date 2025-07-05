@@ -17,7 +17,7 @@ func (rule *MappingRuleBase) modeCheck(mode *string) bool {
 	return slices.Contains(rule.Modes, *mode)
 }
 
-func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+func (rule *MappingRuleSimple) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
 	if !rule.MappingRuleBase.modeCheck(mode) {
 		return nil
 	}
@@ -30,7 +30,7 @@ func (rule *SimpleMappingRule) MatchEvent(device *evdev.InputDevice, event *evde
 	return rule.Output.CreateEvent(rule.Input.NormalizeValue(event.Value), mode)
 }
 
-func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+func (rule *MappingRuleCombo) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
 	if !rule.MappingRuleBase.modeCheck(mode) {
 		return nil
 	}
@@ -68,7 +68,7 @@ func (rule *ComboMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev
 	return nil
 }
 
-func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+func (rule *MappingRuleLatched) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
 	if !rule.MappingRuleBase.modeCheck(mode) {
 		return nil
 	}
@@ -91,14 +91,14 @@ func (rule *LatchedMappingRule) MatchEvent(device *evdev.InputDevice, event *evd
 	return rule.Output.CreateEvent(value, mode)
 }
 
-func (rule *ProportionalAxisMappingRule) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+func (rule *MappingRuleProportionalAxis) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
 	// STUB
 	return nil
 }
 
 // TimerEvent returns an event when enough time has passed (compared to the last recorded axis value)
 // to emit an event.
-func (rule *ProportionalAxisMappingRule) TimerEvent() *evdev.InputEvent {
+func (rule *MappingRuleProportionalAxis) TimerEvent() *evdev.InputEvent {
 	// STUB
 	return nil
 }

@@ -63,19 +63,19 @@ func setBaseRuleParameters(ruleConfig RuleConfig, vDevs map[string]*evdev.InputD
 	}, nil
 }
 
-func makeSimpleRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.SimpleMappingRule, error) {
+func makeSimpleRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleSimple, error) {
 	input, err := makeRuleTarget(ruleConfig.Input, pDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	return &mappingrules.SimpleMappingRule{
+	return &mappingrules.MappingRuleSimple{
 		MappingRuleBase: base,
 		Input:           input,
 	}, nil
 }
 
-func makeComboRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.ComboMappingRule, error) {
+func makeComboRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleCombo, error) {
 	inputs := make([]mappingrules.RuleTarget, 0)
 	for _, inputConfig := range ruleConfig.Inputs {
 		input, err := makeRuleTarget(inputConfig, pDevs)
@@ -85,20 +85,20 @@ func makeComboRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, b
 		inputs = append(inputs, input)
 	}
 
-	return &mappingrules.ComboMappingRule{
+	return &mappingrules.MappingRuleCombo{
 		MappingRuleBase: base,
 		Inputs:          inputs,
 		State:           0,
 	}, nil
 }
 
-func makeLatchedRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.LatchedMappingRule, error) {
+func makeLatchedRule(ruleConfig RuleConfig, pDevs map[string]*evdev.InputDevice, base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleLatched, error) {
 	input, err := makeRuleTarget(ruleConfig.Input, pDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	return &mappingrules.LatchedMappingRule{
+	return &mappingrules.MappingRuleLatched{
 		MappingRuleBase: base,
 		Input:           input,
 		State:           false,
