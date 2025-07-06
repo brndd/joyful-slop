@@ -4,19 +4,20 @@ import "github.com/holoplot/go-evdev"
 
 type MappingRuleLatched struct {
 	MappingRuleBase
-	Input RuleTarget
-	State bool
+	Input  *RuleTargetButton
+	Output *RuleTargetButton
+	State  bool
 }
 
-func (rule *MappingRuleLatched) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+func (rule *MappingRuleLatched) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 	if !rule.MappingRuleBase.modeCheck(mode) {
-		return nil
+		return nil, nil
 	}
 
-	if device != rule.Input.GetDevice() ||
-		event.Code != rule.Input.GetCode() ||
+	if device != rule.Input.Device ||
+		event.Code != rule.Input.Code ||
 		rule.Input.NormalizeValue(event.Value) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	// Input is pressed, so toggle state and emit event
@@ -28,5 +29,5 @@ func (rule *MappingRuleLatched) MatchEvent(device *evdev.InputDevice, event *evd
 		value = 0
 	}
 
-	return rule.Output.CreateEvent(value, mode)
+	return rule.Output.Device, rule.Output.CreateEvent(value, mode)
 }

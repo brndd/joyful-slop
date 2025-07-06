@@ -103,11 +103,11 @@ func main() {
 			case evdev.EV_KEY, evdev.EV_ABS:
 				// We have a matchable event type. Check all the events
 				for _, rule := range rules {
-					outputEvent := rule.MatchEvent(channelEvent.Device, channelEvent.Event, &mode)
-					if outputEvent == nil {
+					device, outputEvent := rule.MatchEvent(channelEvent.Device, channelEvent.Event, &mode)
+					if device == nil || outputEvent == nil {
 						continue
 					}
-					vBuffersByName[rule.OutputName()].AddEvent(outputEvent)
+					vBuffersByDevice[device].AddEvent(outputEvent)
 				}
 			}
 

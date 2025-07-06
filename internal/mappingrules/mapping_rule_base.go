@@ -3,13 +3,8 @@ package mappingrules
 import "slices"
 
 type MappingRuleBase struct {
-	Name   string
-	Output RuleTarget
-	Modes  []string
-}
-
-func (rule *MappingRuleBase) OutputName() string {
-	return rule.Output.GetDeviceName()
+	Name  string
+	Modes []string
 }
 
 func (rule *MappingRuleBase) modeCheck(mode *string) bool {

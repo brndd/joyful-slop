@@ -5,13 +5,14 @@ import "github.com/holoplot/go-evdev"
 // A Combo Mapping Rule can require multiple physical button presses for a single output button
 type MappingRuleCombo struct {
 	MappingRuleBase
-	Inputs []RuleTarget
+	Inputs []*RuleTargetButton
+	Output *RuleTargetButton
 	State  int
 }
 
-func (rule *MappingRuleCombo) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) *evdev.InputEvent {
+func (rule *MappingRuleCombo) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 	if !rule.MappingRuleBase.modeCheck(mode) {
-		return nil
+		return nil, nil
 	}
 
 	// Check each of the inputs, and if we find a match, proceed
@@ -24,7 +25,7 @@ func (rule *MappingRuleCombo) MatchEvent(device *evdev.InputDevice, event *evdev
 	}
 
 	if match == nil {
-		return nil
+		return nil, nil
 	}
 
 	// Get the value and add/subtract it from State
@@ -39,10 +40,10 @@ func (rule *MappingRuleCombo) MatchEvent(device *evdev.InputDevice, event *evdev
 	targetState := len(rule.Inputs)
 
 	if oldState == targetState-1 && rule.State == targetState {
-		return rule.Output.CreateEvent(1, mode)
+		return rule.Output.GetDevice(), rule.Output.CreateEvent(1, mode)
 	}
 	if oldState == targetState && rule.State == targetState-1 {
-		return rule.Output.CreateEvent(0, mode)
+		return rule.Output.GetDevice(), rule.Output.CreateEvent(0, mode)
 	}
-	return nil
+	return nil, nil
 }

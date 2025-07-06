@@ -3,8 +3,7 @@ package mappingrules
 import "github.com/holoplot/go-evdev"
 
 type MappingRule interface {
-	MatchEvent(*evdev.InputDevice, *evdev.InputEvent, *string) *evdev.InputEvent
-	OutputName() string
+	MatchEvent(*evdev.InputDevice, *evdev.InputEvent, *string) (*evdev.InputDevice, *evdev.InputEvent)
 }
 
 // RuleTargets represent either a device input to match on, or an output to produce.
@@ -21,8 +20,4 @@ type RuleTarget interface {
 	//
 	// TODO: should we normalize inside this function to simplify the interface?
 	CreateEvent(int32, *string) *evdev.InputEvent
-
-	GetCode() evdev.EvCode
-	GetDeviceName() string
-	GetDevice() *evdev.InputDevice
 }
