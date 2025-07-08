@@ -25,7 +25,7 @@ func LogErrorf(err error, msg string, params ...interface{}) {
 	if msg == "" {
 		fmt.Printf("%s\n", err.Error())
 	} else {
-		fmt.Printf("%s: %s\n", err.Error(), fmt.Sprintf(msg, params...))
+		fmt.Printf("%s: %s\n", fmt.Sprintf(msg, params...), err.Error())
 	}
 }
 

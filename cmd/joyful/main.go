@@ -75,7 +75,7 @@ func main() {
 
 	timerCount := 0
 	for _, rule := range rules {
-		if timedRule, ok := rule.(*mappingrules.MappingRuleProportionalAxis); ok {
+		if timedRule, ok := rule.(*mappingrules.MappingRuleAxisToButton); ok {
 			go timerWatcher(timedRule, eventChannel)
 			timerCount++
 		}

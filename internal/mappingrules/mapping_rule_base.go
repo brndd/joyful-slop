@@ -7,6 +7,20 @@ type MappingRuleBase struct {
 	Modes []string
 }
 
+func NewMappingRuleBase(
+	name string,
+	modes []string,
+) MappingRuleBase {
+	if len(modes) == 0 {
+		modes = []string{"*"}
+	}
+
+	return MappingRuleBase{
+		Name:  name,
+		Modes: modes,
+	}
+}
+
 func (rule *MappingRuleBase) modeCheck(mode *string) bool {
 	if rule.Modes[0] == "*" {
 		return true

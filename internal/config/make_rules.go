@@ -1,8 +1,8 @@
 package config
 
 import (
+	"errors"
 	"fmt"
-	"slices"
 	"strings"
 
 	"git.annabunches.net/annabunches/joyful/internal/logger"
@@ -23,23 +23,32 @@ func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDev
 		var newRule mappingrules.MappingRule
 		var err error
 
-		baseParams, err := setBaseRuleParameters(ruleConfig, modes)
-		if err != nil {
-			logger.LogErrorf(err, "couldn't set output parameters, skipping rule '%s'", ruleConfig.Name)
+		if ok := validateModes(ruleConfig.Modes, modes); !ok {
+			logger.Logf("Skipping rule '%s', mode list specifies undefined mode.", ruleConfig.Name)
 			continue
 		}
 
+		base := mappingrules.NewMappingRuleBase(ruleConfig.Name, ruleConfig.Modes)
+
 		switch strings.ToLower(ruleConfig.Type) {
-		case RuleTypeSimple:
-			newRule, err = makeMappingRuleButton(ruleConfig, pDevs, vDevs, baseParams)
-		case RuleTypeCombo:
-			newRule, err = makeComboRule(ruleConfig, pDevs, vDevs, baseParams)
+		case RuleTypeButton:
+			newRule, err = makeMappingRuleButton(ruleConfig, pDevs, vDevs, base)
+		case RuleTypeButtonCombo:
+			newRule, err = makeMappingRuleCombo(ruleConfig, pDevs, vDevs, base)
 		case RuleTypeLatched:
-			newRule, err = makeLatchedRule(ruleConfig, pDevs, vDevs, baseParams)
+			newRule, err = makeMappingRuleLatched(ruleConfig, pDevs, vDevs, base)
+		case RuleTypeAxis:
+			newRule, err = makeMappingRuleAxis(ruleConfig, pDevs, vDevs, base)
+		case RuleTypeAxisToButton:
+			newRule, err = makeMappingRuleAxisToButton(ruleConfig, pDevs, vDevs, base)
+		case RuleTypeModeSelect:
+			newRule, err = makeMappingRuleModeSelect(ruleConfig, pDevs, modes, base)
+		default:
+			err = fmt.Errorf("bad rule type '%s' for rule '%s'", ruleConfig.Type, ruleConfig.Name)
 		}
 
 		if err != nil {
-			logger.LogError(err, "failed to build rule")
+			logger.LogErrorf(err, "Failed to build rule '%s'", ruleConfig.Name)
 			continue
 		}
 
@@ -49,56 +58,28 @@ func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDev
 	return rules
 }
 
-func setBaseRuleParameters(ruleConfig RuleConfig, modes []string) (mappingrules.MappingRuleBase, error) {
-	// We perform this check here instead of in makeRuleTarget because only Output targets
-	// can meaningfully have ModeSelect; this lets us avoid plumbing the modes in on every
-	// makeRuleTarget call.
-	if len(ruleConfig.Output.ModeSelect) > 0 {
-		err := validateModes(ruleConfig.Output.ModeSelect, modes)
-		if err != nil {
-			return mappingrules.MappingRuleBase{}, err
-		}
-	}
-
-	err := validateModes(ruleConfig.Modes, modes)
-	if err != nil {
-		return mappingrules.MappingRuleBase{}, err
-	}
-
-	ruleModes := ensureModes(ruleConfig.Modes)
-
-	return mappingrules.MappingRuleBase{
-		Modes: ruleModes,
-		Name:  ruleConfig.Name,
-	}, nil
-}
-
 func makeMappingRuleButton(ruleConfig RuleConfig,
 	pDevs map[string]*evdev.InputDevice,
 	vDevs map[string]*evdev.InputDevice,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleButton, error) {
 
-	input, err := makeRuleTarget(ruleConfig.Input, pDevs)
+	input, err := makeRuleTargetButton(ruleConfig.Input, pDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	output, err := makeRuleTarget(ruleConfig.Output, vDevs)
+	output, err := makeRuleTargetButton(ruleConfig.Output, vDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	return &mappingrules.MappingRuleButton{
-		MappingRuleBase: base,
-		Input:           input.(*mappingrules.RuleTargetButton),
-		Output:          output.(*mappingrules.RuleTargetButton),
-	}, nil
+	return mappingrules.NewMappingRuleButton(base, input, output), nil
 }
 
-func makeComboRule(ruleConfig RuleConfig,
+func makeMappingRuleCombo(ruleConfig RuleConfig,
 	pDevs map[string]*evdev.InputDevice,
 	vDevs map[string]*evdev.InputDevice,
-	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleCombo, error) {
+	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleButtonCombo, error) {
 
 	inputs := make([]*mappingrules.RuleTargetButton, 0)
 	for _, inputConfig := range ruleConfig.Inputs {
@@ -109,142 +90,73 @@ func makeComboRule(ruleConfig RuleConfig,
 		inputs = append(inputs, input)
 	}
 
-	return &mappingrules.MappingRuleCombo{
-		MappingRuleBase: base,
-		Inputs:          inputs,
-		State:           0,
-	}, nil
+	output, err := makeRuleTargetButton(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	return mappingrules.NewMappingRuleButtonCombo(base, inputs, output), nil
 }
 
-func makeLatchedRule(ruleConfig RuleConfig,
+func makeMappingRuleLatched(ruleConfig RuleConfig,
 	pDevs map[string]*evdev.InputDevice,
 	vDevs map[string]*evdev.InputDevice,
-	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleLatched, error) {
+	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleButtonLatched, error) {
 
 	input, err := makeRuleTargetButton(ruleConfig.Input, pDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	return &mappingrules.MappingRuleLatched{
-		MappingRuleBase: base,
-		Input:           input,
-		State:           false,
-	}, nil
-}
-
-func makeRuleTargetButton(targetConfig RuleTargetConfig, devs map[string]*evdev.InputDevice) (*mappingrules.RuleTargetButton, error) {
-	device, ok := devs[targetConfig.Device]
-	if !ok {
-		return nil, fmt.Errorf("couldn't build rule due to non-existent device '%s'", targetConfig.Device)
-	}
-
-	_, eventCode, err := decodeRuleTargetValues(targetConfig)
+	output, err := makeRuleTargetButton(ruleConfig.Output, vDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	baseParams := mappingrules.RuleTargetBase{
-		DeviceName: targetConfig.Device,
-		Device:     device,
-		Inverted:   targetConfig.Inverted,
-		Code:       eventCode,
-	}
-
-	return &mappingrules.RuleTargetButton{
-		RuleTargetBase: baseParams,
-	}, nil
+	return mappingrules.NewMappingRuleButtonLatched(base, input, output), nil
 }
 
-// makeRuleTarget takes an Input declaration from the YAML and returns a fully formed RuleTarget.
-func makeRuleTarget(targetConfig RuleTargetConfig, devs map[string]*evdev.InputDevice) (mappingrules.RuleTarget, error) {
-	if len(targetConfig.ModeSelect) > 0 {
-		return &mappingrules.RuleTargetModeSelect{
-			ModeSelect: targetConfig.ModeSelect,
-		}, nil
-	}
+func makeMappingRuleAxis(ruleConfig RuleConfig,
+	pDevs map[string]*evdev.InputDevice,
+	vDevs map[string]*evdev.InputDevice,
+	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxis, error) {
 
-	device, ok := devs[targetConfig.Device]
-	if !ok {
-		return nil, fmt.Errorf("couldn't build rule due to non-existent device '%s'", targetConfig.Device)
-	}
-
-	eventType, eventCode, err := decodeRuleTargetValues(targetConfig)
+	input, err := makeRuleTargetAxis(ruleConfig.Input, pDevs)
 	if err != nil {
 		return nil, err
 	}
 
-	baseParams := mappingrules.RuleTargetBase{
-		DeviceName: targetConfig.Device,
-		Device:     device,
-		Inverted:   targetConfig.Inverted,
-		Code:       eventCode,
+	output, err := makeRuleTargetAxis(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
 	}
 
-	switch eventType {
-	case evdev.EV_KEY:
-		return &mappingrules.RuleTargetButton{
-			RuleTargetBase: baseParams,
-		}, nil
-
-	case evdev.EV_ABS:
-		return &mappingrules.RuleTargetAxis{
-			RuleTargetBase: baseParams,
-			AxisStart:      targetConfig.AxisStart,
-			AxisEnd:        targetConfig.AxisEnd,
-		}, nil
-
-	default:
-		return nil, fmt.Errorf("skipping rule due to unsupported event type '%d'", eventType)
-	}
+	return mappingrules.NewMappingRuleAxis(base, input, output), nil
 }
 
-// decodeRuleTargetValues returns the appropriate evdev.EvType and evdev.EvCode values
-// for a given RuleTargetConfig, converting the config file strings into appropriate constants
-//
-// Todo: support different formats for key specification
-func decodeRuleTargetValues(target RuleTargetConfig) (evdev.EvType, evdev.EvCode, error) {
-	var eventType evdev.EvType
-	var eventCode evdev.EvCode
-	var ok bool
+// STUB
+func makeMappingRuleAxisToButton(ruleConfig RuleConfig,
+	pDevs map[string]*evdev.InputDevice,
+	vDevs map[string]*evdev.InputDevice,
+	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxisToButton, error) {
 
-	if target.Button != "" {
-		eventType = evdev.EV_KEY
-		eventCode, ok = evdev.KEYFromString[target.Button]
-		if !ok {
-			return 0, 0, fmt.Errorf("skipping rule due to invalid button code '%s'", target.Button)
-		}
-	} else if target.Axis != "" {
-		eventType = evdev.EV_ABS
-		eventCode, ok = evdev.ABSFromString[target.Axis]
-		if !ok {
-			return 0, 0, fmt.Errorf("skipping rule due to invalid axis code '%s'", target.Button)
-		}
-	}
-
-	return eventType, eventCode, nil
+	return nil, errors.New("stub: makeMappingRuleAxisToButton")
 }
 
-// ensureModes either returns the mode list, or if it is empty returns []string{"*"}
-func ensureModes(modes []string) []string {
-	if len(modes) == 0 {
-		return []string{"*"}
-	}
-	return modes
-}
+func makeMappingRuleModeSelect(ruleConfig RuleConfig,
+	pDevs map[string]*evdev.InputDevice,
+	modes []string,
+	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleModeSelect, error) {
 
-// validateModes checks the provided modes against a larger subset of modes (usually all defined ones)
-// and returns an error if any of the modes are not defined.
-func validateModes(modes []string, allModes []string) error {
-	if len(modes) == 0 {
-		return nil
+	input, err := makeRuleTargetButton(ruleConfig.Input, pDevs)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, mode := range modes {
-		if !slices.Contains(allModes, mode) {
-			return fmt.Errorf("mode list specifies undefined mode '%s'", mode)
-		}
+	output, err := makeRuleTargetModeSelect(ruleConfig.Output, modes)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return mappingrules.NewMappingRuleModeSelect(base, input, output), nil
 }

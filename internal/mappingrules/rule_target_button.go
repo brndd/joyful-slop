@@ -3,12 +3,18 @@ package mappingrules
 import "github.com/holoplot/go-evdev"
 
 type RuleTargetButton struct {
-	RuleTargetBase
+	DeviceName string
+	Device     *evdev.InputDevice
+	Button     evdev.EvCode
+	Inverted   bool
 }
 
 func NewRuleTargetButton(device_name string, device *evdev.InputDevice, code evdev.EvCode, inverted bool) *RuleTargetButton {
 	return &RuleTargetButton{
-		RuleTargetBase: NewRuleTargetBase(device_name, device, code, inverted),
+		DeviceName: device_name,
+		Device:     device,
+		Button:     code,
+		Inverted:   inverted,
 	}
 }
 
@@ -22,10 +28,16 @@ func (target *RuleTargetButton) NormalizeValue(value int32) int32 {
 	return value
 }
 
-func (target *RuleTargetButton) CreateEvent(value int32, mode *string) *evdev.InputEvent {
+func (target *RuleTargetButton) CreateEvent(value int32, _ *string) *evdev.InputEvent {
 	return &evdev.InputEvent{
 		Type:  evdev.EV_KEY,
-		Code:  target.Code,
+		Code:  target.Button,
 		Value: value,
 	}
+}
+
+func (target *RuleTargetButton) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) bool {
+	return device == target.Device &&
+		event.Type == evdev.EV_KEY &&
+		event.Code == target.Button
 }

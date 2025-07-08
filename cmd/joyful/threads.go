@@ -28,7 +28,7 @@ func eventWatcher(device *evdev.InputDevice, channel chan<- ChannelEvent) {
 	}
 }
 
-func timerWatcher(rule *mappingrules.MappingRuleProportionalAxis, channel chan<- ChannelEvent) {
+func timerWatcher(rule *mappingrules.MappingRuleAxisToButton, channel chan<- ChannelEvent) {
 	for {
 		event := rule.TimerEvent()
 		if event != nil {

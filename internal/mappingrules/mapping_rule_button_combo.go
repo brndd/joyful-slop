@@ -3,24 +3,37 @@ package mappingrules
 import "github.com/holoplot/go-evdev"
 
 // A Combo Mapping Rule can require multiple physical button presses for a single output button
-type MappingRuleCombo struct {
+type MappingRuleButtonCombo struct {
 	MappingRuleBase
 	Inputs []*RuleTargetButton
 	Output *RuleTargetButton
 	State  int
 }
 
-func (rule *MappingRuleCombo) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
+func NewMappingRuleButtonCombo(
+	base MappingRuleBase,
+	inputs []*RuleTargetButton,
+	output *RuleTargetButton) *MappingRuleButtonCombo {
+
+	return &MappingRuleButtonCombo{
+		MappingRuleBase: base,
+		Inputs:          inputs,
+		Output:          output,
+		State:           0,
+	}
+}
+
+func (rule *MappingRuleButtonCombo) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 	if !rule.MappingRuleBase.modeCheck(mode) {
 		return nil, nil
 	}
 
 	// Check each of the inputs, and if we find a match, proceed
-	var match RuleTarget
+	var match *RuleTargetButton
 	for _, input := range rule.Inputs {
-		if device == input.GetDevice() &&
-			event.Code == input.GetCode() {
+		if input.MatchEvent(device, event) {
 			match = input
+			break
 		}
 	}
 
@@ -40,10 +53,10 @@ func (rule *MappingRuleCombo) MatchEvent(device *evdev.InputDevice, event *evdev
 	targetState := len(rule.Inputs)
 
 	if oldState == targetState-1 && rule.State == targetState {
-		return rule.Output.GetDevice(), rule.Output.CreateEvent(1, mode)
+		return rule.Output.Device, rule.Output.CreateEvent(1, mode)
 	}
 	if oldState == targetState && rule.State == targetState-1 {
-		return rule.Output.GetDevice(), rule.Output.CreateEvent(0, mode)
+		return rule.Output.Device, rule.Output.CreateEvent(0, mode)
 	}
 	return nil, nil
 }

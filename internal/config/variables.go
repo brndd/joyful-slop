@@ -4,6 +4,18 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
+const (
+	DeviceTypePhysical = "physical"
+	DeviceTypeVirtual  = "virtual"
+
+	RuleTypeButton       = "button"
+	RuleTypeButtonCombo  = "button-combo"
+	RuleTypeLatched      = "button-latched"
+	RuleTypeAxis         = "axis"
+	RuleTypeModeSelect   = "mode-select"
+	RuleTypeAxisToButton = "axis-to-button"
+)
+
 var (
 	ButtonFromIndex = []evdev.EvCode{
 		evdev.BTN_TRIGGER,
@@ -59,13 +71,4 @@ var (
 		evdev.BTN_TRIGGER_HAPPY39,
 		evdev.BTN_TRIGGER_HAPPY40,
 	}
-)
-
-const (
-	DeviceTypePhysical = "physical"
-	DeviceTypeVirtual  = "virtual"
-
-	RuleTypeSimple = "simple"
-	RuleTypeCombo  = "combo"
-	RuleTypeLatched = "latched"
 )
