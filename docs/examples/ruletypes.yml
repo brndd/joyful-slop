@@ -1,0 +1,90 @@
+# 
+devices:
+  - name: flightstick
+    type: physical
+    device_name: Flightstick Name From evlist
+  - name: main
+    type: virtual
+    axes: 8
+    buttons: 80
+  - name: mouse
+    type: virtual
+    axes: 0
+    buttons: 0
+    relative_axes:
+      - REL_WHEEL
+
+rules:
+  - type: axis
+    input:
+      device: flightstick
+      # To find reasonable values for your device's deadzones, use the evtest command
+      deadzone_start: 28000
+      deadzone_end: 30000
+      inverted: false
+      axis: ABS_X
+    output:
+      device: main
+      axis: ABS_X
+
+  # Straightforward button mapping
+  - type: button
+    input:
+      device: flightstick
+      button: BTN_BASE2
+      inverted: false
+    output:
+      device: main
+      button: BTN_BASE2
+
+  # A combo rule - BTN_TRIGGER will be active while BTN_THUMB and BTN_THUMB2 are pressed.
+  - type: button-combo
+    inputs:
+      - device: flightstick
+        button: BTN_THUMB
+      - device: flightstick
+        button: BTN_THUMB2
+    output:
+      device: main
+      button: BTN_TRIGGER
+
+  # A latched rule - the virtual BTN_BASE3 will toggle each time the physical BTN_BASE3 is pressed.
+  # This way you can "hold down" the button without having to actually hold it.
+  - type: button-latched
+    input:
+      device: flightstick
+      button: BTN_BASE3
+    output:
+      device: main
+      button: BTN_BASE3
+
+  - type: axis-to-button
+    # The repeat rates look backwards because they are the time between repeats in milliseconds.
+    # So this example will produce a button press every second at the axis' minimum value,
+    # and a button press every 10 milliseconds at the axis' maximum value.
+    repeat_rate_min: 1000
+    repeat_rate_max: 10
+    input:
+      device: flightstick
+      axis: ABS_RY # This axis commonly represents thumbsticks
+      deadzone_start: 0
+      deadzone_end: 30000
+    output:
+      device: main
+      button: BTN_BASE4
+
+  - type: axis-to-relaxis
+    repeat_rate_min: 100
+    repeat_rate_max: 10
+    # This is the value to write for the axis for each repetition. If you wanted to scroll the other
+    # direction, use a negative value. It is useful to use 2 rules on the same input axis with
+    # "overlapping" deadzones to scroll a mousewheel in both directions.
+    increment: 1
+    input:
+      device: flightstick
+      axis: ABS_Z
+      deadzone_start: 0
+      deadzone_end: 500
+    output:
+      device: mouse
+      button: REL_WHEEL
