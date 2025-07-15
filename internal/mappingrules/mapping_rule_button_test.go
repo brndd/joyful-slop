@@ -13,8 +13,7 @@ type MappingRuleButtonTests struct {
 	wrongInputDevice *evdev.InputDevice
 	outputDevice     *evdev.InputDevice
 	mode             *string
-	sampleRule       *MappingRuleButton
-	invertedRule     *MappingRuleButton
+	base             MappingRuleBase
 }
 
 func (t *MappingRuleButtonTests) SetupTest() {
@@ -23,72 +22,64 @@ func (t *MappingRuleButtonTests) SetupTest() {
 	t.outputDevice = &evdev.InputDevice{}
 	mode := "*"
 	t.mode = &mode
-
-	// TODO: implement a constructor function...
-	t.sampleRule = &MappingRuleButton{
-		MappingRuleBase: MappingRuleBase{
-			Modes: []string{"*"},
-		},
-		Input:  NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, false),
-		Output: NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false),
-	}
-
-	t.invertedRule = &MappingRuleButton{
-		MappingRuleBase: MappingRuleBase{
-			Modes: []string{"*"},
-		},
-		Output: NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false),
-		Input:  NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, true),
-	}
+	t.base = NewMappingRuleBase("", []string{})
 }
 
 func (t *MappingRuleButtonTests) TestMatchEvent() {
+	inputButton, _ := NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, false)
+	outputButton, _ := NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false)
+	testRule := NewMappingRuleButton(t.base, inputButton, outputButton)
+
 	// A matching input event should produce an output event
-	correctOutput := &evdev.InputEvent{
+	expected := &evdev.InputEvent{
 		Type:  evdev.EV_KEY,
 		Code:  evdev.BTN_TRIGGER,
 		Value: 1,
 	}
 
-	_, event := t.sampleRule.MatchEvent(
+	_, event := testRule.MatchEvent(
 		t.inputDevice,
 		&evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, t.mode)
-	t.EqualValues(correctOutput, event)
+	t.EqualValues(expected, event)
 
 	// An input event from the wrong device should produce a nil event
-	_, event = t.sampleRule.MatchEvent(
+	_, event = testRule.MatchEvent(
 		t.wrongInputDevice,
 		&evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, t.mode)
 	t.Nil(event)
 
 	// An input event from the wrong button should produce a nil event
-	_, event = t.sampleRule.MatchEvent(
+	_, event = testRule.MatchEvent(
 		t.inputDevice,
 		&evdev.InputEvent{Code: evdev.BTN_TOP, Value: 1}, t.mode)
 	t.Nil(event)
 }
 
 func (t *MappingRuleButtonTests) TestMatchEventInverted() {
+	inputButton, _ := NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, true)
+	outputButton, _ := NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false)
+	testRule := NewMappingRuleButton(t.base, inputButton, outputButton)
+
 	// A matching input event should produce an output event
-	correctOutput := &evdev.InputEvent{
+	expected := &evdev.InputEvent{
 		Type: evdev.EV_KEY,
 		Code: evdev.BTN_TRIGGER,
 	}
 
 	// Should get the opposite value out that we send in
-	correctOutput.Value = 0
-	_, event := t.invertedRule.MatchEvent(
+	expected.Value = 0
+	_, event := testRule.MatchEvent(
 		t.inputDevice,
 		&evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 1}, t.mode)
-	t.EqualValues(correctOutput, event)
+	t.EqualValues(expected, event)
 
-	correctOutput.Value = 1
-	_, event = t.invertedRule.MatchEvent(
+	expected.Value = 1
+	_, event = testRule.MatchEvent(
 		t.inputDevice,
 		&evdev.InputEvent{Code: evdev.BTN_TRIGGER, Value: 0}, t.mode)
-	t.EqualValues(correctOutput, event)
+	t.EqualValues(expected, event)
 }
 
-func TestRunnerMatching(t *testing.T) {
+func TestRunnerMappingRuleButtonTests(t *testing.T) {
 	suite.Run(t, new(MappingRuleButtonTests))
 }

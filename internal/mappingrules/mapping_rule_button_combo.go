@@ -23,7 +23,7 @@ func NewMappingRuleButtonCombo(
 	}
 }
 
-func (rule *MappingRuleButtonCombo) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
+func (rule *MappingRuleButtonCombo) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 	if !rule.MappingRuleBase.modeCheck(mode) {
 		return nil, nil
 	}

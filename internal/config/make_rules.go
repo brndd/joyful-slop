@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -41,6 +40,8 @@ func (parser *ConfigParser) BuildRules(pDevs map[string]*evdev.InputDevice, vDev
 			newRule, err = makeMappingRuleAxis(ruleConfig, pDevs, vDevs, base)
 		case RuleTypeAxisToButton:
 			newRule, err = makeMappingRuleAxisToButton(ruleConfig, pDevs, vDevs, base)
+		case RuleTypeAxisToRelaxis:
+			newRule, err = makeMappingRuleAxisToRelaxis(ruleConfig, pDevs, vDevs, base)
 		case RuleTypeModeSelect:
 			newRule, err = makeMappingRuleModeSelect(ruleConfig, pDevs, modes, base)
 		default:
@@ -134,13 +135,44 @@ func makeMappingRuleAxis(ruleConfig RuleConfig,
 	return mappingrules.NewMappingRuleAxis(base, input, output), nil
 }
 
-// STUB
 func makeMappingRuleAxisToButton(ruleConfig RuleConfig,
 	pDevs map[string]*evdev.InputDevice,
 	vDevs map[string]*evdev.InputDevice,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxisToButton, error) {
 
-	return nil, errors.New("stub: makeMappingRuleAxisToButton")
+	input, err := makeRuleTargetAxis(ruleConfig.Input, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := makeRuleTargetButton(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	return mappingrules.NewMappingRuleAxisToButton(base, input, output, ruleConfig.RepeatRateMin, ruleConfig.RepeatRateMax), nil
+}
+
+func makeMappingRuleAxisToRelaxis(ruleConfig RuleConfig,
+	pDevs map[string]*evdev.InputDevice,
+	vDevs map[string]*evdev.InputDevice,
+	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxisToRelaxis, error) {
+
+	input, err := makeRuleTargetAxis(ruleConfig.Input, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := makeRuleTargetRelaxis(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	return mappingrules.NewMappingRuleAxisToRelaxis(base,
+		input, output,
+		ruleConfig.RepeatRateMin,
+		ruleConfig.RepeatRateMax,
+		ruleConfig.Increment), nil
 }
 
 func makeMappingRuleModeSelect(ruleConfig RuleConfig,

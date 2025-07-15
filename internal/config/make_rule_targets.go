@@ -24,7 +24,7 @@ func makeRuleTargetButton(targetConfig RuleTargetConfig, devs map[string]*evdev.
 		device,
 		eventCode,
 		targetConfig.Inverted,
-	), nil
+	)
 }
 
 func makeRuleTargetAxis(targetConfig RuleTargetConfig, devs map[string]*evdev.InputDevice) (*mappingrules.RuleTargetAxis, error) {
@@ -43,8 +43,28 @@ func makeRuleTargetAxis(targetConfig RuleTargetConfig, devs map[string]*evdev.In
 		device,
 		eventCode,
 		targetConfig.Inverted,
-		0, 0, 0, // TODO: replace these with real values
-	), nil
+		targetConfig.DeadzoneStart,
+		targetConfig.DeadzoneEnd,
+	)
+}
+
+func makeRuleTargetRelaxis(targetConfig RuleTargetConfig, devs map[string]*evdev.InputDevice) (*mappingrules.RuleTargetRelaxis, error) {
+	device, ok := devs[targetConfig.Device]
+	if !ok {
+		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
+	}
+
+	eventCode, ok := evdev.RELFromString[targetConfig.Axis]
+	if !ok {
+		return nil, fmt.Errorf("invalid button code '%s'", targetConfig.Button)
+	}
+
+	return mappingrules.NewRuleTargetRelaxis(
+		targetConfig.Device,
+		device,
+		eventCode,
+		targetConfig.Inverted,
+	)
 }
 
 func makeRuleTargetModeSelect(targetConfig RuleTargetConfig, allModes []string) (*mappingrules.RuleTargetModeSelect, error) {

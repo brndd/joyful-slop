@@ -8,12 +8,13 @@ const (
 	DeviceTypePhysical = "physical"
 	DeviceTypeVirtual  = "virtual"
 
-	RuleTypeButton       = "button"
-	RuleTypeButtonCombo  = "button-combo"
-	RuleTypeLatched      = "button-latched"
-	RuleTypeAxis         = "axis"
-	RuleTypeModeSelect   = "mode-select"
-	RuleTypeAxisToButton = "axis-to-button"
+	RuleTypeButton        = "button"
+	RuleTypeButtonCombo   = "button-combo"
+	RuleTypeLatched       = "button-latched"
+	RuleTypeAxis          = "axis"
+	RuleTypeModeSelect    = "mode-select"
+	RuleTypeAxisToButton  = "axis-to-button"
+	RuleTypeAxisToRelaxis = "axis-to-relaxis"
 )
 
 var (

@@ -1,9 +1,18 @@
 package mappingrules
 
-import "github.com/holoplot/go-evdev"
+import (
+	"time"
+
+	"github.com/holoplot/go-evdev"
+)
 
 type MappingRule interface {
-	MatchEvent(*evdev.InputDevice, *evdev.InputEvent, *string) (*evdev.InputDevice, *evdev.InputEvent)
+	MatchEvent(RuleTargetDevice, *evdev.InputEvent, *string) (*evdev.InputDevice, *evdev.InputEvent)
+}
+
+type TimedEventEmitter interface {
+	TimerEvent() *evdev.InputEvent
+	GetOutputDevice() *evdev.InputDevice
 }
 
 // RuleTargets represent either a device input to match on, or an output to produce.
@@ -25,4 +34,19 @@ type RuleTarget interface {
 	// Typically int32 is the input event's normalized value. *string is the current mode, but is optional
 	// for most implementations.
 	CreateEvent(int32, *string) *evdev.InputEvent
+
+	MatchEvent(device RuleTargetDevice, event *evdev.InputEvent) bool
 }
+
+// RuleTargetDevice is an interface abstraction on top of evdev.InputDevice, implementing
+// only the methods we need in this package. This is used for testing, and the
+// RuleTargetDevice can be safely cast to an *evdev.InputDevice when necessary.
+type RuleTargetDevice interface {
+	AbsInfos() (map[evdev.EvCode]evdev.AbsInfo, error)
+}
+
+const (
+	AxisValueMin = int32(-32768)
+	AxisValueMax = int32(32767)
+	NoNextEvent  = time.Duration(-1)
+)

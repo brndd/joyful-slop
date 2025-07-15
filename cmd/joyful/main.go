@@ -75,7 +75,7 @@ func main() {
 
 	timerCount := 0
 	for _, rule := range rules {
-		if timedRule, ok := rule.(*mappingrules.MappingRuleAxisToButton); ok {
+		if timedRule, ok := rule.(mappingrules.TimedEventEmitter); ok {
 			go timerWatcher(timedRule, eventChannel)
 			timerCount++
 		}
@@ -95,7 +95,8 @@ func main() {
 		case ChannelEventInput:
 			switch channelEvent.Event.Type {
 			case evdev.EV_SYN:
-				// We've received a SYN_REPORT, so now we send all of our pending events
+				// We've received a SYN_REPORT, so now we send all pending events; since SYN_REPORTs
+				// might come from multiple input devices, we'll always flush, just to be sure.
 				for _, buffer := range vBuffersByName {
 					buffer.SendEvents()
 				}
@@ -114,6 +115,8 @@ func main() {
 		case ChannelEventTimer:
 			// Timer events give us the device and event to use directly
 			vBuffersByDevice[channelEvent.Device].AddEvent(channelEvent.Event)
+			// If we get a timer event, flush the output device buffer immediately
+			vBuffersByDevice[channelEvent.Device].SendEvents()
 		}
 	}
 }

@@ -35,6 +35,7 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 			map[evdev.EvType][]evdev.EvCode{
 				evdev.EV_KEY: makeButtons(int(deviceConfig.Buttons)),
 				evdev.EV_ABS: makeAxes(int(deviceConfig.Axes)),
+				evdev.EV_REL: makeRelativeAxes(deviceConfig.RelativeAxes),
 			},
 		)
 
@@ -115,4 +116,21 @@ func makeAxes(numAxes int) []evdev.EvCode {
 	}
 
 	return axes
+}
+
+func makeRelativeAxes(axes []string) []evdev.EvCode {
+	codes := make([]evdev.EvCode, 0)
+
+	for _, axis := range axes {
+		code, ok := evdev.RELFromString[axis]
+
+		if !ok {
+			logger.Logf("Relative axis '%s' invalid. Skipping.", axis)
+			continue
+		}
+
+		codes = append(codes, code)
+	}
+
+	return codes
 }

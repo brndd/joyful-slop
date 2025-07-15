@@ -9,13 +9,13 @@ type RuleTargetButton struct {
 	Inverted   bool
 }
 
-func NewRuleTargetButton(device_name string, device *evdev.InputDevice, code evdev.EvCode, inverted bool) *RuleTargetButton {
+func NewRuleTargetButton(device_name string, device *evdev.InputDevice, code evdev.EvCode, inverted bool) (*RuleTargetButton, error) {
 	return &RuleTargetButton{
 		DeviceName: device_name,
 		Device:     device,
 		Button:     code,
 		Inverted:   inverted,
-	}
+	}, nil
 }
 
 func (target *RuleTargetButton) NormalizeValue(value int32) int32 {
@@ -36,7 +36,7 @@ func (target *RuleTargetButton) CreateEvent(value int32, _ *string) *evdev.Input
 	}
 }
 
-func (target *RuleTargetButton) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent) bool {
+func (target *RuleTargetButton) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent) bool {
 	return device == target.Device &&
 		event.Type == evdev.EV_KEY &&
 		event.Code == target.Button

@@ -17,11 +17,12 @@ func NewMappingRuleAxis(base MappingRuleBase, input *RuleTargetAxis, output *Rul
 	}
 }
 
-func (rule *MappingRuleAxis) MatchEvent(device *evdev.InputDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
+func (rule *MappingRuleAxis) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 	if !rule.MappingRuleBase.modeCheck(mode) ||
 		!rule.Input.MatchEvent(device, event) {
 		return nil, nil
 	}
 
-	return rule.Output.Device, rule.Output.CreateEvent(rule.Input.NormalizeValue(event.Value), mode)
+	// The cast here is safe because the interface is only ever different for unit tests
+	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(rule.Input.NormalizeValue(event.Value), mode)
 }

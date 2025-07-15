@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	TimerCheckIntervalMs  = 250
+	TimerCheckIntervalMs  = 1
 	DeviceCheckIntervalMs = 1
 )
 
@@ -28,12 +28,12 @@ func eventWatcher(device *evdev.InputDevice, channel chan<- ChannelEvent) {
 	}
 }
 
-func timerWatcher(rule *mappingrules.MappingRuleAxisToButton, channel chan<- ChannelEvent) {
+func timerWatcher(rule mappingrules.TimedEventEmitter, channel chan<- ChannelEvent) {
 	for {
 		event := rule.TimerEvent()
 		if event != nil {
 			channel <- ChannelEvent{
-				Device: rule.Output.Device,
+				Device: rule.GetOutputDevice(),
 				Event:  event,
 				Type:   ChannelEventTimer,
 			}
