@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"git.annabunches.net/annabunches/joyful/internal/config"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
@@ -63,24 +64,7 @@ func main() {
 	// Initialize physical devices
 	pDevices := initPhysicalDevices(config)
 
-	// Initialize rules
-	rules := config.BuildRules(pDevices, getVirtualDevices(vBuffersByName))
-	logger.Logf("Created %d mapping rules.", len(rules))
-
-	// start listening for events on devices and timers
-	eventChannel := make(chan ChannelEvent, 1000)
-	for _, device := range pDevices {
-		go eventWatcher(device, eventChannel)
-	}
-
-	timerCount := 0
-	for _, rule := range rules {
-		if timedRule, ok := rule.(mappingrules.TimedEventEmitter); ok {
-			go timerWatcher(timedRule, eventChannel)
-			timerCount++
-		}
-	}
-	logger.Logf("registered %d timers", timerCount)
+	rules, eventChannel, doneChannel, wg := loadRules(config, pDevices, getVirtualDevices(vBuffersByName))
 
 	// initialize the mode variable
 	mode := config.GetModes()[0]
@@ -117,6 +101,50 @@ func main() {
 			vBuffersByDevice[channelEvent.Device].AddEvent(channelEvent.Event)
 			// If we get a timer event, flush the output device buffer immediately
 			vBuffersByDevice[channelEvent.Device].SendEvents()
+
+		case ChannelEventReload:
+			// stop existing channels
+			fmt.Println("Reloading rules.")
+			doneChannel <- true
+			fmt.Println("Waiting for existing listeners to exit. Provide input from each of your devices.")
+			wg.Wait()
+			fmt.Println("Listeners exited. Parsing config.")
+			config := readConfig() // reload the config
+			rules, eventChannel, doneChannel, wg = loadRules(config, pDevices, getVirtualDevices(vBuffersByName))
 		}
 	}
+}
+
+func loadRules(
+	config *config.ConfigParser,
+	pDevices map[string]*evdev.InputDevice,
+	vDevices map[string]*evdev.InputDevice) ([]mappingrules.MappingRule, <-chan ChannelEvent, chan bool, *sync.WaitGroup) {
+
+	var wg sync.WaitGroup
+	eventChannel := make(chan ChannelEvent, 1000)
+	doneChannel := make(chan bool)
+
+	// Initialize rules
+	rules := config.BuildRules(pDevices, vDevices)
+	logger.Logf("Created %d mapping rules.", len(rules))
+
+	// start listening for events on devices and timers
+	for _, device := range pDevices {
+		wg.Add(1)
+		go eventWatcher(device, eventChannel, doneChannel, &wg)
+	}
+
+	timerCount := 0
+	for _, rule := range rules {
+		if timedRule, ok := rule.(mappingrules.TimedEventEmitter); ok {
+			wg.Add(1)
+			go timerWatcher(timedRule, eventChannel, doneChannel, &wg)
+			timerCount++
+		}
+	}
+	logger.Logf("registered %d timers", timerCount)
+
+	go consoleWatcher(eventChannel, &wg)
+
+	return rules, eventChannel, doneChannel, &wg
 }

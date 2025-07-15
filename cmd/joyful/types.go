@@ -7,6 +7,7 @@ type ChannelEventType int
 const (
 	ChannelEventInput ChannelEventType = iota
 	ChannelEventTimer
+	ChannelEventReload
 )
 
 type ChannelEvent struct {

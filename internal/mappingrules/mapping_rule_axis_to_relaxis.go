@@ -3,7 +3,6 @@ package mappingrules
 import (
 	"time"
 
-	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"github.com/holoplot/go-evdev"
 	"github.com/jonboulle/clockwork"
 )
@@ -52,10 +51,6 @@ func (rule *MappingRuleAxisToRelaxis) MatchEvent(
 		!rule.Input.MatchEventDeviceAndCode(device, event) {
 		return nil, nil
 	}
-
-	defer func() {
-		logger.Logf("DEBUG: Rule '%s' nextEvent == '%v' with device value '%d'", rule.Name, rule.nextEvent, event.Value)
-	}()
 
 	// If we're inside the deadzone, unset the next event
 	if rule.Input.InDeadZone(event.Value) {
