@@ -15,6 +15,8 @@ const (
 	RuleTypeModeSelect    = "mode-select"
 	RuleTypeAxisToButton  = "axis-to-button"
 	RuleTypeAxisToRelaxis = "axis-to-relaxis"
+
+	VirtualDeviceMaxButtons = 74
 )
 
 var (
@@ -31,6 +33,10 @@ var (
 		evdev.BTN_BASE4,
 		evdev.BTN_BASE5,
 		evdev.BTN_BASE6,
+		evdev.EvCode(0x12c), // decimal 300
+		evdev.EvCode(0x12d), // decimal 301
+		evdev.EvCode(0x12e), // decimal 302
+		evdev.BTN_DEAD,
 		evdev.BTN_TRIGGER_HAPPY1,
 		evdev.BTN_TRIGGER_HAPPY2,
 		evdev.BTN_TRIGGER_HAPPY3,
@@ -71,5 +77,23 @@ var (
 		evdev.BTN_TRIGGER_HAPPY38,
 		evdev.BTN_TRIGGER_HAPPY39,
 		evdev.BTN_TRIGGER_HAPPY40,
+		evdev.EvCode(0x2e8),
+		evdev.EvCode(0x2e9),
+		evdev.EvCode(0x2f0),
+		evdev.EvCode(0x2f1),
+		evdev.EvCode(0x2f2),
+		evdev.EvCode(0x2f3),
+		evdev.EvCode(0x2f4),
+		evdev.EvCode(0x2f5),
+		evdev.EvCode(0x2f6),
+		evdev.EvCode(0x2f7),
+		evdev.EvCode(0x2f8),
+		evdev.EvCode(0x2f9),
+		evdev.EvCode(0x2fa),
+		evdev.EvCode(0x2fb),
+		evdev.EvCode(0x2fc),
+		evdev.EvCode(0x2fd),
+		evdev.EvCode(0x2fe),
+		evdev.EvCode(0x2ff),
 	}
 )

@@ -82,9 +82,9 @@ func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevi
 }
 
 func makeButtons(numButtons int) []evdev.EvCode {
-	if numButtons > 56 {
-		numButtons = 56
-		logger.Log("Limiting virtual device buttons to 56")
+	if numButtons > VirtualDeviceMaxButtons {
+		numButtons = VirtualDeviceMaxButtons
+		logger.Logf("Limiting virtual device buttons to %d", VirtualDeviceMaxButtons)
 	}
 
 	buttons := make([]evdev.EvCode, numButtons)
