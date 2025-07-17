@@ -16,6 +16,10 @@ const (
 	RuleTypeAxisToButton  = "axis-to-button"
 	RuleTypeAxisToRelaxis = "axis-to-relaxis"
 
+	CodePrefixButton  = "BTN"
+	CodePrefixAxis    = "ABS"
+	CodePrefixRelaxis = "REL"
+
 	VirtualDeviceMaxButtons = 74
 )
 

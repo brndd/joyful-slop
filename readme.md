@@ -23,9 +23,9 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 
 * Macros - have a single input produce a sequence of button presses with configurable pauses.
 * Sequence combos - Button1, Button2, Button3 -> VirtualButtonA
-* More ways to specify keycodes
 * Output keyboard button presses
-* Input and output from gamepad-like devices.
+* Explicit input and output from gamepad-like devices.
+* HIDRAW support for more button options.
 
 ## Configuration
 

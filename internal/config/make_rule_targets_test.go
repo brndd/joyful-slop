@@ -12,6 +12,10 @@ type MakeRuleTargetsTests struct {
 	devs map[string]*evdev.InputDevice
 }
 
+func TestRunnerMakeRuleTargets(t *testing.T) {
+	suite.Run(t, new(MakeRuleTargetsTests))
+}
+
 func (t *MakeRuleTargetsTests) SetupSuite() {
 	t.devs = map[string]*evdev.InputDevice{
 		"test": {},
@@ -140,8 +144,4 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetRelaxis() {
 		_, err := makeRuleTargetRelaxis(config, t.devs)
 		t.NotNil(err)
 	})
-}
-
-func TestRunnerMakeRuleTargets(t *testing.T) {
-	suite.Run(t, new(MakeRuleTargetsTests))
 }
