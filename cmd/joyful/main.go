@@ -68,9 +68,12 @@ func main() {
 
 	// initialize the mode variable
 	mode := config.GetModes()[0]
-	logger.Logf("Initial mode set to '%s'", mode)
 
-	fmt.Println("Joyful Running! Press Ctrl+C to quit.")
+	fmt.Println("Joyful Running! Press Ctrl+C to quit. Press Enter to reload rules.")
+	if len(config.GetModes()) > 1 {
+		logger.Logf("Initial mode set to '%s'", mode)
+	}
+
 	for {
 		// Get an event (blocks if necessary)
 		channelEvent := <-eventChannel

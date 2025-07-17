@@ -23,6 +23,12 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 		}
 
 		name := fmt.Sprintf("joyful-%s", deviceConfig.Name)
+		capabilities := map[evdev.EvType][]evdev.EvCode{
+			evdev.EV_KEY: makeButtons(deviceConfig.NumButtons, deviceConfig.Buttons),
+			evdev.EV_ABS: makeAxes(deviceConfig.NumAxes, deviceConfig.Axes),
+			evdev.EV_REL: makeRelativeAxes(deviceConfig.NumRelativeAxes, deviceConfig.RelativeAxes),
+		}
+
 		device, err := evdev.CreateDevice(
 			name,
 			// TODO: who knows what these should actually be
@@ -32,11 +38,7 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 				Product: 0x0816,
 				Version: 1,
 			},
-			map[evdev.EvType][]evdev.EvCode{
-				evdev.EV_KEY: makeButtons(int(deviceConfig.Buttons)),
-				evdev.EV_ABS: makeAxes(int(deviceConfig.Axes)),
-				evdev.EV_REL: makeRelativeAxes(deviceConfig.RelativeAxes),
-			},
+			capabilities,
 		)
 
 		if err != nil {
@@ -45,7 +47,13 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 		}
 
 		deviceMap[deviceConfig.Name] = device
-		logger.Log(fmt.Sprintf("Created virtual device '%s'", name))
+		logger.Log(fmt.Sprintf(
+			"Created virtual device '%s' with %d buttons, %d axes, and %d relative axes",
+			name,
+			len(capabilities[evdev.EV_KEY]),
+			len(capabilities[evdev.EV_ABS]),
+			len(capabilities[evdev.EV_REL]),
+		))
 	}
 
 	return deviceMap
@@ -81,10 +89,29 @@ func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevi
 	return deviceMap
 }
 
-func makeButtons(numButtons int) []evdev.EvCode {
+// TODO: these functions have a lot of duplication; we need to figure out how to refactor it cleanly
+// without losing logging context...
+func makeButtons(numButtons int, buttonList []string) []evdev.EvCode {
+	if numButtons > 0 && len(buttonList) > 0 {
+		logger.Log("'num_buttons' and 'buttons' both specified, ignoring 'num_buttons'")
+	}
+
 	if numButtons > VirtualDeviceMaxButtons {
 		numButtons = VirtualDeviceMaxButtons
 		logger.Logf("Limiting virtual device buttons to %d", VirtualDeviceMaxButtons)
+	}
+
+	if len(buttonList) > 0 {
+		buttons := make([]evdev.EvCode, 0, len(buttonList))
+		for _, codeStr := range buttonList {
+			code, err := parseCode(codeStr, "BTN")
+			if err != nil {
+				logger.LogError(err, "Failed to create button, skipping")
+				continue
+			}
+			buttons = append(buttons, code)
+		}
+		return buttons
 	}
 
 	buttons := make([]evdev.EvCode, numButtons)
@@ -104,7 +131,24 @@ func makeButtons(numButtons int) []evdev.EvCode {
 	return buttons
 }
 
-func makeAxes(numAxes int) []evdev.EvCode {
+func makeAxes(numAxes int, axisList []string) []evdev.EvCode {
+	if numAxes > 0 && len(axisList) > 0 {
+		logger.Log("'num_axes' and 'axes' both specified, ignoring 'num_axes'")
+	}
+
+	if len(axisList) > 0 {
+		axes := make([]evdev.EvCode, 0, len(axisList))
+		for _, codeStr := range axisList {
+			code, err := parseCode(codeStr, "ABS")
+			if err != nil {
+				logger.LogError(err, "Failed to create axis, skipping")
+				continue
+			}
+			axes = append(axes, code)
+		}
+		return axes
+	}
+
 	if numAxes > 8 {
 		numAxes = 8
 		logger.Log("Limiting virtual device axes to 8")
@@ -118,19 +162,33 @@ func makeAxes(numAxes int) []evdev.EvCode {
 	return axes
 }
 
-func makeRelativeAxes(axes []string) []evdev.EvCode {
-	codes := make([]evdev.EvCode, 0)
-
-	for _, axis := range axes {
-		code, ok := evdev.RELFromString[axis]
-
-		if !ok {
-			logger.Logf("Relative axis '%s' invalid. Skipping.", axis)
-			continue
-		}
-
-		codes = append(codes, code)
+func makeRelativeAxes(numAxes int, axisList []string) []evdev.EvCode {
+	if numAxes > 0 && len(axisList) > 0 {
+		logger.Log("'num_rel_axes' and 'rel_axes' both specified, ignoring 'num_rel_axes'")
 	}
 
-	return codes
+	if len(axisList) > 0 {
+		axes := make([]evdev.EvCode, 0, len(axisList))
+		for _, codeStr := range axisList {
+			code, err := parseCode(codeStr, "REL")
+			if err != nil {
+				logger.LogError(err, "Failed to create axis, skipping")
+				continue
+			}
+			axes = append(axes, code)
+		}
+		return axes
+	}
+
+	if numAxes > 10 {
+		numAxes = 10
+		logger.Log("Limiting virtual device relative axes to 10")
+	}
+
+	axes := make([]evdev.EvCode, numAxes)
+	for i := 0; i < numAxes; i++ {
+		axes[i] = evdev.EvCode(i)
+	}
+
+	return axes
 }

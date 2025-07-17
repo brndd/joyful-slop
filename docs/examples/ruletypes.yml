@@ -5,16 +5,15 @@ devices:
     device_name: Flightstick Name From evlist
   - name: main
     type: virtual
-    axes: 8
-    buttons: 80
+    num_axes: 8
+    num_buttons: 80
   - name: mouse
     type: virtual
-    axes: 0
-    buttons: 0
     relative_axes:
       - REL_WHEEL
 
 rules:
+  # Straightforward axis mapping
   - type: axis
     input:
       device: flightstick
@@ -58,6 +57,7 @@ rules:
       device: main
       button: BTN_BASE3
 
+  # The specified axis will output button presses, and repeat them faster the more the axis is engaged.
   - type: axis-to-button
     # The repeat rates look backwards because they are the time between repeats in milliseconds.
     # So this example will produce a button press every second at the axis' minimum value,
@@ -73,10 +73,12 @@ rules:
       device: main
       button: BTN_BASE4
 
+  # The specified axis will output "relative" axis events, commonly used in mice. This example
+  # simulates a mouse scrollwheel, though only in one direction.
   - type: axis-to-relaxis
     repeat_rate_min: 100
     repeat_rate_max: 10
-    # This is the value to write for the axis for each repetition. If you wanted to scroll the other
+    # This is the value to emit for the axis on each repetition. If you wanted to scroll the other
     # direction, use a negative value. It is useful to use 2 rules on the same input axis with
     # "overlapping" deadzones to scroll a mousewheel in both directions.
     increment: 1

@@ -13,12 +13,16 @@ Each entry in `devices` must have a couple of parameters:
 
 * `device_name` - The name of the device as reported by the included `evlist` command. If your device name ends with a space, use quotation marks (`""`) around the name.
 
-`virtual` devices must additionally define these parameters:
+`virtual` devices can additionally define these parameters:
 
-* `buttons` - a number between 0 and 74. Linux may not recognize buttons greater than 56.
-* `axes` - a number between 0 and 8.
+* `buttons` or `num_buttons` - Either a list of explicit buttons or a number of buttons to create. (max 74 buttons) Linux-native games may not recognize all buttons created by Joyful.
+* `axes` or `num_axes` - An explicit list of `ABS_` axes or a number to create.
+* `relative_axes` or `num_relative_axes` - As above, but for `REL_` axes.
 
-Virtual devices can also define a `relative_axes` parameter; this must be a list of `REL_` event keycodes, and can be useful for a simulated mouse device. Some environments will only register mouse events if the device *only* supports mouse-like events, so it can be useful to isolate your `relative_axes` to their own virtual device.
+A couple of additional notes on virtual devices:
+
+* For all 3 of the above options, an explicit list will override the `num_` parameters if both are present.
+* Some environments will only register mouse events if the device *only* supports mouse-like events, so it can be useful to isolate your `relative_axes` to their own virtual device and explicitly define the axes.
 
 ### Rules configuration
 
@@ -33,25 +37,23 @@ All `rules` must have a `type` parameter. Valid values for this parameter are:
 
 Configuration options for each rule type vary. See <examples/ruletypes.yml> for an example of each type with all options specified.
 
-### Keycodes
+### Event Codes
 
-Keycodes are the values that identify buttons and axes. There are several ways to configure keycodes. All of them are case-insensitive.
+Event codes are the values that identify buttons and axes. There are several ways to configure these codes. All of them are case-insensitive, so `abs_x` and `ABS_X`.
 
-Ways to specify keycodes are:
+Ways to specify event codes are:
 
-* Using evdev's Keycodes. This is the best way to be absolutely certain about which axis you're referencing. You can specify these keycodes in two forms:
+* Using evdev's identifiers. This is the best way to be absolutely certain about which axis you're referencing. You can specify these in two forms:
   * Using the code's identifier from <https://github.com/holoplot/go-evdev/blob/master/codes.go>. e.g., `ABS_X`, `REL_WHEEL`, `BTN_TRIGGER`.
   * Alternately, you can omit the `ABS_` type prefix, and Joyful will automatically add it from context. So for a button input, you can simply specify `button: trigger` instead of `BTN_TRIGGER`.
-* You can use the hexadecimal value of the keycode directly, via `"0x<hex value>"`. This can be useful if you want to force a specific numeric value that isn't represented by a Linux keycode directly. Note however that not all keycodes will work. Only the first 8 axes are available, and see <internal/config/variables.go> for a list of valid button outputs. This is most useful with input configurations. **Note: You must use quotation marks around the hex value to prevent the yaml parser from automatically converting it to decimal.**
-* For buttons, you can specify the button number, as in `button: 3`. There are 74 buttons available, and the first button is button number `0`. As a result, valid values are 0-73. Note that buttons 12-14 and buttons 55-73 may not work in all Linux-native games.
+* You can use the hexadecimal value of the code directly, via `"0x<hex value>"`. This can be useful if you want to force a specific numeric value that isn't represented by a Linux event code directly. Note however that not all output codes will work, especially in Windows games. Therefore, this option is most useful with input configurations. **Note: You must use quotation marks around the hex value to prevent the yaml parser from automatically converting it to decimal.**
+* For buttons, you can specify them with the above methods, or use an integer index, as in `button: 3`. There are 74 buttons available, and the first button is button number `0`. As a result, valid values are 0-73. Note that buttons 12-14 and buttons 55-73 may not work in all Linux-native games.
 
-For input, you can figure out what keycodes your device is emitting by running the Linux utility `evtest`. `evtest` works well with `grep`, so if you just want to see button inputs, you can do:
+For input, you can figure out what event codes your device is emitting by running the Linux utility `evtest`. `evtest` works well with `grep`, so if you just want to see button inputs, you can do:
 
 ```
 evtest | grep BTN_
 ```
-
-The authors of this tool recognize that this is currently a pain in the ass. Easier ways to represent keycodes (as well as outputting additional keycodes) is planned for the future.
 
 ## Modes
 

@@ -1,56 +1,218 @@
 rules:
-  - type: simple
+  ### Rotational Controls
+  - type: axis
+    name: pitch
     input:
       device: right-stick
-      axis: ABS_X
+      axis: Y
+      deadzone_start: 29000
+      deadzone_end: 31000
     output:
-      device: main
-      axis: ABS_X
+      device: primary
+      axis: Y
 
-  - type: simple
+  - type: axis
+    name: roll (turret yaw)
     input:
       device: right-stick
-      axis: ABS_Y
+      axis: X
+      deadzone_start: 30000
+      deadzone_end: 32000
     output:
-      device: main
-      axis: ABS_Y
+      device: primary
+      axis: X
 
-  - type: simple
-    input:
-      device: right-stick
-      axis: ABS_THROTTLE
-    output:
-      device: main
-      axis: ABS_THROTTLE
-
-  - type: simple
-    input:
-      device: left-stick
-      axis: ABS_X
-    output:
-      device: main
-      axis: ABS_RX
-
-  - type: simple
-    input:
-      device: left-stick
-      axis: ABS_Y
-    output:
-      device: main
-      axis: ABS_RY
-
-  - type: simple
-    input:
-      device: left-stick
-      axis: ABS_THROTTLE
-    output:
-      device: main
-      axis: ABS_RUDDER
-
-  - type: simple
+  - type: axis
+    name: yaw
     input:
       device: pedals
-      axis: ABS_Z
+      axis: Z
+      deadzone_start: 124
+      deadzone_end: 132
     output:
-      device: main
-      axis: ABS_Z
+      device: primary
+      axis: Z
+
+  ### Translation Controls
+  - type: axis
+    name: throttle
+    input:
+      device: left-stick
+      axis: Y
+      deadzone_start: 29500
+      deadzone_end: 31000
+    output:
+      device: primary
+      axis: RY
+
+  - type: axis
+    name: translation lateral
+    input:
+      device: left-stick
+      axis: X
+      deadzone_start: 29000
+      deadzone_end: 30500
+    output:
+      device: primary
+      axis: RX
+
+  ### Freelook controls
+  - type: axis
+    name: Freelook X
+    input:
+      device: right-stick
+      axis: RX
+      deadzone_start: 29500
+      deadzone_end: 30250
+    output:
+      device: secondary
+      axis: X
+  - type: axis
+    name: Freelook Y
+    input:
+      device: right-stick
+      axis: RY
+      deadzone_start: 29500
+      deadzone_end: 30250
+    output:
+      device: secondary
+      axis: Y
+
+      
+  # Vertical thrust is on the VPC "paddles" in the main flight mode
+  - type: axis
+    name: translation up
+    modes:
+      - main
+    input:
+      device: right-stick
+      axis: ABS_THROTTLE
+      deadzone_start: 0
+      deadzone_end: 500
+    output:
+      device: primary
+      axis: ABS_THROTTLE
+
+  - type: axis
+    name: translation down
+    modes:
+      - main
+    input:
+      device: left-stick
+      axis: ABS_THROTTLE
+      deadzone_start: 0
+      deadzone_end: 500
+    output:
+      device: primary
+      axis: ABS_RUDDER
+
+  # By default, the left thumbstick controls tractor beam via mousewheel
+  - type: axis-to-relaxis
+    name: tractor in
+    modes:
+      - main
+    repeat_rate_max: 10
+    repeat_rate_min: 100
+    increment: -1
+    input:
+      device: left-stick
+      axis: RY
+      deadzone_start: 0
+      deadzone_end: 30500
+    output:
+      device: mouse
+      axis: REL_WHEEL
+
+  - type: axis-to-relaxis
+    name: tractor out
+    modes:
+      - main
+    repeat_rate_max: 10
+    repeat_rate_min: 100
+    increment: 1
+    input:
+      device: left-stick
+      axis: RY
+      deadzone_start: 29500
+      deadzone_end: 64000
+      inverted: true
+    output:
+      device: mouse
+      axis: REL_WHEEL
+
+  # In Mining mode, we move vertical thrust to the left thumbstick
+  # and remap the right paddle to be mining laser power
+  - type: axis
+    name: translation up alternate
+    modes:
+      - mining
+    input:
+      device: left-stick
+      axis: RY
+      deadzone_start: 29250
+      deadzone_end: 64000
+    output:
+      device: primary
+      axis: ABS_THROTTLE
+
+  - type: axis
+    name: translation down alternate
+    modes:
+      - mining
+    input:
+      device: left-stick
+      axis: RY
+      deadzone_start: 0
+      deadzone_end: 30500
+    output:
+      device: primary
+      axis: ABS_RUDDER
+
+  - type: axis
+    name: mining laser
+    modes:
+      - mining
+    input:
+      device: right-stick
+      axis: ABS_THROTTLE
+      deadzone_start: 0
+      deadzone_end: 500
+    output:
+      device: primary
+      axis: RZ
+      
+  # In tractor mode, most flight controls are disabled to prevent us
+  # from accidentally trying to fly off without throttle control
+  # - type: axis-to-relaxis
+  #   name: tractor in
+  #   modes:
+  #     - tractor
+  #   repeat_rate_max: 10
+  #   repeat_rate_min: 100
+  #   increment: -1
+  #   input:
+  #     device: left-stick
+  #     axis: Y
+  #     deadzone_start: 0
+  #     deadzone_end: 30250
+  #   output:
+  #     device: mouse
+  #     axis: REL_WHEEL
+
+  # - type: axis-to-relaxis
+  #   name: tractor out
+  #   modes:
+  #     - tractor
+  #   repeat_rate_max: 10
+  #   repeat_rate_min: 100
+  #   increment: 1
+  #   input:
+  #     device: left-stick
+  #     axis: Y
+  #     deadzone_start: 29500
+  #     deadzone_end: 64000
+  #     inverted: true
+  #   output:
+  #     device: mouse
+  #     axis: REL_WHEEL
+

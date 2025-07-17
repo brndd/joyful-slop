@@ -1,21 +1,706 @@
 rules:
-  - name: Trigger
-    type: combo
+  # Special Rules
+  - name: Right Trigger
+    type: button-combo
     inputs:
       - device: right-stick
         button: BTN_THUMB
       - device: right-stick
         button: BTN_THUMB2
     output:
-      device: main
+      device: primary
+      button: 0
+
+  - name: Left Trigger
+    type: button-combo
+    inputs:
+      - device: left-stick
+        button: BTN_THUMB
+      - device: left-stick
+        button: BTN_THUMB2
+    output:
+      device: primary
+      button: 1
+
+  - name: ButtonBoxModeShift
+    type: mode-select
+    input:
+      device: button-box
+      button: BTN_BASE2
+    output:
+      modes:
+        - main
+        - mining
+
+  # Right Stick
+  - name: R Red Button
+    type: button
+    input:
+      device: right-stick
+      button: BTN_BASE6
+    output:
+      device: primary
+      button: 2
+  - name: R Black Button
+    type: button
+    input:
+      device: right-stick
+      button: BTN_PINKIE
+    output:
+      device: primary
+      button: 3
+  - name: R Pinkie Button
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY14
+    output:
+      device: primary
+      button: 4
+
+  - name: R Side Button
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY2
+    output:
+      device: primary
+      button: 5
+  - name: R Side Up
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY3
+    output:
+      device: primary
+      button: 6
+  - name: R Side Down
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY4
+    output:
+      device: primary
+      button: 7
+
+  - name: R High Hat
+    type: button
+    input:
+      device: right-stick
+      button: "0x12c"
+    output:
+      device: primary
+      button: 8
+  - name: R High Hat Up
+    type: button
+    input:
+      device: right-stick
+      button: "0x12d"
+    output:
+      device: primary
+      button: 9
+  - name: R High Hat Right
+    type: button
+    input:
+      device: right-stick
+      button: "0x12e"
+    output:
+      device: primary
+      button: 10
+  - name: R High Hat Down
+    type: button
+    input:
+      device: right-stick
+      button: BTN_DEAD
+    output:
+      device: primary
+      button: 11
+  - name: R High Hat Left
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY1
+    output:
+      device: primary
+      button: 12
+
+  - name: R Low Hat
+    type: button
+    input:
+      device: right-stick
+      button: BTN_BASE
+    output:
+      device: primary
+      button: 13
+  - name: R Low Hat Up
+    type: button
+    input:
+      device: right-stick
+      button: BTN_BASE2
+    output:
+      device: primary
+      button: 14
+  - name: R Low Hat Right
+    type: button
+    input:
+      device: right-stick
+      button: BTN_BASE3
+    output:
+      device: primary
+      button: 15
+  - name: R Low Hat Down
+    type: button
+    input:
+      device: right-stick
+      button: BTN_BASE4
+    output:
+      device: primary
+      button: 16
+  - name: R Low Hat Left
+    type: button
+    input:
+      device: right-stick
+      button: BTN_BASE5
+    output:
+      device: primary
+      button: 17
+
+  - name: R Thumb Hat
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY9
+    output:
+      device: primary
+      button: 18
+  - name: R Thumb Hat Up
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY10
+    output:
+      device: primary
+      button: 19
+  - name: R Thumb Hat Right
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY11
+    output:
+      device: primary
+      button: 20
+  - name: R Thumb Hat Down
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY12
+    output:
+      device: primary
+      button: 21
+  - name: R Thumb Hat Left
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY13
+    output:
+      device: primary
+      button: 22
+
+  - name: R Wheel
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY5
+    output:
+      device: primary
+      button: 23
+  - name: R Wheel Stage2
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY6
+    output:
+      device: primary
+      button: 24
+  - name: R Wheel Down
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY7
+    output:
+      device: primary
+      button: 25
+  - name: R Wheel Up
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY8
+    output:
+      device: primary
+      button: 26
+
+  - name: R Thumbstick
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TOP2
+    output:
+      device: primary
+      button: 27
+
+  # Left Stick
+  - name: L Red Button
+    type: button
+    input:
+      device: left-stick
+      button: BTN_BASE6
+    output:
+      device: primary
+      button: 28
+  - name: L Black Button
+    type: button
+    input:
+      device: left-stick
+      button: BTN_PINKIE
+    output:
+      device: primary
+      button: 29
+  - name: L Pinkie Button
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY14
+    output:
+      device: primary
+      button: 30
+
+  - name: L Side Button
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY2
+    output:
+      device: primary
+      button: 31
+  - name: L Side Up
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY3
+    output:
+      device: primary
+      button: 32
+  - name: L Side Down
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY4
+    output:
+      device: primary
+      button: 33
+
+  - name: L High Hat
+    type: button
+    input:
+      device: left-stick
+      button: "0x12c"
+    output:
+      device: primary
+      button: 34
+  - name: L High Hat Up
+    type: button
+    input:
+      device: left-stick
+      button: "0x12d"
+    output:
+      device: primary
+      button: 35
+  - name: L High Hat Right
+    type: button
+    input:
+      device: left-stick
+      button: "0x12e"
+    output:
+      device: primary
+      button: 36
+  - name: L High Hat Down
+    type: button
+    input:
+      device: left-stick
+      button: BTN_DEAD
+    output:
+      device: primary
+      button: 37
+  - name: L High Hat Left
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY1
+    output:
+      device: primary
+      button: 38
+
+  - name: L Low Hat
+    type: button
+    input:
+      device: left-stick
+      button: BTN_BASE
+    output:
+      device: primary
+      button: 39
+  - name: L Low Hat Up
+    type: button
+    input:
+      device: left-stick
+      button: BTN_BASE2
+    output:
+      device: primary
+      button: 40
+  - name: L Low Hat Right
+    type: button
+    input:
+      device: left-stick
+      button: BTN_BASE3
+    output:
+      device: primary
+      button: 41
+  - name: L Low Hat Down
+    type: button
+    input:
+      device: left-stick
+      button: BTN_BASE4
+    output:
+      device: primary
+      button: 42
+  - name: L Low Hat Left
+    type: button
+    input:
+      device: left-stick
+      button: BTN_BASE5
+    output:
+      device: primary
+      button: 43
+
+  - name: L Thumb Hat
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY9
+    output:
+      device: primary
+      button: 44
+  - name: L Thumb Hat Up
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY10
+    output:
+      device: primary
+      button: 45
+  - name: L Thumb Hat Right
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY11
+    output:
+      device: primary
+      button: 46
+  - name: L Thumb Hat Down
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY12
+    output:
+      device: primary
+      button: 47
+  - name: L Thumb Hat Left
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY13
+    output:
+      device: primary
+      button: 48
+
+  - name: L Wheel
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY5
+    output:
+      device: primary
+      button: 49
+  - name: L Wheel Stage2
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY6
+    output:
+      device: primary
+      button: 50
+  - name: L Wheel Down
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY7
+    output:
+      device: primary
+      button: 51
+  - name: L Wheel Up
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY8
+    output:
+      device: primary
+      button: 52
+
+  - name: L Thumbstick
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TOP2
+    output:
+      device: primary
+      button: 53
+
+  # Button Box
+  - name: BB Power1 On
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY12
+    output:
+      device: primary
+      button: 54
+  - name: BB Power1 Off
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY13
+    output:
+      device: primary
+      button: 55
+  - name: BB Power2 On
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY10
+    output:
+      device: primary
+      button: 56
+  - name: BB Power2 Off
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY11
+    output:
+      device: primary
+      button: 57
+  - name: BB Power3 On
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY8
+    output:
+      device: primary
+      button: 58
+  - name: BB Power3 Off
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY9
+    output:
+      device: primary
+      button: 59
+  - name: BB Power4 On
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY6
+    output:
+      device: primary
+      button: 60
+  - name: BB Power4 Off
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY7
+    output:
+      device: primary
+      button: 61
+
+
+  - name: BB Top Row1
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY3
+    output:
+      device: primary
+      button: 62
+  - name: BB Top Row2
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY4
+    output:
+      device: primary
+      button: 63
+  - name: BB Top Row3
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY2
+    output:
+      device: primary
+      button: 64
+
+  - name: BB Side1
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY1
+    output:
+      device: primary
+      button: 65
+  - name: BB Side2
+    type: button
+    input:
+      device: button-box
+      button: "0x12e"
+    output:
+      device: primary
+      button: 66
+  - name: BB Side3
+    type: button
+    input:
+      device: button-box
+      button: "0x12d"
+    output:
+      device: primary
+      button: 67
+
+  - name: BB Toggle1
+    type: button
+    input:
+      device: button-box
+      button: BTN_BASE3
+    output:
+      device: primary
+      button: 68
+  - name: BB Toggle2 On 
+    type: button
+    input:
+      device: button-box
+      button: BTN_BASE6
+    output:
+      device: primary
+      button: 69
+  - name: BB Toggle2 Off
+    type: button
+    input:
+      device: button-box
+      button: "0x12c"
+    output:
+      device: primary
+      button: 70
+  - name: BB Toggle3 On 
+    type: button
+    input:
+      device: button-box
+      button: BTN_BASE4
+    output:
+      device: primary
+      button: 71
+  - name: BB Toggle3 Off
+    type: button
+    input:
+      device: button-box
+      button: BTN_BASE5
+    output:
+      device: primary
+      button: 72
+
+  - name: BB Middle Row1
+    type: button
+    input:
+      device: button-box
+      button: BTN_BASE
+    output:
+      device: secondary
+      button: 0
+  - name: BB Middle Row2
+    type: button
+    input:
+      device: button-box
+      button: BTN_PINKIE
+    output:
+      device: secondary
+      button: 1
+  - name: BB Middle Row3
+    type: button
+    input:
+      device: button-box
+      button: BTN_TOP2
+    output:
+      device: secondary
+      button: 2
+
+  - name: BB Bottom Row1
+    type: button
+    input:
+      device: button-box
+      button: BTN_DEAD
+    output:
+      device: secondary
+      button: 3
+  - name: BB Bottom Row2
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY5
+    output:
+      device: secondary
+      button: 4
+  - name: BB Bottom Row3
+    type: button
+    input:
+      device: button-box
+      button: BTN_TRIGGER_HAPPY14
+    output:
+      device: secondary
+      button: 5
+
+  - name: BB Dial1 Right
+    type: button
+    input:
+      device: button-box
+      button: BTN_THUMB2
+    output:
+      device: secondary
+      button: 6
+  - name: BB Dial1 Left
+    type: button
+    input:
+      device: button-box
+      button: BTN_TOP
+    output:
+      device: secondary
+      button: 7
+  - name: BB Dial2 Right
+    type: button
+    input:
+      device: button-box
       button: BTN_TRIGGER
-  - name: Trigger2
-    type: combo
-    inputs:
-      - device: left-stick
-        button: BTN_THUMB
-      - device: left-stick
-        button: BTN_THUMB2
     output:
-      device: main
+      device: secondary
+      button: 8
+  - name: BB Dial2 Left
+    type: button
+    input:
+      device: button-box
       button: BTN_THUMB
+    output:
+      device: secondary
+      button: 9
