@@ -8,26 +8,27 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 
 ## Features
 
-### Current Features - try them today!
+### Current Features
 
-* Create virtual devices with up to 8 axes and 56 buttons.
-* Make simple 1:1 mappings of buttons and axes: Button1 -> VirtualButtonA
-* Make combination mappings: Button1 + Button2 -> VirtualButtonA
+* Create virtual devices with up to 8 axes and 74 buttons.
+* Flexible rule system that allows several different types of rules, including:
+    * Simple 1:1 mappings of buttons and axes: Button1 -> VirtualButtonA
+    * Combination mappings: Button1 + Button2 -> VirtualButtonA
+    * "Split" axis mapping: map sections of an axis to different outputs using deadzones.
+    * Axis -> button mapping with optional "proportional" repeat speed (i.e. repeat faster as the axis is engaged further)
+    * Axis -> Relative Axis mapping, for converting a joystick axis to mouse movement and scrollwheel events.
 * Define multiple modes with per-mode behavior.
-* "Split" axis mapping: map sections of an axis to different outputs.
-* Configure per-mapping configurable deadzones for axes.
-* Axis -> button mapping with optional "proportional" repeat speed (i.e. repeat faster as the axis is engaged further)
-* Axis -> Relative Axis mapping, for converting a joystick axis to mouse movement and scrollwheel events.
+* Configure per-rule configurable deadzones for axes.
 
-### Future Features - try them at an unspecified point in the future!
+### Possible Future Features
 
 * Macros - have a single input produce a sequence of button presses with configurable pauses.
 * Sequence combos - Button1, Button2, Button3 -> VirtualButtonA
 * Output keyboard button presses
-* Explicit input and output from gamepad-like devices.
+* Hat support
 * HIDRAW support for more button options.
-* Specify different config directories for multiple sets of mappings.
-* Positional and percentage-based deadzones.
+* Percentage-based deadzones.
+* Sensitivity Curves.
 
 ## Configuration
 
@@ -37,11 +38,15 @@ A configuration guide and examples can be found in the `docs/` directory.
 
 Configuration can be fairly complicated and repetitive. If anyone wants to create a graphical interface to configure Joyful, we would love to link to it here.
 
+## Usage
+
+After building (see below) and writing your configuration (see above), just run `joyful`. (Feel free to move this somewhere in your path. You can use `--config <directory>` to specify different configuration profiles.
+
 ## Technical details
 
 Joyful is written in golang, and uses evdev/uinput to manage devices.
 
-### Building
+### Build & Install
 
 To build joyful, install `go` via your package manager, then run:
 
@@ -49,7 +54,7 @@ To build joyful, install `go` via your package manager, then run:
 CGO_ENABLED=0 go build -o build/ ./...
 ```
 
-Look for binaries in the `build/` directory.
+Copy the binaries in the `build/` directory to somewhere in your `$PATH`. (details depend on your setup, but typically somewhere like `/usr/local/bin` or `~/bin`)
 
 ### Contributing
 

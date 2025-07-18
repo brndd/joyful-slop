@@ -1,9 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
+	"strings"
 	"sync"
 
 	"git.annabunches.net/annabunches/joyful/internal/config"
@@ -13,12 +14,17 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
-func readConfig() *config.ConfigParser {
+func getConfigDir() string {
+	configFlag := flag.String("config", "~/.config/joyful", "Directory to read configuration from.")
+	flag.Parse()
+	configDir := strings.ReplaceAll(*configFlag, "~", "${HOME}")
+	return os.ExpandEnv(configDir)
+}
+
+func readConfig(configDir string) *config.ConfigParser {
 	parser := &config.ConfigParser{}
-	homeDir, err := os.UserHomeDir()
-	logger.FatalIfError(err, "Can't get user home directory, so can't find configuration.")
-	err = parser.Parse(filepath.Join(homeDir, ".config/joyful"))
-	logger.FatalIfError(err, "")
+	err := parser.Parse(configDir)
+	logger.FatalIfError(err, "Failed to parse config")
 	return parser
 }
 
@@ -56,7 +62,8 @@ func initPhysicalDevices(config *config.ConfigParser) map[string]*evdev.InputDev
 
 func main() {
 	// parse configs
-	config := readConfig()
+	configDir := getConfigDir()
+	config := readConfig(configDir)
 
 	// Initialize virtual devices with event buffers
 	vBuffersByName, vBuffersByDevice := initVirtualBuffers(config)
@@ -112,8 +119,9 @@ func main() {
 			fmt.Println("Waiting for existing listeners to exit. Provide input from each of your devices.")
 			wg.Wait()
 			fmt.Println("Listeners exited. Parsing config.")
-			config := readConfig() // reload the config
+			config := readConfig(configDir) // reload the config
 			rules, eventChannel, doneChannel, wg = loadRules(config, pDevices, getVirtualDevices(vBuffersByName))
+			fmt.Println("Config re-loaded. Only rule changes applied. Device and Mode changes require restart.")
 		}
 	}
 }
