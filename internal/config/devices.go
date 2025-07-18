@@ -116,16 +116,8 @@ func makeButtons(numButtons int, buttonList []string) []evdev.EvCode {
 
 	buttons := make([]evdev.EvCode, numButtons)
 
-	startCode := 0x120
-	for i := 0; i < numButtons && i < 16; i++ {
-		buttons[i] = evdev.EvCode(startCode + i)
-	}
-
-	if numButtons > 16 {
-		startCode = 0x2c0
-		for i := 0; i < numButtons-16; i++ {
-			buttons[16+i] = evdev.EvCode(startCode + i)
-		}
+	for i := 0; i < numButtons; i++ {
+		buttons[i] = ButtonFromIndex[i]
 	}
 
 	return buttons
