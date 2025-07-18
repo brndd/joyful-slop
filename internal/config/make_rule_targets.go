@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
 	"github.com/holoplot/go-evdev"
 )
@@ -134,11 +133,9 @@ func calculateDeadzones(targetConfig RuleTargetConfig, device Device, axis evdev
 }
 
 func clampAndShift(start, end, min, max int32) (int32, int32) {
-	logger.Logf("DEBUG: %d %d %d %d", start, end, min, max)
 	if start < min {
 		end += min - start
 		start = min
-		logger.Logf("DEBUG: %d %d %d %d", start, end, min, max)
 	}
 	if end > max {
 		start -= end - max
