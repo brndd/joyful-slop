@@ -26,6 +26,8 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 * Output keyboard button presses
 * Explicit input and output from gamepad-like devices.
 * HIDRAW support for more button options.
+* Specify different config directories for multiple sets of mappings.
+* Positional and percentage-based deadzones.
 
 ## Configuration
 
@@ -37,14 +39,14 @@ Configuration can be fairly complicated and repetitive. If anyone wants to creat
 
 ## Technical details
 
-Joyful is written in golang, and uses evdev/uinput to manage devices. 
+Joyful is written in golang, and uses evdev/uinput to manage devices.
 
 ### Building
 
 To build joyful, install `go` via your package manager, then run:
 
 ```
-go build -o build/ ./...
+CGO_ENABLED=0 go build -o build/ ./...
 ```
 
 Look for binaries in the `build/` directory.

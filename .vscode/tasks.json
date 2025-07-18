@@ -16,12 +16,18 @@
                 "build",
                 "-o",
                 "build/",
-                "./cmd/joyful",
+                "./..."
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true,
+                "isDefault": true
             },
-        },
+            "options": {
+                "env": {
+                    "CGO_ENABLED": "0"
+                }
+            },
+            "problemMatcher": []
+        }
     ],
 }

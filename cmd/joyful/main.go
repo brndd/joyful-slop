@@ -41,7 +41,7 @@ func initVirtualBuffers(config *config.ConfigParser) (map[string]*virtualdevice.
 func getVirtualDevices(buffers map[string]*virtualdevice.EventBuffer) map[string]*evdev.InputDevice {
 	devices := make(map[string]*evdev.InputDevice)
 	for name, buffer := range buffers {
-		devices[name] = buffer.Device
+		devices[name] = buffer.Device.(*evdev.InputDevice)
 	}
 	return devices
 }

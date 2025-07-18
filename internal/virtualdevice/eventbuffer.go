@@ -10,12 +10,12 @@ import (
 
 type EventBuffer struct {
 	events []*evdev.InputEvent
-	Device *evdev.InputDevice
+	Device VirtualDevice
 }
 
-func NewEventBuffer(device *evdev.InputDevice) *EventBuffer {
+func NewEventBuffer(device VirtualDevice) *EventBuffer {
 	return &EventBuffer{
-		events: make([]*evdev.InputEvent, 0),
+		events: make([]*evdev.InputEvent, 0, 100),
 		Device: device,
 	}
 }
@@ -24,20 +24,33 @@ func (buffer *EventBuffer) AddEvent(event *evdev.InputEvent) {
 	buffer.events = append(buffer.events, event)
 }
 
-func (buffer *EventBuffer) SendEvents() {
+func (buffer *EventBuffer) SendEvents() []error {
 	eventTime := syscall.NsecToTimeval(int64(time.Now().Nanosecond()))
+	writeErrors := make([]error, 0)
+
+	if len(buffer.events) == 0 {
+		return writeErrors
+	}
 
 	for i := 0; i < len(buffer.events); i++ {
 		buffer.events[i].Time = eventTime
-		buffer.Device.WriteOne(buffer.events[i])
+		err := buffer.Device.WriteOne(buffer.events[i])
+		if err != nil {
+			writeErrors = append(writeErrors, err)
+		}
 	}
 
-	buffer.Device.WriteOne(&evdev.InputEvent{
+	err := buffer.Device.WriteOne(&evdev.InputEvent{
 		Time:  eventTime,
 		Type:  evdev.EV_SYN,
 		Code:  evdev.SYN_REPORT,
 		Value: 0,
 	})
 
-	buffer.events = make([]*evdev.InputEvent, 0)
+	if err != nil {
+		writeErrors = append(writeErrors, err)
+	}
+
+	buffer.events = make([]*evdev.InputEvent, 0, 100)
+	return writeErrors
 }
