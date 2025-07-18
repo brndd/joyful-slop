@@ -17,8 +17,8 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
     * "Split" axis mapping: map sections of an axis to different outputs using deadzones.
     * Axis -> button mapping with optional "proportional" repeat speed (i.e. repeat faster as the axis is engaged further)
     * Axis -> Relative Axis mapping, for converting a joystick axis to mouse movement and scrollwheel events.
+* Configure per-rule configurable deadzones for axes, with multiple ways to specify deadzones.
 * Define multiple modes with per-mode behavior.
-* Configure per-rule configurable deadzones for axes.
 
 ### Possible Future Features
 
@@ -27,7 +27,6 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 * Output keyboard button presses
 * Hat support
 * HIDRAW support for more button options.
-* Percentage-based deadzones.
 * Sensitivity Curves.
 
 ## Configuration
@@ -40,7 +39,7 @@ Configuration can be fairly complicated and repetitive. If anyone wants to creat
 
 ## Usage
 
-After building (see below) and writing your configuration (see above), just run `joyful`. (Feel free to move this somewhere in your path. You can use `--config <directory>` to specify different configuration profiles.
+After building (see below) and writing your configuration (see above), just run `joyful`. You can use `joyful --config <directory>` to specify different configuration profiles; just put all the YAML files for a given profile in a unique directory.
 
 ## Technical details
 

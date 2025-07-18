@@ -43,7 +43,7 @@ func NewMappingRuleAxisToRelaxis(
 }
 
 func (rule *MappingRuleAxisToRelaxis) MatchEvent(
-	device RuleTargetDevice,
+	device Device,
 	event *evdev.InputEvent,
 	mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 

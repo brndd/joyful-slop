@@ -55,6 +55,16 @@ For input, you can figure out what event codes your device is emitting by runnin
 evtest | grep BTN_
 ```
 
+### Axis Deadzones
+
+For most axis inputs, you will want to define deadzones. There are three possible approaches:
+
+* Define `deadzone_start` and `deadzone_end` to explicitly set the deadzone bounds.
+* Define `deadzone_center` and `deadzone_size`; this will create a deadzone of the indicated size centered at the given axis position.
+* Define `deadzone_center` and `deadzone_size_percent` to use a percentage of the total axis size.
+
+See <examples/ruletypes.yml> for usage examples.
+
 ## Modes
 
 Modes are optional, and also have the simplest configuration. To define modes, add this to your configuration:

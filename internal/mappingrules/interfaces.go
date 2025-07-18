@@ -7,7 +7,7 @@ import (
 )
 
 type MappingRule interface {
-	MatchEvent(RuleTargetDevice, *evdev.InputEvent, *string) (*evdev.InputDevice, *evdev.InputEvent)
+	MatchEvent(Device, *evdev.InputEvent, *string) (*evdev.InputDevice, *evdev.InputEvent)
 }
 
 type TimedEventEmitter interface {
@@ -35,13 +35,13 @@ type RuleTarget interface {
 	// for most implementations.
 	CreateEvent(int32, *string) *evdev.InputEvent
 
-	MatchEvent(device RuleTargetDevice, event *evdev.InputEvent) bool
+	MatchEvent(device Device, event *evdev.InputEvent) bool
 }
 
-// RuleTargetDevice is an interface abstraction on top of evdev.InputDevice, implementing
+// Device is an interface abstraction on top of evdev.InputDevice, implementing
 // only the methods we need in this package. This is used for testing, and the
-// RuleTargetDevice can be safely cast to an *evdev.InputDevice when necessary.
-type RuleTargetDevice interface {
+// Device can be safely cast to an *evdev.InputDevice when necessary.
+type Device interface {
 	AbsInfos() (map[evdev.EvCode]evdev.AbsInfo, error)
 }
 

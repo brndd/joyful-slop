@@ -6,13 +6,13 @@ import (
 
 type RuleTargetRelaxis struct {
 	DeviceName string
-	Device     RuleTargetDevice
+	Device     Device
 	Axis       evdev.EvCode
 	Inverted   bool
 }
 
 func NewRuleTargetRelaxis(device_name string,
-	device RuleTargetDevice,
+	device Device,
 	axis evdev.EvCode,
 	inverted bool) (*RuleTargetRelaxis, error) {
 
@@ -41,6 +41,6 @@ func (target *RuleTargetRelaxis) CreateEvent(value int32, mode *string) *evdev.I
 }
 
 // Relative axis is only supported for output.
-func (target *RuleTargetRelaxis) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent) bool {
+func (target *RuleTargetRelaxis) MatchEvent(device Device, event *evdev.InputEvent) bool {
 	return false
 }

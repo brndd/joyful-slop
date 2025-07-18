@@ -26,6 +26,34 @@ rules:
       device: main
       axis: ABS_X
 
+  - type: axis
+    input:
+      device: flightstick
+      # An alternate way to specify deadzones is to define the deadzone's center and then a
+      # size value. This will create a deadzone that covers a range of deadzone_size,
+      # centered on the center value. Note that if your deadzone_center is at the lower or upper end
+      # of the axis, the total size will still be as given; the deadzone will be "shifted" into bounds.
+      deadzone_center: 29000
+      deadzone_size: 2000
+      inverted: false
+      axis: Y # The ABS_ prefix is optional
+    output:
+      device: main
+      axis: ABS_Y
+
+  - type: axis
+    input:
+      device: flightstick
+      # A final way to specify deadzones is to use a size percentage instead of an absolute size.
+      # This works exactly like deadzone_size, but calculates a percentage of the axis' total range.
+      deadzone_center: 29000
+      deadzone_size_percent: 5
+      inverted: false
+      axis: Y # The ABS_ prefix is optional
+    output:
+      device: main
+      axis: ABS_Y
+
   # Straightforward button mapping
   - type: button
     input:

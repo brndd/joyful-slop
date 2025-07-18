@@ -41,11 +41,14 @@ type RuleConfig struct {
 }
 
 type RuleTargetConfig struct {
-	Device        string   `yaml:"device,omitempty"`
-	Button        string   `yaml:"button,omitempty"`
-	Axis          string   `yaml:"axis,omitempty"`
-	DeadzoneStart int32    `yaml:"deadzone_start,omitempty"`
-	DeadzoneEnd   int32    `yaml:"deadzone_end,omitempty"`
-	Inverted      bool     `yaml:"inverted,omitempty"`
-	Modes         []string `yaml:"modes,omitempty"`
+	Device              string   `yaml:"device,omitempty"`
+	Button              string   `yaml:"button,omitempty"`
+	Axis                string   `yaml:"axis,omitempty"`
+	DeadzoneCenter      int32    `yaml:"deadzone_center,omitempty"`
+	DeadzoneSize        int32    `yaml:"deadzone_size,omitempty"`
+	DeadzoneSizePercent int32    `yaml:"deadzone_size_percent,omitempty"`
+	DeadzoneStart       int32    `yaml:"deadzone_start,omitempty"`
+	DeadzoneEnd         int32    `yaml:"deadzone_end,omitempty"`
+	Inverted            bool     `yaml:"inverted,omitempty"`
+	Modes               []string `yaml:"modes,omitempty"`
 }

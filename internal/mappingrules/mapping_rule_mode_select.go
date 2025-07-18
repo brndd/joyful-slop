@@ -22,7 +22,7 @@ func NewMappingRuleModeSelect(
 }
 
 func (rule *MappingRuleModeSelect) MatchEvent(
-	device RuleTargetDevice,
+	device Device,
 	event *evdev.InputEvent,
 	mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 

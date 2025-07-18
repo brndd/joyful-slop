@@ -39,7 +39,7 @@ func NewMappingRuleAxisToButton(base MappingRuleBase, input *RuleTargetAxis, out
 	}
 }
 
-func (rule *MappingRuleAxisToButton) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
+func (rule *MappingRuleAxisToButton) MatchEvent(device Device, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 
 	if !rule.MappingRuleBase.modeCheck(mode) ||
 		!rule.Input.MatchEventDeviceAndCode(device, event) {
@@ -105,5 +105,5 @@ func (rule *MappingRuleAxisToButton) TimerEvent() *evdev.InputEvent {
 }
 
 func (rule *MappingRuleAxisToButton) GetOutputDevice() *evdev.InputDevice {
-	return rule.Output.Device
+	return rule.Output.Device.(*evdev.InputDevice)
 }

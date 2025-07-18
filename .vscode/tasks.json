@@ -28,6 +28,23 @@
                 }
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Test Project",
+            "args": [
+                "test",
+                "./..."
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "options": {
+                "env": {
+                    "CGO_ENABLED": "0"
+                }
+            },
+            "problemMatcher": []
         }
     ],
 }

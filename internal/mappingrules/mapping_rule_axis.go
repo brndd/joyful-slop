@@ -17,7 +17,7 @@ func NewMappingRuleAxis(base MappingRuleBase, input *RuleTargetAxis, output *Rul
 	}
 }
 
-func (rule *MappingRuleAxis) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
+func (rule *MappingRuleAxis) MatchEvent(device Device, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 	if !rule.MappingRuleBase.modeCheck(mode) ||
 		!rule.Input.MatchEvent(device, event) {
 		return nil, nil

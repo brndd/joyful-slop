@@ -22,7 +22,7 @@ func NewMappingRuleButtonLatched(
 	}
 }
 
-func (rule *MappingRuleButtonLatched) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
+func (rule *MappingRuleButtonLatched) MatchEvent(device Device, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {
 	if !rule.MappingRuleBase.modeCheck(mode) {
 		return nil, nil
 	}
@@ -42,5 +42,5 @@ func (rule *MappingRuleButtonLatched) MatchEvent(device RuleTargetDevice, event 
 		value = 0
 	}
 
-	return rule.Output.Device, rule.Output.CreateEvent(value, mode)
+	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(value, mode)
 }

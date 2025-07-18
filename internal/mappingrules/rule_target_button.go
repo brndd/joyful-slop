@@ -4,12 +4,12 @@ import "github.com/holoplot/go-evdev"
 
 type RuleTargetButton struct {
 	DeviceName string
-	Device     *evdev.InputDevice
+	Device     Device
 	Button     evdev.EvCode
 	Inverted   bool
 }
 
-func NewRuleTargetButton(device_name string, device *evdev.InputDevice, code evdev.EvCode, inverted bool) (*RuleTargetButton, error) {
+func NewRuleTargetButton(device_name string, device Device, code evdev.EvCode, inverted bool) (*RuleTargetButton, error) {
 	return &RuleTargetButton{
 		DeviceName: device_name,
 		Device:     device,
@@ -36,7 +36,7 @@ func (target *RuleTargetButton) CreateEvent(value int32, _ *string) *evdev.Input
 	}
 }
 
-func (target *RuleTargetButton) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent) bool {
+func (target *RuleTargetButton) MatchEvent(device Device, event *evdev.InputEvent) bool {
 	return device == target.Device &&
 		event.Type == evdev.EV_KEY &&
 		event.Code == target.Button

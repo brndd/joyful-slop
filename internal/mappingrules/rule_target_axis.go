@@ -9,7 +9,7 @@ import (
 
 type RuleTargetAxis struct {
 	DeviceName    string
-	Device        RuleTargetDevice
+	Device        Device
 	Axis          evdev.EvCode
 	Inverted      bool
 	DeadzoneStart int32
@@ -19,7 +19,7 @@ type RuleTargetAxis struct {
 }
 
 func NewRuleTargetAxis(device_name string,
-	device RuleTargetDevice,
+	device Device,
 	axis evdev.EvCode,
 	inverted bool,
 	deadzoneStart int32,
@@ -89,13 +89,13 @@ func (target *RuleTargetAxis) CreateEvent(value int32, mode *string) *evdev.Inpu
 	}
 }
 
-func (target *RuleTargetAxis) MatchEvent(device RuleTargetDevice, event *evdev.InputEvent) bool {
+func (target *RuleTargetAxis) MatchEvent(device Device, event *evdev.InputEvent) bool {
 	return target.MatchEventDeviceAndCode(device, event) &&
 		!target.InDeadZone(event.Value)
 }
 
 // TODO: Add tests
-func (target *RuleTargetAxis) MatchEventDeviceAndCode(device RuleTargetDevice, event *evdev.InputEvent) bool {
+func (target *RuleTargetAxis) MatchEventDeviceAndCode(device Device, event *evdev.InputEvent) bool {
 	return device == target.Device &&
 		event.Type == evdev.EV_ABS &&
 		event.Code == target.Axis
