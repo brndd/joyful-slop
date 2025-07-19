@@ -1,0 +1,46 @@
+rules:
+  - type: axis
+    input:
+      device: left-stick
+      axis: X
+    output:
+      device: primary
+      axis: X
+  - type: axis
+    input:
+      device: left-stick
+      axis: Y
+    output:
+      device: primary
+      axis: Y
+
+  - type: axis
+    input:
+      device: right-stick
+      axis: X
+    output:
+      device: primary
+      axis: RX
+  - type: axis
+    input:
+      device: right-stick
+      axis: Y
+      inverted: true
+    output:
+      device: primary
+      axis: RY
+
+  - type: axis
+    input:
+      device: right-stick
+      axis: throttle
+    output:
+      device: primary
+      axis: RZ
+  - type: axis
+    input:
+      device: left-stick
+      axis: throttle
+    output:
+      device: primary
+      axis: Z

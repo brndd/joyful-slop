@@ -1,0 +1,84 @@
+rules:
+  - name: R Red
+    type: button
+    input:
+      device: right-stick
+      button: BTN_BASE6
+    output:
+      device: primary
+      button: BTN_SOUTH
+  - name: R Black
+    type: button
+    input:
+      device: right-stick
+      button: BTN_PINKIE
+    output:
+      device: primary
+      button: BTN_EAST
+  - name: R Pinkie
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY14
+    output:
+      device: primary
+      button: BTN_TR
+  - name: R Thumbstick
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TOP2
+    output:
+      device: primary
+      button: BTN_THUMBR
+  - name: R Thumb Hat
+    type: button
+    input:
+      device: right-stick
+      button: BTN_TRIGGER_HAPPY9
+    output:
+      device: primary
+      button: BTN_START
+
+  - name: L Red
+    type: button
+    input:
+      device: left-stick
+      button: BTN_BASE6
+    output:
+      device: primary
+      button: BTN_NORTH
+  - name: L Black
+    type: button
+    input:
+      device: left-stick
+      button: BTN_PINKIE
+    output:
+      device: primary
+      button: BTN_WEST
+  - name: L Pinkie
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY14
+    output:
+      device: primary
+      button: BTN_TL
+  - name: L Thumbstick
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TOP2
+    output:
+      device: primary
+      button: BTN_THUMBL
+  - name: L Thumb Hat
+    type: button
+    input:
+      device: left-stick
+      button: BTN_TRIGGER_HAPPY9
+    output:
+      device: primary
+      button: BTN_SELECT
+
+  # TODO: d-pad needs hat support
