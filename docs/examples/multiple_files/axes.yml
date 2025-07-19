@@ -5,8 +5,6 @@ rules:
     input:
       device: right-stick
       axis: Y
-      deadzone_start: 29000
-      deadzone_end: 31000
     output:
       device: primary
       axis: Y
@@ -16,8 +14,6 @@ rules:
     input:
       device: right-stick
       axis: X
-      deadzone_start: 30000
-      deadzone_end: 32000
     output:
       device: primary
       axis: X
@@ -27,8 +23,6 @@ rules:
     input:
       device: pedals
       axis: Z
-      deadzone_start: 124
-      deadzone_end: 132
     output:
       device: primary
       axis: Z
@@ -39,8 +33,6 @@ rules:
     input:
       device: left-stick
       axis: Y
-      deadzone_start: 29500
-      deadzone_end: 31000
     output:
       device: primary
       axis: RY
@@ -50,8 +42,6 @@ rules:
     input:
       device: left-stick
       axis: X
-      deadzone_start: 29000
-      deadzone_end: 30500
     output:
       device: primary
       axis: RX
@@ -62,8 +52,6 @@ rules:
     input:
       device: right-stick
       axis: RX
-      deadzone_start: 29500
-      deadzone_end: 30250
     output:
       device: secondary
       axis: X
@@ -72,8 +60,6 @@ rules:
     input:
       device: right-stick
       axis: RY
-      deadzone_start: 29500
-      deadzone_end: 30250
     output:
       device: secondary
       axis: Y
@@ -87,8 +73,6 @@ rules:
     input:
       device: right-stick
       axis: ABS_THROTTLE
-      deadzone_start: 0
-      deadzone_end: 500
     output:
       device: primary
       axis: ABS_THROTTLE
@@ -100,8 +84,6 @@ rules:
     input:
       device: left-stick
       axis: ABS_THROTTLE
-      deadzone_start: 0
-      deadzone_end: 500
     output:
       device: primary
       axis: ABS_RUDDER
@@ -111,8 +93,8 @@ rules:
     name: tractor in
     modes:
       - main
-    repeat_rate_max: 10
-    repeat_rate_min: 100
+    repeat_rate_max: 50
+    repeat_rate_min: 500
     increment: -1
     input:
       device: left-stick
@@ -127,8 +109,8 @@ rules:
     name: tractor out
     modes:
       - main
-    repeat_rate_max: 10
-    repeat_rate_min: 100
+    repeat_rate_max: 50
+    repeat_rate_min: 500
     increment: 1
     input:
       device: left-stick
@@ -175,44 +157,6 @@ rules:
     input:
       device: right-stick
       axis: ABS_THROTTLE
-      deadzone_start: 0
-      deadzone_end: 500
     output:
       device: primary
       axis: RZ
-      
-  # In tractor mode, most flight controls are disabled to prevent us
-  # from accidentally trying to fly off without throttle control
-  # - type: axis-to-relaxis
-  #   name: tractor in
-  #   modes:
-  #     - tractor
-  #   repeat_rate_max: 10
-  #   repeat_rate_min: 100
-  #   increment: -1
-  #   input:
-  #     device: left-stick
-  #     axis: Y
-  #     deadzone_start: 0
-  #     deadzone_end: 30250
-  #   output:
-  #     device: mouse
-  #     axis: REL_WHEEL
-
-  # - type: axis-to-relaxis
-  #   name: tractor out
-  #   modes:
-  #     - tractor
-  #   repeat_rate_max: 10
-  #   repeat_rate_min: 100
-  #   increment: 1
-  #   input:
-  #     device: left-stick
-  #     axis: Y
-  #     deadzone_start: 29500
-  #     deadzone_end: 64000
-  #     inverted: true
-  #   output:
-  #     device: mouse
-  #     axis: REL_WHEEL
-

@@ -57,7 +57,9 @@ evtest | grep BTN_
 
 ### Axis Deadzones
 
-For most axis inputs, you will want to define deadzones. There are three possible approaches:
+**NOTE: For most axis mappings, you probably don't want to specify a deadzone!** Use deadzone configurations in your target game instead. Joyful-configured deadzones are intended to be used in conjunction with the `axis-to-button` and `axis-to-relaxis` input types, or when splitting an axis into multiple outputs. Using them with standard `axis` mappings may result in a loss of fidelity and "stuck" inputs.
+
+There are three ways to specify deadzones:
 
 * Define `deadzone_start` and `deadzone_end` to explicitly set the deadzone bounds.
 * Define `deadzone_center` and `deadzone_size`; this will create a deadzone of the indicated size centered at the given axis position.
