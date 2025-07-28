@@ -154,7 +154,7 @@ func loadRules(
 			timerCount++
 		}
 	}
-	logger.Logf("registered %d timers", timerCount)
+	logger.Logf("Registered %d timers.", timerCount)
 
 	go consoleWatcher(eventChannel)
 
