@@ -6,6 +6,7 @@ require (
 	github.com/goccy/go-yaml v1.18.0
 	github.com/holoplot/go-evdev v0.0.0-20240306072622-217e18f17db1
 	github.com/jonboulle/clockwork v0.5.0
+	github.com/spf13/pflag v1.0.7
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
 )

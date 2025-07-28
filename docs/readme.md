@@ -11,7 +11,7 @@ Each entry in `devices` must have a couple of parameters:
 
 `physical` devices must additionally define these parameters:
 
-* `device_name` - The name of the device as reported by the included `evlist` command. If your device name ends with a space, use quotation marks (`""`) around the name.
+* `device_name` - The name of the device as reported by the included `evinfo` command. If your device name ends with a space, use quotation marks (`""`) around the name.
 
 `virtual` devices can additionally define these parameters:
 
