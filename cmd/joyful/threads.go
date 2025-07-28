@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"os"
 	"sync"
 	"time"
@@ -19,26 +20,25 @@ const (
 func eventWatcher(
 	device *evdev.InputDevice,
 	channel chan<- ChannelEvent,
-	done chan bool,
+	ctx context.Context,
 	wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
 	for {
-		select {
-		case cancel := <-done:
-			if cancel {
-				done <- true
-				return
-			}
-		default:
-		}
-
 		event, err := device.ReadOne()
 		if err != nil {
 			logger.LogError(err, "Error while reading event. Disconnecting device.")
 			return
 		}
+
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			// Proceed
+		}
+
 		channel <- ChannelEvent{Device: device, Event: event, Type: ChannelEventInput}
 
 		if event.Type == evdev.EV_SYN {
@@ -50,19 +50,17 @@ func eventWatcher(
 func timerWatcher(
 	rule mappingrules.TimedEventEmitter,
 	channel chan<- ChannelEvent,
-	done chan bool,
+	ctx context.Context,
 	wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
 	for {
 		select {
-		case cancel := <-done:
-			if cancel {
-				done <- true
-				return
-			}
+		case <-ctx.Done():
+			return
 		default:
+			// Proceed
 		}
 
 		event := rule.TimerEvent()
@@ -77,9 +75,9 @@ func timerWatcher(
 	}
 }
 
-// consoleWatcher reads input from stdin, and on receiving anything
-func consoleWatcher(channel chan<- ChannelEvent, wg *sync.WaitGroup) {
-	defer wg.Done()
+// consoleWatcher reads input from stdin, and on receiving anything,
+// closes the current threading context
+func consoleWatcher(channel chan<- ChannelEvent) {
 	stdin := bufio.NewReader(os.Stdin)
 	for {
 		_, err := stdin.ReadString('\n')
