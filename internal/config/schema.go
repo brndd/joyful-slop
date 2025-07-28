@@ -32,6 +32,8 @@ type RuleConfig struct {
 	Name          string             `yaml:"name,omitempty"`
 	Type          string             `yaml:"type"`
 	Input         RuleTargetConfig   `yaml:"input,omitempty"`
+	InputLower    RuleTargetConfig   `yaml:"input_lower,omitempty"`
+	InputUpper    RuleTargetConfig   `yaml:"input_upper,omitempty"`
 	Inputs        []RuleTargetConfig `yaml:"inputs,omitempty"`
 	Output        RuleTargetConfig   `yaml:"output"`
 	Modes         []string           `yaml:"modes,omitempty"`

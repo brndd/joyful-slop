@@ -54,6 +54,19 @@ rules:
       device: main
       axis: ABS_Y
 
+  # Create a single merged output axis from 2 input axes
+  - type: axis-combined
+    input_lower:
+      device: flightstick
+      axis: X
+      inverted: true # the lower half of the axis will often need to be inverted
+    input_uppper:
+      device: flightstick
+      axis: RX
+    output:
+      device: main
+      axis: RZ
+
   # Straightforward button mapping
   - type: button
     input:

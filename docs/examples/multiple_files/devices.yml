@@ -6,7 +6,7 @@ devices:
   - name: secondary
     type: virtual
     num_buttons: 74
-    num_axes: 2
+    num_axes: 3
   - name: mouse
     type: virtual
     num_buttons: 0

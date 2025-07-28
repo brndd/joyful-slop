@@ -66,27 +66,20 @@ rules:
 
       
   # Vertical thrust is on the VPC "paddles" in the main flight mode
-  - type: axis
-    name: translation up
+  - type: axis-combined
+    name: translation vertical
     modes:
       - main
-    input:
-      device: right-stick
-      axis: ABS_THROTTLE
-    output:
-      device: primary
-      axis: ABS_THROTTLE
-
-  - type: axis
-    name: translation down
-    modes:
-      - main
-    input:
+    input_lower:
       device: left-stick
-      axis: ABS_THROTTLE
+      axis: Throttle
+      inverted: true
+    input_upper:
+      device: right-stick
+      axis: Throttle
     output:
       device: primary
-      axis: ABS_RUDDER
+      axis: RZ
 
   # By default, the left thumbstick controls tractor beam via mousewheel
   - type: axis-to-relaxis
@@ -125,30 +118,15 @@ rules:
   # In Mining mode, we move vertical thrust to the left thumbstick
   # and remap the right paddle to be mining laser power
   - type: axis
-    name: translation up alternate
+    name: translation up/down alternate
     modes:
       - mining
     input:
       device: left-stick
       axis: RY
-      deadzone_start: 29250
-      deadzone_end: 64000
     output:
       device: primary
-      axis: ABS_THROTTLE
-
-  - type: axis
-    name: translation down alternate
-    modes:
-      - mining
-    input:
-      device: left-stick
-      axis: RY
-      deadzone_start: 0
-      deadzone_end: 30500
-    output:
-      device: primary
-      axis: ABS_RUDDER
+      axis: RZ
 
   - type: axis
     name: mining laser
@@ -156,7 +134,7 @@ rules:
       - mining
     input:
       device: right-stick
-      axis: ABS_THROTTLE
+      axis: Throttle
     output:
       device: primary
-      axis: RZ
+      axis: Throttle

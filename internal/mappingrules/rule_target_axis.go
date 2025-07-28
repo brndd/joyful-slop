@@ -14,6 +14,8 @@ type RuleTargetAxis struct {
 	Inverted      bool
 	DeadzoneStart int32
 	DeadzoneEnd   int32
+	OutputMin     int32
+	OutputMax     int32
 	axisSize      int32
 	deadzoneSize  int32
 }
@@ -61,6 +63,8 @@ func NewRuleTargetAxis(device_name string,
 		Device:        device,
 		Axis:          axis,
 		Inverted:      inverted,
+		OutputMin:     AxisValueMin,
+		OutputMax:     AxisValueMax,
 		DeadzoneStart: deadzoneStart,
 		DeadzoneEnd:   deadzoneEnd,
 		deadzoneSize:  deadzoneSize,
@@ -77,7 +81,7 @@ func NewRuleTargetAxis(device_name string,
 // in the deadzone, among other things.
 func (target *RuleTargetAxis) NormalizeValue(value int32) int32 {
 	axisStrength := target.GetAxisStrength(value)
-	return LerpInt(AxisValueMin, AxisValueMax, axisStrength)
+	return LerpInt(target.OutputMin, target.OutputMax, axisStrength)
 }
 
 func (target *RuleTargetAxis) CreateEvent(value int32, mode *string) *evdev.InputEvent {
@@ -103,7 +107,7 @@ func (target *RuleTargetAxis) MatchEventDeviceAndCode(device Device, event *evde
 
 // TODO: Add tests
 func (target *RuleTargetAxis) InDeadZone(value int32) bool {
-	return value >= target.DeadzoneStart && value <= target.DeadzoneEnd
+	return target.deadzoneSize > 0 && value >= target.DeadzoneStart && value <= target.DeadzoneEnd
 }
 
 // GetAxisStrength returns a float between 0.0 and 1.0, representing the proportional

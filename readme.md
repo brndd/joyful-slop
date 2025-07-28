@@ -41,9 +41,11 @@ Configuration can be fairly complicated and repetitive. If anyone wants to creat
 
 After building (see below) and writing your configuration (see above), just run `joyful`. You can use `joyful --config <directory>` to specify different configuration profiles; just put all the YAML files for a given profile in a unique directory.
 
+Pressing `<enter>` in the running terminal window will reload the `rules` section of your config files, so you can make changes to your rules without restarting the application. Applying any changes to `devices` or `modes` requires exiting and re-launching the program.
+
 ## Technical details
 
-Joyful is written in golang, and uses evdev/uinput to manage devices.
+Joyful is written in golang, and uses evdev/uinput to manage devices. See `cmd/joyful/main.go` for the program's entry point.
 
 ### Build & Install
 

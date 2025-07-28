@@ -49,6 +49,8 @@ func (parser *ConfigParser) BuildRules(pInputDevs map[string]*evdev.InputDevice,
 			newRule, err = makeMappingRuleLatched(ruleConfig, pDevs, vDevs, base)
 		case RuleTypeAxis:
 			newRule, err = makeMappingRuleAxis(ruleConfig, pDevs, vDevs, base)
+		case RuleTypeAxisCombined:
+			newRule, err = makeMappingRuleAxisCombined(ruleConfig, pDevs, vDevs, base)
 		case RuleTypeAxisToButton:
 			newRule, err = makeMappingRuleAxisToButton(ruleConfig, pDevs, vDevs, base)
 		case RuleTypeAxisToRelaxis:
@@ -144,6 +146,29 @@ func makeMappingRuleAxis(ruleConfig RuleConfig,
 	}
 
 	return mappingrules.NewMappingRuleAxis(base, input, output), nil
+}
+
+func makeMappingRuleAxisCombined(ruleConfig RuleConfig,
+	pDevs map[string]Device,
+	vDevs map[string]Device,
+	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxisCombined, error) {
+
+	inputLower, err := makeRuleTargetAxis(ruleConfig.InputLower, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	inputUpper, err := makeRuleTargetAxis(ruleConfig.InputUpper, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := makeRuleTargetAxis(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	return mappingrules.NewMappingRuleAxisCombined(base, inputLower, inputUpper, output), nil
 }
 
 func makeMappingRuleAxisToButton(ruleConfig RuleConfig,

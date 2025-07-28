@@ -12,6 +12,7 @@ const (
 	RuleTypeButtonCombo   = "button-combo"
 	RuleTypeLatched       = "button-latched"
 	RuleTypeAxis          = "axis"
+	RuleTypeAxisCombined  = "axis-combined"
 	RuleTypeModeSelect    = "mode-select"
 	RuleTypeAxisToButton  = "axis-to-button"
 	RuleTypeAxisToRelaxis = "axis-to-relaxis"

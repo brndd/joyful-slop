@@ -15,6 +15,10 @@ type RuleTargetAxisTests struct {
 	call *mock.Call
 }
 
+func TestRunnerRuleTargetAxisTests(t *testing.T) {
+	suite.Run(t, new(RuleTargetAxisTests))
+}
+
 func (t *RuleTargetAxisTests) SetupTest() {
 	t.mock = new(InputDeviceMock)
 	t.call = t.mock.On("AbsInfos").Return(map[evdev.EvCode]evdev.AbsInfo{
@@ -68,26 +72,41 @@ func (t *RuleTargetAxisTests) TestNewRuleTargetAxis() {
 
 func (t *RuleTargetAxisTests) TestNormalizeValue() {
 	// Basic normalization should work
-	ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
-	t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(10000)))
-	t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(0)))
-	t.EqualValues(0, ruleTarget.NormalizeValue(int32(5000)))
+	t.Run("Simple normalization", func() {
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+		t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(10000)))
+		t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(0)))
+		t.EqualValues(0, ruleTarget.NormalizeValue(int32(5000)))
+	})
 
 	// Normalization with a deadzone should work
-	ruleTarget, _ = NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 5000)
-	t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(10000)))
-	t.True(ruleTarget.NormalizeValue(int32(5001)) < int32(-31000))
-	t.EqualValues(0, ruleTarget.NormalizeValue(int32(7500)))
+	t.Run("With Deadzone", func() {
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 5000)
+		t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(10000)))
+		t.True(ruleTarget.NormalizeValue(int32(5001)) < int32(-31000))
+		t.EqualValues(0, ruleTarget.NormalizeValue(int32(7500)))
+	})
 
-	// Normalization on an inverted axis should work
-	ruleTarget, _ = NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, 0, 0)
-	t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(0)))
-	t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(10000)))
+	t.Run("Inverted", func() {
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, 0, 0)
+		t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(0)))
+		t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(10000)))
+	})
 
-	// Normalization past the stated axis bounds should clamp
-	ruleTarget, _ = NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
-	t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(-30000)))
-	t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(30000)))
+	t.Run("Out of bounds", func() { // Normalization past the stated axis bounds should clamp
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+		t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(-30000)))
+		t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(30000)))
+	})
+
+	t.Run("With partial output range", func() {
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+		ruleTarget.OutputMin = 0
+		ruleTarget.OutputMax = AxisValueMax
+		t.EqualValues(0, ruleTarget.NormalizeValue(int32(0)))
+		t.EqualValues(AxisValueMax, ruleTarget.NormalizeValue(int32(10000)))
+		t.InDelta(AxisValueMax/2, ruleTarget.NormalizeValue(int32(5000)), 10.0)
+	})
 }
 
 func (t *RuleTargetAxisTests) TestMatchEvent() {
@@ -177,8 +196,4 @@ func (t *RuleTargetAxisTests) TestGetAxisStrength() {
 		t.InDelta(0.5, ruleTarget.GetAxisStrength(2500), 0.01)
 		t.Equal(1.0, ruleTarget.GetAxisStrength(0))
 	})
-}
-
-func TestRunnerRuleTargetAxisTests(t *testing.T) {
-	suite.Run(t, new(RuleTargetAxisTests))
 }

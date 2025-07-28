@@ -32,6 +32,7 @@ All `rules` must have a `type` parameter. Valid values for this parameter are:
 * `button-combo` - multiple input buttons mapped to a single output. The output event will trigger when all the input conditions are met.
 * `button-latched` - a single button mapped to a single output, but each time the input is pressed, the output will toggle.
 * `axis` - a simple axis mapping
+* `axis-combined` - a mapping that combines 2 input axes into a single output axis.
 * `axis-to-button` - causes an axis input to produce a button output. This can be repeated with variable speed proportional to the axis' input value
 * `axis-to-relaxis` - like axis-to-button, but produces a "relative axis" output value. This is useful for simulating mouse scrollwheel and movement events.
 
