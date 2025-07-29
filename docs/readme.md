@@ -36,7 +36,7 @@ All `rules` must have a `type` parameter. Valid values for this parameter are:
 * `axis-to-button` - causes an axis input to produce a button output. This can be repeated with variable speed proportional to the axis' input value
 * `axis-to-relaxis` - like axis-to-button, but produces a "relative axis" output value. This is useful for simulating mouse scrollwheel and movement events.
 
-Configuration options for each rule type vary. See <examples/ruletypes.yml> for an example of each type with all options specified.
+Configuration options for each rule type vary. See [examples/ruletypes.yml](examples/ruletypes.yml) for an example of each type with all options specified.
 
 ### Event Codes
 

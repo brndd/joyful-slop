@@ -5,12 +5,20 @@ import (
 	"os"
 )
 
+var IsDebugMode = false
+
 func Log(msg string) {
 	fmt.Println(msg)
 }
 
 func Logf(msg string, params ...interface{}) {
 	fmt.Printf(msg+"\n", params...)
+}
+
+func LogDebugf(msg string, params ...interface{}) {
+	if IsDebugMode {
+		fmt.Printf("DEBUG: %s\n", fmt.Sprintf(msg, params...))
+	}
 }
 
 func LogError(err error, msg string) {

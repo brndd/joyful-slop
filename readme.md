@@ -20,6 +20,7 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
     * Axis -> Relative Axis mapping, for converting a joystick axis to mouse movement and scrollwheel events.
 * Configure per-rule configurable deadzones for axes, with multiple ways to specify deadzones.
 * Define multiple modes with per-mode behavior.
+    * Text-to-speech engine that announces the current mode when it changes.
 
 ### Possible Future Features
 
@@ -29,6 +30,7 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 * Hat support
 * HIDRAW support for more button options.
 * Sensitivity Curves.
+* Packaged builds for Arch and possibly other distributions.
 
 ## Configuration
 
@@ -44,19 +46,24 @@ After building (see below) and writing your configuration (see above), just run 
 
 Pressing `<enter>` in the running terminal window will reload the `rules` section of your config files, so you can make changes to your rules without restarting the application. Applying any changes to `devices` or `modes` requires exiting and re-launching the program.
 
+## Build & Install
+
+To build joyful, first use your distribution's package manager to install the following packages:
+* `go`
+* `alsa-lib` - this may be `libasound2-dev` or `libasound2-devel` depending on your distribution
+* `espeak-ng` - if you want text-to-speech to announce mode changes
+
+Then, run:
+
+```
+go build -o build/ ./...
+```
+
+Finally, copy the files in the `build/` directory to somewhere in your `$PATH`. (details depend on your setup, but typically somewhere like `/usr/local/bin` or `~/bin`)
+
 ## Technical details
 
-Joyful is written in golang, and uses evdev/uinput to manage devices. See `cmd/joyful/main.go` for the program's entry point.
-
-### Build & Install
-
-To build joyful, install `go` via your package manager, then run:
-
-```
-CGO_ENABLED=0 go build -o build/ ./...
-```
-
-Copy the binaries in the `build/` directory to somewhere in your `$PATH`. (details depend on your setup, but typically somewhere like `/usr/local/bin` or `~/bin`)
+Joyful is written in golang, and uses `evdev`/`uinput` to manage devices, `piper` and `oto` for TTS. See [cmd/joyful/main.go](cmd/joyful/main.go) for the program's entry point.
 
 ### Contributing
 

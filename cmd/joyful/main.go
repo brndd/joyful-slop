@@ -2,23 +2,22 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"os"
 	"strings"
 	"sync"
 
+	"github.com/holoplot/go-evdev"
+	flag "github.com/spf13/pflag"
+
 	"git.annabunches.net/annabunches/joyful/internal/config"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
 	"git.annabunches.net/annabunches/joyful/internal/virtualdevice"
-	"github.com/holoplot/go-evdev"
 )
 
-func getConfigDir() string {
-	configFlag := flag.String("config", "~/.config/joyful", "Directory to read configuration from.")
-	flag.Parse()
-	configDir := strings.ReplaceAll(*configFlag, "~", "${HOME}")
+func getConfigDir(dir string) string {
+	configDir := strings.ReplaceAll(dir, "~", "${HOME}")
 	return os.ExpandEnv(configDir)
 }
 
@@ -62,9 +61,20 @@ func initPhysicalDevices(config *config.ConfigParser) map[string]*evdev.InputDev
 }
 
 func main() {
+	// parse command-line
+	var configFlag string
+	flag.BoolVarP(&logger.IsDebugMode, "debug", "d", false, "Output very verbose debug messages.")
+	flag.StringVarP(&configFlag, "config", "c", "~/.config/joyful", "Directory to read configuration from.")
+	ttsOps := addTTSFlags()
+	flag.Parse()
+
 	// parse configs
-	configDir := getConfigDir()
+	configDir := getConfigDir(configFlag)
 	config := readConfig(configDir)
+
+	// initialize TTS
+	tts, err := newTTS(ttsOps)
+	logger.LogIfError(err, "Failed to initialize TTS")
 
 	// Initialize virtual devices with event buffers
 	vBuffersByName, vBuffersByDevice := initVirtualBuffers(config)
@@ -72,10 +82,17 @@ func main() {
 	// Initialize physical devices
 	pDevices := initPhysicalDevices(config)
 
+	// Load the rules
 	rules, eventChannel, cancel, wg := loadRules(config, pDevices, getVirtualDevices(vBuffersByName))
 
 	// initialize the mode variable
 	mode := config.GetModes()[0]
+
+	// initialize TTS phrases for modes
+	for _, m := range config.GetModes() {
+		tts.AddMessage(m)
+		logger.LogDebugf("Added TTS message '%s'", m)
+	}
 
 	fmt.Println("Joyful Running! Press Ctrl+C to quit. Press Enter to reload rules.")
 	if len(config.GetModes()) > 1 {
@@ -83,6 +100,7 @@ func main() {
 	}
 
 	for {
+		lastMode := mode
 		// Get an event (blocks if necessary)
 		channelEvent := <-eventChannel
 
@@ -123,6 +141,10 @@ func main() {
 			config := readConfig(configDir) // reload the config
 			rules, eventChannel, cancel, wg = loadRules(config, pDevices, getVirtualDevices(vBuffersByName))
 			fmt.Println("Config re-loaded. Only rule changes applied. Device and Mode changes require restart.")
+		}
+
+		if lastMode != mode && tts != nil {
+			tts.Say(mode)
 		}
 	}
 }
