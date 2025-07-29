@@ -15,6 +15,7 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
     * Simple 1:1 mappings of buttons and axes: Button1 -> VirtualButtonA
     * Combination mappings: Button1 + Button2 -> VirtualButtonA
     * "Split" axis mapping: map sections of an axis to different outputs using deadzones.
+    * "Combined" axis mapping: map two physical axes to one virtual axis.
     * Axis -> button mapping with optional "proportional" repeat speed (i.e. repeat faster as the axis is engaged further)
     * Axis -> Relative Axis mapping, for converting a joystick axis to mouse movement and scrollwheel events.
 * Configure per-rule configurable deadzones for axes, with multiple ways to specify deadzones.
