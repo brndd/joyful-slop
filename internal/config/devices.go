@@ -66,7 +66,7 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 // This function assumes you have already called Parse() on the config directory.
 //
 // This function should only be called once.
-func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevice {
+func (parser *ConfigParser) ConnectPhysicalDevices(lock bool) map[string]*evdev.InputDevice {
 	deviceMap := make(map[string]*evdev.InputDevice)
 
 	for _, deviceConfig := range parser.config.Devices {
@@ -80,7 +80,12 @@ func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevi
 			continue
 		}
 
-		// TODO: grab exclusive access to device (add config option)
+		if lock {
+			err := device.Grab()
+			if err != nil {
+				logger.LogError(err, "Failed to grab device for exclusive access")
+			}
+		}
 
 		logger.Log(fmt.Sprintf("Connected to '%s' as '%s'", deviceConfig.DeviceName, deviceConfig.Name))
 		deviceMap[deviceConfig.Name] = device
