@@ -67,15 +67,15 @@ cd joyful
 Then, to build and install, run:
 
 ```
-make
-make install
+go build -o build/ ./...
+cp build/* ~/bin/
 ```
 
-By default this will install into `~/bin`. If you want to install Joyful system-wide, you can instead do:
+If you want to install Joyful system-wide, you can instead do:
 
 ```
-make
-sudo make PREFIX=/usr/local install
+go build -o build/ ./...
+sudo cp build/* /usr/local/bin/
 ```
 
 
