@@ -2,8 +2,15 @@ DESTDIR=/
 PREFIX=${HOME}/
 BINDIR=bin/
 
-default:
+.PHONY: default build test install uninstall clean
+
+default: build
+
+build:
 	go build -o build/ ./...
+
+test:
+	go test ./...
 
 install:
 	mkdir -p ${DESTDIR}/${PREFIX}/${BINDIR}
