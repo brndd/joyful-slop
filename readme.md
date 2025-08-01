@@ -32,7 +32,7 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 * Sensitivity Curves.
 * Packaged builds for Arch and possibly other distributions.
 
-## Configuration
+## Configure
 
 Configuration is handled via YAML files in `~/.config/joyful/`. Joyful will read every yaml file in this directory and combine them, so you can split your configuration up however you like. 
 
@@ -40,26 +40,50 @@ A configuration guide and examples can be found in the `docs/` directory.
 
 Configuration can be fairly complicated and repetitive. If anyone wants to create a graphical interface to configure Joyful, we would love to link to it here.
 
-## Usage
+## Install
 
-After building (see below) and writing your configuration (see above), just run `joyful`. You can use `joyful --config <directory>` to specify different configuration profiles; just put all the YAML files for a given profile in a unique directory.
+If you are on Arch or an Arch-based distro, you can get the latest Joyful release from the AUR:
 
-Pressing `<enter>` in the running terminal window will reload the `rules` section of your config files, so you can make changes to your rules without restarting the application. Applying any changes to `devices` or `modes` requires exiting and re-launching the program.
+```
+yay -S joyful
+```
 
-## Build & Install
+### Manual Install
 
-To build joyful, first use your distribution's package manager to install the following packages:
+To build joyful manually, first use your distribution's package manager to install the following dependencies:
+
 * `go`
+* `make`
 * `alsa-lib` - this may be `libasound2-dev` or `libasound2-devel` depending on your distribution
 * `espeak-ng` - if you want text-to-speech to announce mode changes
 
-Then, run:
+Then, clone this repository, e.g.:
 
 ```
-go build -o build/ ./...
+git clone https://git.annabunches.net/anna/joyful.git
+cd joyful
 ```
 
-Finally, copy the files in the `build/` directory to somewhere in your `$PATH`. (details depend on your setup, but typically somewhere like `/usr/local/bin` or `~/bin`)
+Then, to build and install, run:
+
+```
+make
+make install
+```
+
+By default this will install into `~/bin`. If you want to install Joyful system-wide, you can instead do:
+
+```
+make
+sudo make PREFIX=/usr/local install
+```
+
+
+## Usage
+
+After installing Joyful and writing your configuration (see above), run `joyful`. You can use `joyful --config <directory>` to specify different configuration profiles; just put all the YAML files for a given profile in a unique directory.
+
+Pressing `<enter>` in the running terminal window will reload the `rules` section of your config files, so you can make changes to your rules without restarting the application. Applying any changes to `devices` or `modes` requires exiting and re-launching the program.
 
 ## Technical details
 
