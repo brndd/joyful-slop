@@ -2,7 +2,7 @@
 
 Configuration is divided into three sections: `devices`, `modes`, and `rules`. Each yaml file can have any number of these sections; joyful will combine the configuration from all files at runtime.
 
-### Device configuration
+## Device configuration
 
 Each entry in `devices` must have a couple of parameters:
 
@@ -15,16 +15,18 @@ Each entry in `devices` must have a couple of parameters:
 
 `virtual` devices can additionally define these parameters:
 
+* `preset` - Can be `joystick`, `gamepad`, `mouse`, or `keyboard`, and will configure the virtual device to look like and emit an appropriate set of outputs based on the name. For exactly which axes and buttons are defined for each type, see the `Capabilities` values in [internal/config/variables.go](internal/config/variables.go).
 * `buttons` or `num_buttons` - Either a list of explicit buttons or a number of buttons to create. (max 74 buttons) Linux-native games may not recognize all buttons created by Joyful.
 * `axes` or `num_axes` - An explicit list of `ABS_` axes or a number to create.
 * `relative_axes` or `num_relative_axes` - As above, but for `REL_` axes.
 
 A couple of additional notes on virtual devices:
 
-* For all 3 of the above options, an explicit list will override the `num_` parameters if both are present.
-* Some environments will only register mouse events if the device *only* supports mouse-like events, so it can be useful to isolate your `relative_axes` to their own virtual device and explicitly define the axes.
+* Users are encouraged to use the `preset` options whenever possible. They have the highest probability of working the way you expect. If you need to output to multiple types of device, the best approach is to create multiple virtual devices.
+* For all 3 of the above options, there is a priority order. If you specify a `preset`, it will be used ignoring any other settings. An explicit list will override the corresponding `num_` parameter.
+* Some environments/applications are prescriptive about what combinations make sense; for example, they will only register mouse events if the device *only* supports mouse-like events. The `presets` attempt to take this into account. If you are defining capabilities manually and attempt to mix and match button codes, you may also run into this problem.
 
-### Rules configuration
+## Rules configuration
 
 All `rules` must have a `type` parameter. Valid values for this parameter are:
 

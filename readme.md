@@ -18,6 +18,7 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
     * "Combined" axis mapping: map two physical axes to one virtual axis.
     * Axis -> button mapping with optional "proportional" repeat speed (i.e. repeat faster as the axis is engaged further)
     * Axis -> Relative Axis mapping, for converting a joystick axis to mouse movement and scrollwheel events.
+* Define keyboard, mouse, and gamepad outputs in addition to joysticks.
 * Configure per-rule configurable deadzones for axes, with multiple ways to specify deadzones.
 * Define multiple modes with per-mode behavior.
     * Text-to-speech engine that announces the current mode when it changes.
@@ -26,10 +27,9 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 
 * Macros - have a single input produce a sequence of button presses with configurable pauses.
 * Sequence combos - Button1, Button2, Button3 -> VirtualButtonA
-* Output keyboard button presses
 * Hat support
 * HIDRAW support for more button options.
-* Sensitivity Curves.
+* Sensitivity Curves?
 * Packaged builds for Arch and possibly other distributions.
 
 ## Configure
@@ -87,10 +87,10 @@ Pressing `<enter>` in the running terminal window will reload the `rules` sectio
 
 ## Technical details
 
-Joyful is written in golang, and uses `evdev`/`uinput` to manage devices, `piper` and `oto` for TTS. See [cmd/joyful/main.go](cmd/joyful/main.go) for the program's entry point.
+Joyful is written in golang, and uses `evdev`/`uinput` to manage devices and `espeak-ng` for TTS. See [cmd/joyful/main.go](cmd/joyful/main.go) for the program's entry point.
+
+This was originally going to be a Rust project, but the author's Rust skills weren't quite up to the task yet. Please look forward to the inevitable Rust rewrite.
 
 ### Contributing
 
-Send patches and questions to [annabunches@gmail.com](mailto:annabunches@gmail.com). Make sure the subject of your email starts with `[Joyful]`.
-
-If enough people show an interest in contributing, I'll consider mirroring the repository on Github.
+Issues and pull requests should be made on the [Codeberg mirror](https://codeberg.org/annabunches/joyful).

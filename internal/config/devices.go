@@ -23,10 +23,25 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 		}
 
 		name := fmt.Sprintf("joyful-%s", deviceConfig.Name)
-		capabilities := map[evdev.EvType][]evdev.EvCode{
-			evdev.EV_KEY: makeButtons(deviceConfig.NumButtons, deviceConfig.Buttons),
-			evdev.EV_ABS: makeAxes(deviceConfig.NumAxes, deviceConfig.Axes),
-			evdev.EV_REL: makeRelativeAxes(deviceConfig.NumRelativeAxes, deviceConfig.RelativeAxes),
+
+		var capabilities map[evdev.EvType][]evdev.EvCode
+
+		// todo: add tests for presets
+		switch deviceConfig.Preset {
+		case DevicePresetGamepad:
+			capabilities = CapabilitiesPresetGamepad
+		case DevicePresetKeyboard:
+			capabilities = CapabilitiesPresetKeyboard
+		case DevicePresetJoystick:
+			capabilities = CapabilitiesPresetJoystick
+		case DevicePresetMouse:
+			capabilities = CapabilitiesPresetMouse
+		default:
+			capabilities = map[evdev.EvType][]evdev.EvCode{
+				evdev.EV_KEY: makeButtons(deviceConfig.NumButtons, deviceConfig.Buttons),
+				evdev.EV_ABS: makeAxes(deviceConfig.NumAxes, deviceConfig.Axes),
+				evdev.EV_REL: makeRelativeAxes(deviceConfig.NumRelativeAxes, deviceConfig.RelativeAxes),
+			}
 		}
 
 		device, err := evdev.CreateDevice(
@@ -60,13 +75,12 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 }
 
 // ConnectPhysicalDevices will create InputDevices corresponding to any registered
-// devices with type = physical. It will also attempt to acquire exclusive access
-// to those devices, to prevent the same inputs from being read on multiple devices.
+// devices with type = physical.
 //
 // This function assumes you have already called Parse() on the config directory.
 //
 // This function should only be called once.
-func (parser *ConfigParser) ConnectPhysicalDevices(lock bool) map[string]*evdev.InputDevice {
+func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevice {
 	deviceMap := make(map[string]*evdev.InputDevice)
 
 	for _, deviceConfig := range parser.config.Devices {
@@ -80,7 +94,8 @@ func (parser *ConfigParser) ConnectPhysicalDevices(lock bool) map[string]*evdev.
 			continue
 		}
 
-		if lock {
+		if deviceConfig.Lock {
+			logger.LogDebugf("Locking device '%s'", deviceConfig.DeviceName)
 			err := device.Grab()
 			if err != nil {
 				logger.LogError(err, "Failed to grab device for exclusive access")

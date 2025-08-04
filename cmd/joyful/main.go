@@ -52,8 +52,8 @@ func getVirtualDevices(buffers map[string]*virtualdevice.EventBuffer) map[string
 	return devices
 }
 
-func initPhysicalDevices(config *config.ConfigParser, lock bool) map[string]*evdev.InputDevice {
-	pDeviceMap := config.ConnectPhysicalDevices(lock)
+func initPhysicalDevices(config *config.ConfigParser) map[string]*evdev.InputDevice {
+	pDeviceMap := config.ConnectPhysicalDevices()
 	if len(pDeviceMap) == 0 {
 		logger.Log("Warning: no physical devices found in configuration. No rules will work.")
 	}
@@ -63,9 +63,7 @@ func initPhysicalDevices(config *config.ConfigParser, lock bool) map[string]*evd
 func main() {
 	// parse command-line
 	var configFlag string
-	var noLockFlag bool
 	flag.BoolVarP(&logger.IsDebugMode, "debug", "d", false, "Output very verbose debug messages.")
-	flag.BoolVar(&noLockFlag, "no-lock", false, "Disable locking the physical devices for exclusive reading.")
 	flag.StringVarP(&configFlag, "config", "c", "~/.config/joyful", "Directory to read configuration from.")
 	ttsOps := addTTSFlags()
 	flag.Parse()
@@ -82,7 +80,7 @@ func main() {
 	vBuffersByName, vBuffersByDevice := initVirtualBuffers(config)
 
 	// Initialize physical devices
-	pDevices := initPhysicalDevices(config, !noLockFlag)
+	pDevices := initPhysicalDevices(config)
 
 	// Load the rules
 	rules, eventChannel, cancel, wg := loadRules(config, pDevices, getVirtualDevices(vBuffersByName))

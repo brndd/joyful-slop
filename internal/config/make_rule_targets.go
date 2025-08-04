@@ -14,7 +14,7 @@ func makeRuleTargetButton(targetConfig RuleTargetConfig, devs map[string]Device)
 		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
 	}
 
-	eventCode, err := parseCode(targetConfig.Button, "BTN")
+	eventCode, err := parseCodeButton(targetConfig.Button)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func makeRuleTargetAxis(targetConfig RuleTargetConfig, devs map[string]Device) (
 		return nil, errors.New("deadzone_end must be greater than deadzone_start")
 	}
 
-	eventCode, err := parseCode(targetConfig.Axis, "ABS")
+	eventCode, err := parseCode(targetConfig.Axis, CodePrefixAxis)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func makeRuleTargetRelaxis(targetConfig RuleTargetConfig, devs map[string]Device
 		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
 	}
 
-	eventCode, err := parseCode(targetConfig.Axis, "REL")
+	eventCode, err := parseCode(targetConfig.Axis, CodePrefixRelaxis)
 	if err != nil {
 		return nil, err
 	}

@@ -1,19 +1,7 @@
 devices:
   - name: primary
     type: virtual
-    num_axes: 6
-    buttons:
-      - BTN_EAST
-      - BTN_SOUTH
-      - BTN_NORTH
-      - BTN_WEST
-      - BTN_TL
-      - BTN_TR
-      - BTN_SELECT
-      - BTN_START
-      - BTN_MODE
-      - BTN_THUMBL
-      - BTN_THUMBR
+    preset: gamepad
   - name: right-stick
     type: physical
     device_name: VIRPIL Controls 20220407 R-VPC Stick MT-50CM2

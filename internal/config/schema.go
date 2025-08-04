@@ -20,12 +20,14 @@ type DeviceConfig struct {
 	Type            string   `yaml:"type"`
 	DeviceName      string   `yaml:"device_name,omitempty"`
 	Uuid            string   `yaml:"uuid,omitempty"`
+	Preset          string   `yaml:"preset,omitempty"`
 	NumButtons      int      `yaml:"num_buttons,omitempty"`
 	NumAxes         int      `yaml:"num_axes,omitempty"`
 	NumRelativeAxes int      `yaml:"num_rel_axes"`
 	Buttons         []string `yaml:"buttons,omitempty"`
 	Axes            []string `yaml:"axes,omitempty"`
 	RelativeAxes    []string `yaml:"rel_axes,omitempty"`
+	Lock            bool     `yaml:"lock,omitempty"`
 }
 
 type RuleConfig struct {
@@ -53,4 +55,45 @@ type RuleTargetConfig struct {
 	DeadzoneEnd         int32    `yaml:"deadzone_end,omitempty"`
 	Inverted            bool     `yaml:"inverted,omitempty"`
 	Modes               []string `yaml:"modes,omitempty"`
+}
+
+// TODO: custom yaml unmarshaling is obtuse; do we really need to do all of this work
+// just to set a single default value?
+func (dc *DeviceConfig) UnmarshalYAML(unmarshal func(data interface{}) error) error {
+	var raw struct {
+		Name            string
+		Type            string
+		DeviceName      string `yaml:"device_name"`
+		Uuid            string
+		Preset          string
+		NumButtons      int `yaml:"num_buttons"`
+		NumAxes         int `yaml:"num_axes"`
+		NumRelativeAxes int `yaml:"num_rel_axes"`
+		Buttons         []string
+		Axes            []string
+		RelativeAxes    []string `yaml:"relative_axes"`
+		Lock            bool     `yaml:"lock,omitempty"`
+	}
+	raw.Lock = true
+
+	err := unmarshal(&raw)
+	if err != nil {
+		return err
+	}
+
+	*dc = DeviceConfig{
+		Name:            raw.Name,
+		Type:            raw.Type,
+		DeviceName:      raw.DeviceName,
+		Uuid:            raw.Uuid,
+		Preset:          raw.Preset,
+		NumButtons:      raw.NumButtons,
+		NumAxes:         raw.NumAxes,
+		NumRelativeAxes: raw.NumRelativeAxes,
+		Buttons:         raw.Buttons,
+		Axes:            raw.Axes,
+		RelativeAxes:    raw.RelativeAxes,
+		Lock:            raw.Lock,
+	}
+	return nil
 }

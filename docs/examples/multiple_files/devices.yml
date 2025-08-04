@@ -1,18 +1,13 @@
 devices:
   - name: primary
     type: virtual
-    num_buttons: 74
-    num_axes: 8
+    preset: joystick
   - name: secondary
     type: virtual
-    num_buttons: 74
-    num_axes: 3
+    preset: joystick
   - name: mouse
     type: virtual
-    num_buttons: 0
-    num_axes: 0
-    rel_axes:
-      - REL_WHEEL
+    preset: mouse
   - name: right-stick
     type: physical
     device_name: VIRPIL Controls 20220407 R-VPC Stick MT-50CM2

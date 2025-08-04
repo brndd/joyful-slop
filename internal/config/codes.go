@@ -8,13 +8,23 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
+func parseCodeButton(code string) (evdev.EvCode, error) {
+	prefix := CodePrefixButton
+
+	if strings.HasPrefix(code, CodePrefixKey+"_") {
+		prefix = CodePrefixKey
+	}
+
+	return parseCode(code, prefix)
+}
+
 func parseCode(code, prefix string) (evdev.EvCode, error) {
 	code = strings.ToUpper(code)
 
 	var codeLookup map[string]evdev.EvCode
 
 	switch prefix {
-	case CodePrefixButton:
+	case CodePrefixButton, CodePrefixKey:
 		codeLookup = evdev.KEYFromString
 	case CodePrefixAxis:
 		codeLookup = evdev.ABSFromString
