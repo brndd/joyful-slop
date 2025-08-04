@@ -4,18 +4,19 @@ Configuration is divided into three sections: `devices`, `modes`, and `rules`. E
 
 ## Device configuration
 
-Each entry in `devices` must have a couple of parameters:
+Each entry in `devices` must have these parameters:
 
 * `name` - This is an identifier that your rules will use to refer to the device. It is recommended to avoid spaces or special characters.
-* `type` - Should be `physical` for an input device, and `virtual` for an output device.
+* `type` - 'physical' for an input device, 'virtual' for an output device.
 
-`physical` devices must additionally define these parameters:
+`physical` devices have these additional parameters:
 
-* `device_name` - The name of the device as reported by the included `evinfo` command. If your device name ends with a space, use quotation marks (`""`) around the name.
+* `device_name` (required) - The name of the device as reported by the included `evinfo` command. If your device name ends with a space, use quotation marks (`""`) around the name.
+* `lock` - If set to 'true', the device will be locked for exclusive access. This means that your game will not see any events from the device, so you'll need to make sure you map every button you want to use. Setting this to 'false' might be useful if you're just mapping a few joystick buttons to keyboard buttons. This value defaults to 'true'.
 
-`virtual` devices can additionally define these parameters:
+`virtual` devices have these additional parameters:
 
-* `preset` - Can be `joystick`, `gamepad`, `mouse`, or `keyboard`, and will configure the virtual device to look like and emit an appropriate set of outputs based on the name. For exactly which axes and buttons are defined for each type, see the `Capabilities` values in [internal/config/variables.go](internal/config/variables.go).
+* `preset` - Can be 'joystick', 'gamepad', 'mouse', or 'keyboard', and will configure the virtual device to look like and emit an appropriate set of outputs based on the name. For exactly which axes and buttons are defined for each type, see the `Capabilities` values in [internal/config/variables.go](internal/config/variables.go).
 * `buttons` or `num_buttons` - Either a list of explicit buttons or a number of buttons to create. (max 74 buttons) Linux-native games may not recognize all buttons created by Joyful.
 * `axes` or `num_axes` - An explicit list of `ABS_` axes or a number to create.
 * `relative_axes` or `num_relative_axes` - As above, but for `REL_` axes.
