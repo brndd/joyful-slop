@@ -43,6 +43,32 @@ func printDevice(devPath evdev.InputPath) {
 		return
 	}
 
+	// Get metadata
+	// metadata := struct {
+	// 	uuid    string
+	// 	vendor  string
+	// 	product string
+	// 	version string
+	// }{}
+
+	// uuid, err := device.UniqueID()
+	// if err != nil {
+	// 	metadata.uuid = "unknown"
+	// } else {
+	// 	metadata.uuid = uuid
+	// }
+
+	// inputId, err := device.InputID()
+	// if err != nil {
+	// 	metadata.vendor = "unknown"
+	// 	metadata.product = "unknown"
+	// 	metadata.version = "unknown"
+	// } else {
+	// 	metadata.vendor = "0x" + strconv.FormatUint(uint64(inputId.Vendor), 16)
+	// 	metadata.product = "0x" + strconv.FormatUint(uint64(inputId.Product), 16)
+	// 	metadata.version = strconv.FormatUint(uint64(inputId.Version), 10)
+	// }
+
 	// Get axis info
 	var axisOutputs []string
 	absInfos, err := device.AbsInfos()
@@ -56,8 +82,13 @@ func printDevice(devPath evdev.InputPath) {
 		}
 	}
 
+	// Print everything
 	fmt.Printf("%s:\n", devPath.Path)
-	fmt.Printf("\tName: '%s'\n", devPath.Name)
+	fmt.Printf("\tName:\t\t'%s'\n", devPath.Name)
+	// fmt.Printf("\tUUID:\t\t'%s'\n", metadata.uuid)
+	// fmt.Printf("\tVendor:\t\t'%s'\n", metadata.vendor)
+	// fmt.Printf("\tProduct:\t'%s'\n", metadata.product)
+	// fmt.Printf("\tVersion:\t'%s'\n", metadata.version)
 	if len(axisOutputs) > 0 {
 		fmt.Println("\tAxes:")
 		for _, str := range axisOutputs {
@@ -76,7 +107,7 @@ func printDeviceQuiet(devPath evdev.InputPath) {
 		return
 	}
 
-	fmt.Printf("'%s'\n", devPath.Name)
+	fmt.Printf("'%s': '%s'\n", devPath.Path, devPath.Name)
 }
 
 // TODO: it would be nice to be able to specify a device by name or device file and get axis info

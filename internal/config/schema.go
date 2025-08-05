@@ -19,7 +19,7 @@ type DeviceConfig struct {
 	Name            string   `yaml:"name"`
 	Type            string   `yaml:"type"`
 	DeviceName      string   `yaml:"device_name,omitempty"`
-	Uuid            string   `yaml:"uuid,omitempty"`
+	DevicePath      string   `yaml:"device_path,omitempty"`
 	Preset          string   `yaml:"preset,omitempty"`
 	NumButtons      int      `yaml:"num_buttons,omitempty"`
 	NumAxes         int      `yaml:"num_axes,omitempty"`
@@ -64,7 +64,7 @@ func (dc *DeviceConfig) UnmarshalYAML(unmarshal func(data interface{}) error) er
 		Name            string
 		Type            string
 		DeviceName      string `yaml:"device_name"`
-		Uuid            string
+		DevicePath      string `yaml:"device_path"`
 		Preset          string
 		NumButtons      int `yaml:"num_buttons"`
 		NumAxes         int `yaml:"num_axes"`
@@ -85,7 +85,7 @@ func (dc *DeviceConfig) UnmarshalYAML(unmarshal func(data interface{}) error) er
 		Name:            raw.Name,
 		Type:            raw.Type,
 		DeviceName:      raw.DeviceName,
-		Uuid:            raw.Uuid,
+		DevicePath:      raw.DevicePath,
 		Preset:          raw.Preset,
 		NumButtons:      raw.NumButtons,
 		NumAxes:         raw.NumAxes,

@@ -9,10 +9,20 @@ Each entry in `devices` must have these parameters:
 * `name` - This is an identifier that your rules will use to refer to the device. It is recommended to avoid spaces or special characters.
 * `type` - 'physical' for an input device, 'virtual' for an output device.
 
+### Physical Devices
+
 `physical` devices have these additional parameters:
 
-* `device_name` (required) - The name of the device as reported by the included `evinfo` command. If your device name ends with a space, use quotation marks (`""`) around the name.
+* `device_name` - The name of the device as reported by the included `evinfo` command. If your device name ends with a space, use quotation marks (`""`) around the name.
+* `device_path` - If you have multiple devices that report the same name, you can use `device_path` instead of `device_name`. Setting this will cause the device to be opened directly via the device file. 
+    * It is recommended to use the `by-path` symlinks, e.g., `/dev/input/by-path/pci-0000:0d:00.0-usbv2-0:3:1.0-event-joystick`.
+    * Note that this method may be slightly unreliable since these identifiers may change if they are plugged into different USB ports or in the rare case that the USB topology changes (e.g., you add a new USB hub).
+    * On the other hand, this method causes the device to be opened considerably faster, lowering Joyful's startup time substantially. If this is important to you this method may be preferable.
 * `lock` - If set to 'true', the device will be locked for exclusive access. This means that your game will not see any events from the device, so you'll need to make sure you map every button you want to use. Setting this to 'false' might be useful if you're just mapping a few joystick buttons to keyboard buttons. This value defaults to 'true'.
+
+`device_path` is given higher priority than `device_name`; if both are specified, `device_path` will be used.
+
+### Virtual Devices
 
 `virtual` devices have these additional parameters:
 

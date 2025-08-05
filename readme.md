@@ -48,6 +48,8 @@ If you are on Arch or an Arch-based distro, you can get the latest Joyful releas
 yay -S joyful
 ```
 
+You may also need to add the user(s) who will be running joyful to the `input` group.
+
 ### Manual Install
 
 To build joyful manually, first use your distribution's package manager to install the following dependencies:

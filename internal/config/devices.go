@@ -88,21 +88,32 @@ func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevi
 			continue
 		}
 
-		device, err := evdev.OpenByName(deviceConfig.DeviceName)
+		var infoName string
+		var device *evdev.InputDevice
+		var err error
+
+		if deviceConfig.DevicePath != "" {
+			infoName = deviceConfig.DevicePath
+			device, err = evdev.Open(deviceConfig.DevicePath)
+		} else {
+			infoName = deviceConfig.DeviceName
+			device, err = evdev.OpenByName(deviceConfig.DeviceName)
+		}
+
 		if err != nil {
-			logger.LogError(err, "Failed to open physical device, skipping. Confirm the device name with 'evlist'. Watch out for spaces.")
+			logger.LogError(err, "Failed to open physical device, skipping. Confirm the device name or path with 'evinfo'")
 			continue
 		}
 
 		if deviceConfig.Lock {
-			logger.LogDebugf("Locking device '%s'", deviceConfig.DeviceName)
+			logger.LogDebugf("Locking device '%s'", infoName)
 			err := device.Grab()
 			if err != nil {
 				logger.LogError(err, "Failed to grab device for exclusive access")
 			}
 		}
 
-		logger.Log(fmt.Sprintf("Connected to '%s' as '%s'", deviceConfig.DeviceName, deviceConfig.Name))
+		logger.Log(fmt.Sprintf("Connected to '%s' as '%s'", infoName, deviceConfig.Name))
 		deviceMap[deviceConfig.Name] = device
 	}
 
