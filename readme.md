@@ -30,7 +30,7 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 * Hat support
 * HIDRAW support for more button options.
 * Sensitivity Curves?
-* Packaged builds for Arch and possibly other distributions.
+* Packaged builds non-Arch distributions.
 
 ## Configure
 
