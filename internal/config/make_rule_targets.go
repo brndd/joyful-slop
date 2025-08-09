@@ -8,7 +8,7 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
-func makeRuleTargetButton(targetConfig RuleTargetConfig, devs map[string]Device) (*mappingrules.RuleTargetButton, error) {
+func makeRuleTargetButton(targetConfig RuleTargetConfigButton, devs map[string]Device) (*mappingrules.RuleTargetButton, error) {
 	device, ok := devs[targetConfig.Device]
 	if !ok {
 		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
@@ -27,7 +27,7 @@ func makeRuleTargetButton(targetConfig RuleTargetConfig, devs map[string]Device)
 	)
 }
 
-func makeRuleTargetAxis(targetConfig RuleTargetConfig, devs map[string]Device) (*mappingrules.RuleTargetAxis, error) {
+func makeRuleTargetAxis(targetConfig RuleTargetConfigAxis, devs map[string]Device) (*mappingrules.RuleTargetAxis, error) {
 	device, ok := devs[targetConfig.Device]
 	if !ok {
 		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
@@ -57,7 +57,7 @@ func makeRuleTargetAxis(targetConfig RuleTargetConfig, devs map[string]Device) (
 	)
 }
 
-func makeRuleTargetRelaxis(targetConfig RuleTargetConfig, devs map[string]Device) (*mappingrules.RuleTargetRelaxis, error) {
+func makeRuleTargetRelaxis(targetConfig RuleTargetConfigRelaxis, devs map[string]Device) (*mappingrules.RuleTargetRelaxis, error) {
 	device, ok := devs[targetConfig.Device]
 	if !ok {
 		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
@@ -72,11 +72,10 @@ func makeRuleTargetRelaxis(targetConfig RuleTargetConfig, devs map[string]Device
 		targetConfig.Device,
 		device,
 		eventCode,
-		targetConfig.Inverted,
 	)
 }
 
-func makeRuleTargetModeSelect(targetConfig RuleTargetConfig, allModes []string) (*mappingrules.RuleTargetModeSelect, error) {
+func makeRuleTargetModeSelect(targetConfig RuleTargetConfigModeSelect, allModes []string) (*mappingrules.RuleTargetModeSelect, error) {
 	if ok := validateModes(targetConfig.Modes, allModes); !ok {
 		return nil, errors.New("undefined mode in mode select list")
 	}
@@ -92,7 +91,7 @@ func hasError(_ any, err error) bool {
 // calculateDeadzones produces the deadzone start and end values in absolute terms
 // TODO: on the one hand, this logic feels betten encapsulated in mappingrules. On the other hand,
 // passing even more parameters to NewRuleTargetAxis feels terrible
-func calculateDeadzones(targetConfig RuleTargetConfig, device Device, axis evdev.EvCode) (int32, int32, error) {
+func calculateDeadzones(targetConfig RuleTargetConfigAxis, device Device, axis evdev.EvCode) (int32, int32, error) {
 
 	var deadzoneStart, deadzoneEnd int32
 	deadzoneStart = 0

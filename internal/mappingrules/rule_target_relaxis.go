@@ -8,19 +8,16 @@ type RuleTargetRelaxis struct {
 	DeviceName string
 	Device     Device
 	Axis       evdev.EvCode
-	Inverted   bool
 }
 
 func NewRuleTargetRelaxis(device_name string,
 	device Device,
-	axis evdev.EvCode,
-	inverted bool) (*RuleTargetRelaxis, error) {
+	axis evdev.EvCode) (*RuleTargetRelaxis, error) {
 
 	return &RuleTargetRelaxis{
 		DeviceName: device_name,
 		Device:     device,
 		Axis:       axis,
-		Inverted:   inverted,
 	}, nil
 }
 

@@ -8,19 +8,21 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
-// CreateVirtualDevices will register any configured devices with type = virtual
+// InitVirtualDevices will register any configured devices with type = virtual
 // using /dev/uinput, and return a map of those devices.
 //
-// This function assumes you have already called Parse() on the config directory.
+// This function assumes Parse() has been called.
 //
-// This function should only be called once, unless you want to create duplicate devices for some reason.
-func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice {
+// This function should only be called once, unless we want to create duplicate devices for some reason.
+func (parser *ConfigParser) InitVirtualDevices() map[string]*evdev.InputDevice {
 	deviceMap := make(map[string]*evdev.InputDevice)
 
 	for _, deviceConfig := range parser.config.Devices {
 		if strings.ToLower(deviceConfig.Type) != DeviceTypeVirtual {
 			continue
 		}
+
+		deviceConfig := deviceConfig.Config.(DeviceConfigVirtual)
 
 		name := fmt.Sprintf("joyful-%s", deviceConfig.Name)
 
@@ -74,19 +76,21 @@ func (parser *ConfigParser) CreateVirtualDevices() map[string]*evdev.InputDevice
 	return deviceMap
 }
 
-// ConnectPhysicalDevices will create InputDevices corresponding to any registered
+// InitPhysicalDevices will create InputDevices corresponding to any registered
 // devices with type = physical.
 //
-// This function assumes you have already called Parse() on the config directory.
+// This function assumes Parse() has been called.
 //
 // This function should only be called once.
-func (parser *ConfigParser) ConnectPhysicalDevices() map[string]*evdev.InputDevice {
+func (parser *ConfigParser) InitPhysicalDevices() map[string]*evdev.InputDevice {
 	deviceMap := make(map[string]*evdev.InputDevice)
 
 	for _, deviceConfig := range parser.config.Devices {
 		if strings.ToLower(deviceConfig.Type) != DeviceTypePhysical {
 			continue
 		}
+
+		deviceConfig := deviceConfig.Config.(DeviceConfigPhysical)
 
 		var infoName string
 		var device *evdev.InputDevice

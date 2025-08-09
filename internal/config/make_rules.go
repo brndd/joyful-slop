@@ -14,7 +14,7 @@ import (
 // This would speed up rule matching by only checking relevant rules for a given input event.
 // We could take this further and make it a map[<struct of *inputdevice, type, and code>][]rule
 // For very large rule-bases this may be helpful for staying performant.
-func (parser *ConfigParser) BuildRules(pInputDevs map[string]*evdev.InputDevice, vInputDevs map[string]*evdev.InputDevice) []mappingrules.MappingRule {
+func (parser *ConfigParser) InitRules(pInputDevs map[string]*evdev.InputDevice, vInputDevs map[string]*evdev.InputDevice) []mappingrules.MappingRule {
 	rules := make([]mappingrules.MappingRule, 0)
 	modes := parser.GetModes()
 
@@ -42,21 +42,21 @@ func (parser *ConfigParser) BuildRules(pInputDevs map[string]*evdev.InputDevice,
 
 		switch strings.ToLower(ruleConfig.Type) {
 		case RuleTypeButton:
-			newRule, err = makeMappingRuleButton(ruleConfig, pDevs, vDevs, base)
+			newRule, err = makeMappingRuleButton(ruleConfig.Config.(RuleConfigButton), pDevs, vDevs, base)
 		case RuleTypeButtonCombo:
-			newRule, err = makeMappingRuleCombo(ruleConfig, pDevs, vDevs, base)
-		case RuleTypeLatched:
-			newRule, err = makeMappingRuleLatched(ruleConfig, pDevs, vDevs, base)
+			newRule, err = makeMappingRuleCombo(ruleConfig.Config.(RuleConfigButtonCombo), pDevs, vDevs, base)
+		case RuleTypeButtonLatched:
+			newRule, err = makeMappingRuleLatched(ruleConfig.Config.(RuleConfigButtonLatched), pDevs, vDevs, base)
 		case RuleTypeAxis:
-			newRule, err = makeMappingRuleAxis(ruleConfig, pDevs, vDevs, base)
+			newRule, err = makeMappingRuleAxis(ruleConfig.Config.(RuleConfigAxis), pDevs, vDevs, base)
 		case RuleTypeAxisCombined:
-			newRule, err = makeMappingRuleAxisCombined(ruleConfig, pDevs, vDevs, base)
+			newRule, err = makeMappingRuleAxisCombined(ruleConfig.Config.(RuleConfigAxisCombined), pDevs, vDevs, base)
 		case RuleTypeAxisToButton:
-			newRule, err = makeMappingRuleAxisToButton(ruleConfig, pDevs, vDevs, base)
+			newRule, err = makeMappingRuleAxisToButton(ruleConfig.Config.(RuleConfigAxisToButton), pDevs, vDevs, base)
 		case RuleTypeAxisToRelaxis:
-			newRule, err = makeMappingRuleAxisToRelaxis(ruleConfig, pDevs, vDevs, base)
+			newRule, err = makeMappingRuleAxisToRelaxis(ruleConfig.Config.(RuleConfigAxisToRelaxis), pDevs, vDevs, base)
 		case RuleTypeModeSelect:
-			newRule, err = makeMappingRuleModeSelect(ruleConfig, pDevs, modes, base)
+			newRule, err = makeMappingRuleModeSelect(ruleConfig.Config.(RuleConfigModeSelect), pDevs, modes, base)
 		default:
 			err = fmt.Errorf("bad rule type '%s' for rule '%s'", ruleConfig.Type, ruleConfig.Name)
 		}
@@ -72,7 +72,14 @@ func (parser *ConfigParser) BuildRules(pInputDevs map[string]*evdev.InputDevice,
 	return rules
 }
 
-func makeMappingRuleButton(ruleConfig RuleConfig,
+// TODO: how much of these functions could we fold into the unmarshaling logic itself? The main problem
+// is that we don't have access to the device maps in those functions... could we set device names
+// as stand-ins and do a post-processing pass that *just* handles device linking and possibly mode
+// checking?
+//
+// In other words - can we unmarshal the config directly into our target structs and remove most of
+// this library?
+func makeMappingRuleButton(ruleConfig RuleConfigButton,
 	pDevs map[string]Device,
 	vDevs map[string]Device,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleButton, error) {
@@ -90,7 +97,7 @@ func makeMappingRuleButton(ruleConfig RuleConfig,
 	return mappingrules.NewMappingRuleButton(base, input, output), nil
 }
 
-func makeMappingRuleCombo(ruleConfig RuleConfig,
+func makeMappingRuleCombo(ruleConfig RuleConfigButtonCombo,
 	pDevs map[string]Device,
 	vDevs map[string]Device,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleButtonCombo, error) {
@@ -112,7 +119,7 @@ func makeMappingRuleCombo(ruleConfig RuleConfig,
 	return mappingrules.NewMappingRuleButtonCombo(base, inputs, output), nil
 }
 
-func makeMappingRuleLatched(ruleConfig RuleConfig,
+func makeMappingRuleLatched(ruleConfig RuleConfigButtonLatched,
 	pDevs map[string]Device,
 	vDevs map[string]Device,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleButtonLatched, error) {
@@ -130,7 +137,7 @@ func makeMappingRuleLatched(ruleConfig RuleConfig,
 	return mappingrules.NewMappingRuleButtonLatched(base, input, output), nil
 }
 
-func makeMappingRuleAxis(ruleConfig RuleConfig,
+func makeMappingRuleAxis(ruleConfig RuleConfigAxis,
 	pDevs map[string]Device,
 	vDevs map[string]Device,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxis, error) {
@@ -148,7 +155,7 @@ func makeMappingRuleAxis(ruleConfig RuleConfig,
 	return mappingrules.NewMappingRuleAxis(base, input, output), nil
 }
 
-func makeMappingRuleAxisCombined(ruleConfig RuleConfig,
+func makeMappingRuleAxisCombined(ruleConfig RuleConfigAxisCombined,
 	pDevs map[string]Device,
 	vDevs map[string]Device,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxisCombined, error) {
@@ -171,7 +178,7 @@ func makeMappingRuleAxisCombined(ruleConfig RuleConfig,
 	return mappingrules.NewMappingRuleAxisCombined(base, inputLower, inputUpper, output), nil
 }
 
-func makeMappingRuleAxisToButton(ruleConfig RuleConfig,
+func makeMappingRuleAxisToButton(ruleConfig RuleConfigAxisToButton,
 	pDevs map[string]Device,
 	vDevs map[string]Device,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxisToButton, error) {
@@ -189,7 +196,7 @@ func makeMappingRuleAxisToButton(ruleConfig RuleConfig,
 	return mappingrules.NewMappingRuleAxisToButton(base, input, output, ruleConfig.RepeatRateMin, ruleConfig.RepeatRateMax), nil
 }
 
-func makeMappingRuleAxisToRelaxis(ruleConfig RuleConfig,
+func makeMappingRuleAxisToRelaxis(ruleConfig RuleConfigAxisToRelaxis,
 	pDevs map[string]Device,
 	vDevs map[string]Device,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleAxisToRelaxis, error) {
@@ -211,7 +218,7 @@ func makeMappingRuleAxisToRelaxis(ruleConfig RuleConfig,
 		ruleConfig.Increment), nil
 }
 
-func makeMappingRuleModeSelect(ruleConfig RuleConfig,
+func makeMappingRuleModeSelect(ruleConfig RuleConfigModeSelect,
 	pDevs map[string]Device,
 	modes []string,
 	base mappingrules.MappingRuleBase) (*mappingrules.MappingRuleModeSelect, error) {

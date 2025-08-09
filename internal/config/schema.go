@@ -1,79 +1,213 @@
 // These types comprise the YAML schema for configuring Joyful.
 // The config files will be combined and then unmarshalled into this
-//
-// TODO: currently the types in here aren't especially strong; each one is
-// decomposed into a different object based on the Type fields. We should implement
-// some sort of delayed unmarshalling technique, for example see ideas at
-// https://stackoverflow.com/questions/70635636/unmarshaling-yaml-into-different-struct-based-off-yaml-field
-// Then we can be more explicit about the interface here.
 
 package config
 
+import (
+	"fmt"
+)
+
 type Config struct {
-	Devices []DeviceConfig `yaml:"devices"`
-	Modes   []string       `yaml:"modes,omitempty"`
-	Rules   []RuleConfig   `yaml:"rules"`
+	Devices []DeviceConfig
+	Modes   []string
+	Rules   []RuleConfig
 }
 
+// These top-level structs use custom unmarshaling to unpack each available sub-type
 type DeviceConfig struct {
-	Name            string   `yaml:"name"`
-	Type            string   `yaml:"type"`
-	DeviceName      string   `yaml:"device_name,omitempty"`
-	DevicePath      string   `yaml:"device_path,omitempty"`
-	Preset          string   `yaml:"preset,omitempty"`
-	NumButtons      int      `yaml:"num_buttons,omitempty"`
-	NumAxes         int      `yaml:"num_axes,omitempty"`
-	NumRelativeAxes int      `yaml:"num_rel_axes"`
-	Buttons         []string `yaml:"buttons,omitempty"`
-	Axes            []string `yaml:"axes,omitempty"`
-	RelativeAxes    []string `yaml:"rel_axes,omitempty"`
-	Lock            bool     `yaml:"lock,omitempty"`
+	Type   string
+	Config interface{}
 }
 
 type RuleConfig struct {
-	Name          string             `yaml:"name,omitempty"`
-	Type          string             `yaml:"type"`
-	Input         RuleTargetConfig   `yaml:"input,omitempty"`
-	InputLower    RuleTargetConfig   `yaml:"input_lower,omitempty"`
-	InputUpper    RuleTargetConfig   `yaml:"input_upper,omitempty"`
-	Inputs        []RuleTargetConfig `yaml:"inputs,omitempty"`
-	Output        RuleTargetConfig   `yaml:"output"`
-	Modes         []string           `yaml:"modes,omitempty"`
-	RepeatRateMin int                `yaml:"repeat_rate_min,omitempty"`
-	RepeatRateMax int                `yaml:"repeat_rate_max,omitempty"`
-	Increment     int                `yaml:"increment,omitempty"`
+	Type   string
+	Name   string
+	Modes  []string
+	Config interface{}
 }
 
-type RuleTargetConfig struct {
-	Device              string   `yaml:"device,omitempty"`
-	Button              string   `yaml:"button,omitempty"`
-	Axis                string   `yaml:"axis,omitempty"`
-	DeadzoneCenter      int32    `yaml:"deadzone_center,omitempty"`
-	DeadzoneSize        int32    `yaml:"deadzone_size,omitempty"`
-	DeadzoneSizePercent int32    `yaml:"deadzone_size_percent,omitempty"`
-	DeadzoneStart       int32    `yaml:"deadzone_start,omitempty"`
-	DeadzoneEnd         int32    `yaml:"deadzone_end,omitempty"`
-	Inverted            bool     `yaml:"inverted,omitempty"`
-	Modes               []string `yaml:"modes,omitempty"`
+type DeviceConfigPhysical struct {
+	Name       string
+	DeviceName string `yaml:"device_name,omitempty"`
+	DevicePath string `yaml:"device_path,omitempty"`
+	Lock       bool
+}
+
+// TODO: configure custom unmarshaling so we can overload Buttons, Axes, and RelativeAxes...
+type DeviceConfigVirtual struct {
+	Name            string
+	Preset          string
+	NumButtons      int `yaml:"num_buttons,omitempty"`
+	NumAxes         int `yaml:"num_axes,omitempty"`
+	NumRelativeAxes int `yaml:"num_rel_axes"`
+	Buttons         []string
+	Axes            []string
+	RelativeAxes    []string `yaml:"rel_axes,omitempty"`
+}
+
+type RuleConfigButton struct {
+	Input  RuleTargetConfigButton
+	Output RuleTargetConfigButton
+}
+
+type RuleConfigButtonCombo struct {
+	Inputs []RuleTargetConfigButton
+	Output RuleTargetConfigButton
+}
+
+type RuleConfigButtonLatched struct {
+	Input  RuleTargetConfigButton
+	Output RuleTargetConfigButton
+}
+
+type RuleConfigAxis struct {
+	Input  RuleTargetConfigAxis
+	Output RuleTargetConfigAxis
+}
+
+type RuleConfigAxisCombined struct {
+	InputLower RuleTargetConfigAxis `yaml:"input_lower,omitempty"`
+	InputUpper RuleTargetConfigAxis `yaml:"input_upper,omitempty"`
+	Output     RuleTargetConfigAxis
+}
+
+type RuleConfigAxisToButton struct {
+	RepeatRateMin int `yaml:"repeat_rate_min,omitempty"`
+	RepeatRateMax int `yaml:"repeat_rate_max,omitempty"`
+	Input         RuleTargetConfigAxis
+	Output        RuleTargetConfigButton
+}
+
+type RuleConfigAxisToRelaxis struct {
+	RepeatRateMin int `yaml:"repeat_rate_min"`
+	RepeatRateMax int `yaml:"repeat_rate_max"`
+	Increment     int
+	Input         RuleTargetConfigAxis
+	Output        RuleTargetConfigRelaxis
+}
+
+type RuleConfigModeSelect struct {
+	Input  RuleTargetConfigButton
+	Output RuleTargetConfigModeSelect
+}
+
+type RuleTargetConfigButton struct {
+	Device   string
+	Button   string
+	Inverted bool
+}
+
+type RuleTargetConfigAxis struct {
+	Device              string
+	Axis                string
+	DeadzoneCenter      int32 `yaml:"deadzone_center,omitempty"`
+	DeadzoneSize        int32 `yaml:"deadzone_size,omitempty"`
+	DeadzoneSizePercent int32 `yaml:"deadzone_size_percent,omitempty"`
+	DeadzoneStart       int32 `yaml:"deadzone_start,omitempty"`
+	DeadzoneEnd         int32 `yaml:"deadzone_end,omitempty"`
+	Inverted            bool
+}
+
+type RuleTargetConfigRelaxis struct {
+	Device string
+	Axis   string
+}
+
+type RuleTargetConfigModeSelect struct {
+	Modes []string
+}
+
+func (dc *DeviceConfig) UnmarshalYAML(unmarshal func(data interface{}) error) error {
+	metaConfig := &struct {
+		Type string
+	}{}
+	err := unmarshal(metaConfig)
+	if err != nil {
+		return err
+	}
+	dc.Type = metaConfig.Type
+
+	err = nil
+	switch metaConfig.Type {
+	case DeviceTypePhysical:
+		config := DeviceConfigPhysical{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case DeviceTypeVirtual:
+		config := DeviceConfigVirtual{}
+		err = unmarshal(&config)
+		dc.Config = config
+	default:
+		err = fmt.Errorf("invalid device type '%s'", dc.Type)
+	}
+	return err
+}
+
+func (dc *RuleConfig) UnmarshalYAML(unmarshal func(data interface{}) error) error {
+	metaConfig := &struct {
+		Type  string
+		Name  string
+		Modes []string
+	}{}
+	err := unmarshal(metaConfig)
+	if err != nil {
+		return err
+	}
+	dc.Type = metaConfig.Type
+	dc.Name = metaConfig.Name
+	dc.Modes = metaConfig.Modes
+
+	switch dc.Type {
+	case RuleTypeButton:
+		config := RuleConfigButton{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case RuleTypeButtonCombo:
+		config := RuleConfigButtonCombo{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case RuleTypeButtonLatched:
+		config := RuleConfigButtonLatched{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case RuleTypeAxis:
+		config := RuleConfigAxis{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case RuleTypeAxisCombined:
+		config := RuleConfigAxisCombined{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case RuleTypeAxisToButton:
+		config := RuleConfigAxisToButton{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case RuleTypeAxisToRelaxis:
+		config := RuleConfigAxisToRelaxis{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case RuleTypeModeSelect:
+		config := RuleConfigModeSelect{}
+		err = unmarshal(&config)
+		dc.Config = config
+	default:
+		err = fmt.Errorf("invalid rule type '%s'", dc.Type)
+	}
+
+	return err
 }
 
 // TODO: custom yaml unmarshaling is obtuse; do we really need to do all of this work
 // just to set a single default value?
-func (dc *DeviceConfig) UnmarshalYAML(unmarshal func(data interface{}) error) error {
+func (dc *DeviceConfigPhysical) UnmarshalYAML(unmarshal func(data interface{}) error) error {
 	var raw struct {
-		Name            string
-		Type            string
-		DeviceName      string `yaml:"device_name"`
-		DevicePath      string `yaml:"device_path"`
-		Preset          string
-		NumButtons      int `yaml:"num_buttons"`
-		NumAxes         int `yaml:"num_axes"`
-		NumRelativeAxes int `yaml:"num_rel_axes"`
-		Buttons         []string
-		Axes            []string
-		RelativeAxes    []string `yaml:"relative_axes"`
-		Lock            bool     `yaml:"lock,omitempty"`
+		Name       string
+		DeviceName string `yaml:"device_name"`
+		DevicePath string `yaml:"device_path"`
+		Lock       bool   `yaml:"lock,omitempty"`
 	}
+
+	// Set non-standard defaults
 	raw.Lock = true
 
 	err := unmarshal(&raw)
@@ -81,19 +215,11 @@ func (dc *DeviceConfig) UnmarshalYAML(unmarshal func(data interface{}) error) er
 		return err
 	}
 
-	*dc = DeviceConfig{
-		Name:            raw.Name,
-		Type:            raw.Type,
-		DeviceName:      raw.DeviceName,
-		DevicePath:      raw.DevicePath,
-		Preset:          raw.Preset,
-		NumButtons:      raw.NumButtons,
-		NumAxes:         raw.NumAxes,
-		NumRelativeAxes: raw.NumRelativeAxes,
-		Buttons:         raw.Buttons,
-		Axes:            raw.Axes,
-		RelativeAxes:    raw.RelativeAxes,
-		Lock:            raw.Lock,
+	*dc = DeviceConfigPhysical{
+		Name:       raw.Name,
+		DeviceName: raw.DeviceName,
+		DevicePath: raw.DevicePath,
+		Lock:       raw.Lock,
 	}
 	return nil
 }

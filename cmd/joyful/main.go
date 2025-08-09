@@ -28,8 +28,11 @@ func readConfig(configDir string) *config.ConfigParser {
 	return parser
 }
 
-func initVirtualBuffers(config *config.ConfigParser) (map[string]*virtualdevice.EventBuffer, map[*evdev.InputDevice]*virtualdevice.EventBuffer) {
-	vDevices := config.CreateVirtualDevices()
+func initVirtualBuffers(config *config.ConfigParser) (map[string]*evdev.InputDevice,
+	map[string]*virtualdevice.EventBuffer,
+	map[*evdev.InputDevice]*virtualdevice.EventBuffer) {
+
+	vDevices := config.InitVirtualDevices()
 	if len(vDevices) == 0 {
 		logger.Log("Warning: no virtual devices found in configuration. No rules will work.")
 	}
@@ -40,20 +43,11 @@ func initVirtualBuffers(config *config.ConfigParser) (map[string]*virtualdevice.
 		vBuffersByName[name] = virtualdevice.NewEventBuffer(device)
 		vBuffersByDevice[device] = vBuffersByName[name]
 	}
-	return vBuffersByName, vBuffersByDevice
-}
-
-// Extracts the evdev devices from a list of virtual buffers and returns them.
-func getVirtualDevices(buffers map[string]*virtualdevice.EventBuffer) map[string]*evdev.InputDevice {
-	devices := make(map[string]*evdev.InputDevice)
-	for name, buffer := range buffers {
-		devices[name] = buffer.Device.(*evdev.InputDevice)
-	}
-	return devices
+	return vDevices, vBuffersByName, vBuffersByDevice
 }
 
 func initPhysicalDevices(config *config.ConfigParser) map[string]*evdev.InputDevice {
-	pDeviceMap := config.ConnectPhysicalDevices()
+	pDeviceMap := config.InitPhysicalDevices()
 	if len(pDeviceMap) == 0 {
 		logger.Log("Warning: no physical devices found in configuration. No rules will work.")
 	}
@@ -77,13 +71,13 @@ func main() {
 	logger.LogIfError(err, "Failed to initialize TTS")
 
 	// Initialize virtual devices with event buffers
-	vBuffersByName, vBuffersByDevice := initVirtualBuffers(config)
+	vDevicesByName, vBuffersByName, vBuffersByDevice := initVirtualBuffers(config)
 
 	// Initialize physical devices
 	pDevices := initPhysicalDevices(config)
 
 	// Load the rules
-	rules, eventChannel, cancel, wg := loadRules(config, pDevices, getVirtualDevices(vBuffersByName))
+	rules, eventChannel, cancel, wg := loadRules(config, pDevices, vDevicesByName)
 
 	// initialize the mode variable
 	mode := config.GetModes()[0]
@@ -139,7 +133,7 @@ func main() {
 			wg.Wait()
 			fmt.Println("Listeners exited. Parsing config.")
 			config := readConfig(configDir) // reload the config
-			rules, eventChannel, cancel, wg = loadRules(config, pDevices, getVirtualDevices(vBuffersByName))
+			rules, eventChannel, cancel, wg = loadRules(config, pDevices, vDevicesByName)
 			fmt.Println("Config re-loaded. Only rule changes applied. Device and Mode changes require restart.")
 		}
 
@@ -159,7 +153,7 @@ func loadRules(
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Initialize rules
-	rules := config.BuildRules(pDevices, vDevices)
+	rules := config.InitRules(pDevices, vDevices)
 	logger.Logf("Created %d mapping rules.", len(rules))
 
 	// start listening for events on devices and timers
