@@ -1,6 +1,7 @@
 package mappingrules
 
 import (
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"github.com/holoplot/go-evdev"
 )
@@ -12,7 +13,26 @@ type MappingRuleAxisCombined struct {
 	Output     *RuleTargetAxis
 }
 
-func NewMappingRuleAxisCombined(base MappingRuleBase, inputLower *RuleTargetAxis, inputUpper *RuleTargetAxis, output *RuleTargetAxis) *MappingRuleAxisCombined {
+func NewMappingRuleAxisCombined(ruleConfig configparser.RuleConfigAxisCombined,
+	pDevs map[string]Device,
+	vDevs map[string]Device,
+	base MappingRuleBase) (*MappingRuleAxisCombined, error) {
+
+	inputLower, err := NewRuleTargetAxisFromConfig(ruleConfig.InputLower, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	inputUpper, err := NewRuleTargetAxisFromConfig(ruleConfig.InputUpper, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := NewRuleTargetAxisFromConfig(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
+
 	inputLower.OutputMax = 0
 	inputUpper.OutputMin = 0
 	return &MappingRuleAxisCombined{
@@ -20,7 +40,7 @@ func NewMappingRuleAxisCombined(base MappingRuleBase, inputLower *RuleTargetAxis
 		InputLower:      inputLower,
 		InputUpper:      inputUpper,
 		Output:          output,
-	}
+	}, nil
 }
 
 func (rule *MappingRuleAxisCombined) MatchEvent(device Device, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {

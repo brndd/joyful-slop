@@ -4,12 +4,21 @@ import (
 	"errors"
 	"slices"
 
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"github.com/holoplot/go-evdev"
 )
 
 type RuleTargetModeSelect struct {
 	Modes []string
+}
+
+func NewRuleTargetModeSelectFromConfig(targetConfig configparser.RuleTargetConfigModeSelect, allModes []string) (*RuleTargetModeSelect, error) {
+	if ok := validateModes(targetConfig.Modes, allModes); !ok {
+		return nil, errors.New("undefined mode in mode select list")
+	}
+
+	return NewRuleTargetModeSelect(targetConfig.Modes)
 }
 
 func NewRuleTargetModeSelect(modes []string) (*RuleTargetModeSelect, error) {

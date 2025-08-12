@@ -1,6 +1,10 @@
 package mappingrules
 
 import (
+	"fmt"
+
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
+	"git.annabunches.net/annabunches/joyful/internal/eventcodes"
 	"github.com/holoplot/go-evdev"
 )
 
@@ -10,12 +14,30 @@ type RuleTargetRelaxis struct {
 	Axis       evdev.EvCode
 }
 
-func NewRuleTargetRelaxis(device_name string,
+func NewRuleTargetRelaxisFromConfig(targetConfig configparser.RuleTargetConfigRelaxis, devs map[string]Device) (*RuleTargetRelaxis, error) {
+	device, ok := devs[targetConfig.Device]
+	if !ok {
+		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
+	}
+
+	eventCode, err := eventcodes.ParseCode(targetConfig.Axis, eventcodes.CodePrefixRelaxis)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewRuleTargetRelaxis(
+		targetConfig.Device,
+		device,
+		eventCode,
+	)
+}
+
+func NewRuleTargetRelaxis(deviceName string,
 	device Device,
 	axis evdev.EvCode) (*RuleTargetRelaxis, error) {
 
 	return &RuleTargetRelaxis{
-		DeviceName: device_name,
+		DeviceName: deviceName,
 		Device:     device,
 		Axis:       axis,
 	}, nil

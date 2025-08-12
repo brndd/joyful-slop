@@ -1,6 +1,9 @@
 package mappingrules
 
-import "github.com/holoplot/go-evdev"
+import (
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
+	"github.com/holoplot/go-evdev"
+)
 
 // A Combo Mapping Rule can require multiple physical button presses for a single output button
 type MappingRuleButtonCombo struct {
@@ -10,17 +13,31 @@ type MappingRuleButtonCombo struct {
 	State  int
 }
 
-func NewMappingRuleButtonCombo(
-	base MappingRuleBase,
-	inputs []*RuleTargetButton,
-	output *RuleTargetButton) *MappingRuleButtonCombo {
+func NewMappingRuleButtonCombo(ruleConfig configparser.RuleConfigButtonCombo,
+	pDevs map[string]Device,
+	vDevs map[string]Device,
+	base MappingRuleBase) (*MappingRuleButtonCombo, error) {
+
+	inputs := make([]*RuleTargetButton, 0)
+	for _, inputConfig := range ruleConfig.Inputs {
+		input, err := NewRuleTargetButtonFromConfig(inputConfig, pDevs)
+		if err != nil {
+			return nil, err
+		}
+		inputs = append(inputs, input)
+	}
+
+	output, err := NewRuleTargetButtonFromConfig(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
 
 	return &MappingRuleButtonCombo{
 		MappingRuleBase: base,
 		Inputs:          inputs,
 		Output:          output,
 		State:           0,
-	}
+	}, nil
 }
 
 func (rule *MappingRuleButtonCombo) MatchEvent(device Device, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {

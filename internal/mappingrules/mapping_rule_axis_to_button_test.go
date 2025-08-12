@@ -19,6 +19,44 @@ type MappingRuleAxisToButtonTests struct {
 	base         MappingRuleBase
 }
 
+func TestRunnerMappingRuleAxisToButtonTests(t *testing.T) {
+	suite.Run(t, new(MappingRuleAxisToButtonTests))
+}
+
+// buildTimerRule creates a MappingRuleAxisToButton with a mocked clock
+func (t *MappingRuleAxisToButtonTests) buildTimerRule(
+	repeatMin,
+	repeatMax int,
+	nextEvent time.Duration) (*MappingRuleAxisToButton, *clockwork.FakeClock) {
+
+	mockClock := clockwork.NewFakeClock()
+	testRule := t.buildRule(repeatMin, repeatMax)
+	testRule.clock = mockClock
+	testRule.lastEvent = testRule.clock.Now()
+	testRule.nextEvent = nextEvent
+	if nextEvent != NoNextEvent {
+		testRule.active = true
+	}
+	return testRule, mockClock
+}
+
+// Todo: don't love this repeated logic...
+func (t *MappingRuleAxisToButtonTests) buildRule(repeatMin, repeatMax int) *MappingRuleAxisToButton {
+	return &MappingRuleAxisToButton{
+		MappingRuleBase: t.base,
+		Input:           t.inputRule,
+		Output:          t.outputRule,
+		RepeatRateMin:   repeatMin,
+		RepeatRateMax:   repeatMax,
+		lastEvent:       time.Now(),
+		nextEvent:       NoNextEvent,
+		repeat:          repeatMin != 0 && repeatMax != 0,
+		pressed:         false,
+		active:          false,
+		clock:           clockwork.NewRealClock(),
+	}
+}
+
 func (t *MappingRuleAxisToButtonTests) SetupTest() {
 	mode := "*"
 	t.mode = &mode
@@ -40,7 +78,7 @@ func (t *MappingRuleAxisToButtonTests) TestMatchEvent() {
 
 	// A valid input should set a nextevent
 	t.Run("No Repeat", func() {
-		testRule := NewMappingRuleAxisToButton(t.base, t.inputRule, t.outputRule, 0, 0)
+		testRule := t.buildRule(0, 0)
 
 		t.Run("Valid Input", func() {
 			testRule.MatchEvent(t.inputDevice, &evdev.InputEvent{
@@ -62,7 +100,7 @@ func (t *MappingRuleAxisToButtonTests) TestMatchEvent() {
 	})
 
 	t.Run("Repeat", func() {
-		testRule := NewMappingRuleAxisToButton(t.base, t.inputRule, t.outputRule, 750, 250)
+		testRule := t.buildRule(750, 250)
 		testRule.MatchEvent(t.inputDevice, &evdev.InputEvent{
 			Type:  evdev.EV_ABS,
 			Code:  evdev.ABS_X,
@@ -90,7 +128,7 @@ func (t *MappingRuleAxisToButtonTests) TestTimerEvent() {
 	t.Run("No Repeat", func() {
 		// Get event if called immediately
 		t.Run("Event is available immediately", func() {
-			testRule, _ := buildTimerRule(t, 0, 0, 0)
+			testRule, _ := t.buildTimerRule(0, 0, 0)
 
 			event := testRule.TimerEvent()
 
@@ -100,7 +138,7 @@ func (t *MappingRuleAxisToButtonTests) TestTimerEvent() {
 
 		// Off event on second call
 		t.Run("Event emits off on second call", func() {
-			testRule, _ := buildTimerRule(t, 0, 0, 0)
+			testRule, _ := t.buildTimerRule(0, 0, 0)
 
 			testRule.TimerEvent()
 			event := testRule.TimerEvent()
@@ -111,7 +149,7 @@ func (t *MappingRuleAxisToButtonTests) TestTimerEvent() {
 
 		// No further event, even if we wait a while
 		t.Run("Additional events are not emitted while still active.", func() {
-			testRule, mockClock := buildTimerRule(t, 0, 0, 0)
+			testRule, mockClock := t.buildTimerRule(0, 0, 0)
 
 			testRule.TimerEvent()
 			testRule.TimerEvent()
@@ -125,13 +163,13 @@ func (t *MappingRuleAxisToButtonTests) TestTimerEvent() {
 
 	t.Run("Repeat", func() {
 		t.Run("No event if called immediately", func() {
-			testRule, _ := buildTimerRule(t, 100, 10, 50*time.Millisecond)
+			testRule, _ := t.buildTimerRule(100, 10, 50*time.Millisecond)
 			event := testRule.TimerEvent()
 			t.Nil(event)
 		})
 
 		t.Run("No event after 49ms", func() {
-			testRule, mockClock := buildTimerRule(t, 100, 10, 50*time.Millisecond)
+			testRule, mockClock := t.buildTimerRule(100, 10, 50*time.Millisecond)
 			mockClock.Advance(49 * time.Millisecond)
 
 			event := testRule.TimerEvent()
@@ -140,7 +178,7 @@ func (t *MappingRuleAxisToButtonTests) TestTimerEvent() {
 		})
 
 		t.Run("Event after 50ms", func() {
-			testRule, mockClock := buildTimerRule(t, 100, 10, 50*time.Millisecond)
+			testRule, mockClock := t.buildTimerRule(100, 10, 50*time.Millisecond)
 			mockClock.Advance(50 * time.Millisecond)
 
 			event := testRule.TimerEvent()
@@ -150,7 +188,7 @@ func (t *MappingRuleAxisToButtonTests) TestTimerEvent() {
 		})
 
 		t.Run("Additional event at 100ms", func() {
-			testRule, mockClock := buildTimerRule(t, 100, 10, 50*time.Millisecond)
+			testRule, mockClock := t.buildTimerRule(100, 10, 50*time.Millisecond)
 
 			mockClock.Advance(50 * time.Millisecond)
 			testRule.TimerEvent()
@@ -162,25 +200,4 @@ func (t *MappingRuleAxisToButtonTests) TestTimerEvent() {
 			t.NotNil(event)
 		})
 	})
-}
-
-func TestRunnerMappingRuleAxisToButtonTests(t *testing.T) {
-	suite.Run(t, new(MappingRuleAxisToButtonTests))
-}
-
-// buildTimerRule creates a MappingRuleAxisToButton with a mocked clock
-func buildTimerRule(t *MappingRuleAxisToButtonTests,
-	repeatMin,
-	repeatMax int,
-	nextEvent time.Duration) (*MappingRuleAxisToButton, *clockwork.FakeClock) {
-
-	mockClock := clockwork.NewFakeClock()
-	testRule := NewMappingRuleAxisToButton(t.base, t.inputRule, t.outputRule, repeatMin, repeatMax)
-	testRule.clock = mockClock
-	testRule.lastEvent = testRule.clock.Now()
-	testRule.nextEvent = nextEvent
-	if nextEvent != NoNextEvent {
-		testRule.active = true
-	}
-	return testRule, mockClock
 }

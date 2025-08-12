@@ -38,7 +38,9 @@ func (t *MappingRuleAxisCombinedTests) SetupTest() {
 	}, nil)
 
 	t.inputTargetLower, _ = NewRuleTargetAxis("test-input", t.inputDevice, evdev.ABS_X, true, 0, 0)
+	t.inputTargetLower.OutputMax = 0
 	t.inputTargetUpper, _ = NewRuleTargetAxis("test-input", t.inputDevice, evdev.ABS_Y, false, 0, 0)
+	t.inputTargetUpper.OutputMin = 0
 
 	t.outputDevice = &evdev.InputDevice{}
 	t.outputTarget, _ = NewRuleTargetAxis("test-output", t.outputDevice, evdev.ABS_X, false, 0, 0)
@@ -57,19 +59,30 @@ func (t *MappingRuleAxisCombinedTests) TearDownSubTest() {
 	t.inputDevice.Reset()
 }
 
+// TODO: this test sucks
 func (t *MappingRuleAxisCombinedTests) TestNewMappingRuleAxisCombined() {
 	t.inputDevice.Stub("AbsInfos").Return(map[evdev.EvCode]evdev.AbsInfo{
 		evdev.ABS_X: {Minimum: 0, Maximum: 10000},
 		evdev.ABS_Y: {Minimum: 0, Maximum: 10000},
 	}, nil)
 
-	rule := NewMappingRuleAxisCombined(t.base, t.inputTargetLower, t.inputTargetUpper, t.outputTarget)
+	rule := &MappingRuleAxisCombined{
+		MappingRuleBase: t.base,
+		InputLower:      t.inputTargetLower,
+		InputUpper:      t.inputTargetUpper,
+		Output:          t.outputTarget,
+	}
 	t.EqualValues(0, rule.InputLower.OutputMax)
 	t.EqualValues(0, rule.InputUpper.OutputMin)
 }
 
 func (t *MappingRuleAxisCombinedTests) TestMatchEvent() {
-	rule := NewMappingRuleAxisCombined(t.base, t.inputTargetLower, t.inputTargetUpper, t.outputTarget)
+	rule := &MappingRuleAxisCombined{
+		MappingRuleBase: t.base,
+		InputLower:      t.inputTargetLower,
+		InputUpper:      t.inputTargetUpper,
+		Output:          t.outputTarget,
+	}
 
 	t.Run("Lower Input", func() {
 		testCases := []struct{ in, out int32 }{

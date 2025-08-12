@@ -1,7 +1,7 @@
 // These types comprise the YAML schema for configuring Joyful.
 // The config files will be combined and then unmarshalled into this
 
-package config
+package configparser
 
 import (
 	"fmt"

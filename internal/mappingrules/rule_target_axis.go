@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
+	"git.annabunches.net/annabunches/joyful/internal/eventcodes"
 	"github.com/holoplot/go-evdev"
 )
 
@@ -18,6 +20,77 @@ type RuleTargetAxis struct {
 	OutputMax     int32
 	axisSize      int32
 	deadzoneSize  int32
+}
+
+func NewRuleTargetAxisFromConfig(targetConfig configparser.RuleTargetConfigAxis, devs map[string]Device) (*RuleTargetAxis, error) {
+	device, ok := devs[targetConfig.Device]
+	if !ok {
+		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
+	}
+
+	if targetConfig.DeadzoneEnd < targetConfig.DeadzoneStart {
+		return nil, errors.New("deadzone_end must be greater than deadzone_start")
+	}
+
+	eventCode, err := eventcodes.ParseCode(targetConfig.Axis, eventcodes.CodePrefixAxis)
+	if err != nil {
+		return nil, err
+	}
+
+	deadzoneStart, deadzoneEnd, err := calculateDeadzones(targetConfig, device, eventCode)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewRuleTargetAxis(
+		targetConfig.Device,
+		device,
+		eventCode,
+		targetConfig.Inverted,
+		deadzoneStart,
+		deadzoneEnd,
+	)
+}
+
+// calculateDeadzones produces the deadzone start and end values in absolute terms
+func calculateDeadzones(targetConfig configparser.RuleTargetConfigAxis, device Device, axis evdev.EvCode) (int32, int32, error) {
+
+	var deadzoneStart, deadzoneEnd int32
+	deadzoneStart = 0
+	deadzoneEnd = 0
+
+	if targetConfig.DeadzoneStart != 0 || targetConfig.DeadzoneEnd != 0 {
+		return targetConfig.DeadzoneStart, targetConfig.DeadzoneEnd, nil
+	}
+
+	var min, max int32
+	absInfoMap, err := device.AbsInfos()
+
+	if err != nil {
+		min = AxisValueMin
+		max = AxisValueMax
+	} else {
+		absInfo := absInfoMap[axis]
+		min = absInfo.Minimum
+		max = absInfo.Maximum
+	}
+
+	if targetConfig.DeadzoneCenter < min || targetConfig.DeadzoneCenter > max {
+		return 0, 0, fmt.Errorf("deadzone_center '%d' is out of bounds", targetConfig.DeadzoneCenter)
+	}
+
+	switch {
+	case targetConfig.DeadzoneSize != 0:
+		deadzoneStart = targetConfig.DeadzoneCenter - targetConfig.DeadzoneSize/2
+		deadzoneEnd = targetConfig.DeadzoneCenter + targetConfig.DeadzoneSize/2
+	case targetConfig.DeadzoneSizePercent != 0:
+		deadzoneSize := (max - min) / targetConfig.DeadzoneSizePercent
+		deadzoneStart = targetConfig.DeadzoneCenter - deadzoneSize/2
+		deadzoneEnd = targetConfig.DeadzoneCenter + deadzoneSize/2
+	}
+
+	deadzoneStart, deadzoneEnd = clampAndShift(deadzoneStart, deadzoneEnd, min, max)
+	return deadzoneStart, deadzoneEnd, nil
 }
 
 func NewRuleTargetAxis(device_name string,

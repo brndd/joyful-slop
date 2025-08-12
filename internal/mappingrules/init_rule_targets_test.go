@@ -1,9 +1,12 @@
-package config
+// TODO: these tests should live with their rule_target_* counterparts
+
+package mappingrules
 
 import (
 	"fmt"
 	"testing"
 
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"github.com/holoplot/go-evdev"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -48,45 +51,45 @@ func (t *MakeRuleTargetsTests) SetupSuite() {
 }
 
 func (t *MakeRuleTargetsTests) TestMakeRuleTargetButton() {
-	config := RuleTargetConfigButton{Device: "test"}
+	config := configparser.RuleTargetConfigButton{Device: "test"}
 
 	t.Run("Standard keycode", func() {
 		config.Button = "BTN_TRIGGER"
-		rule, err := makeRuleTargetButton(config, t.devs)
+		rule, err := NewRuleTargetButtonFromConfig(config, t.devs)
 		t.Nil(err)
 		t.EqualValues(evdev.BTN_TRIGGER, rule.Button)
 	})
 
 	t.Run("Hex code", func() {
 		config.Button = "0x2fd"
-		rule, err := makeRuleTargetButton(config, t.devs)
+		rule, err := NewRuleTargetButtonFromConfig(config, t.devs)
 		t.Nil(err)
 		t.EqualValues(evdev.EvCode(0x2fd), rule.Button)
 	})
 
 	t.Run("Index", func() {
 		config.Button = "3"
-		rule, err := makeRuleTargetButton(config, t.devs)
+		rule, err := NewRuleTargetButtonFromConfig(config, t.devs)
 		t.Nil(err)
 		t.EqualValues(evdev.BTN_TOP, rule.Button)
 	})
 
 	t.Run("Index too high", func() {
 		config.Button = "74"
-		_, err := makeRuleTargetButton(config, t.devs)
+		_, err := NewRuleTargetButtonFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
 
 	t.Run("Un-prefixed keycode", func() {
 		config.Button = "pinkie"
-		rule, err := makeRuleTargetButton(config, t.devs)
+		rule, err := NewRuleTargetButtonFromConfig(config, t.devs)
 		t.Nil(err)
 		t.EqualValues(evdev.BTN_PINKIE, rule.Button)
 	})
 
 	t.Run("Invalid keycode", func() {
 		config.Button = "foo"
-		_, err := makeRuleTargetButton(config, t.devs)
+		_, err := NewRuleTargetButtonFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
 }
@@ -103,9 +106,9 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 
 	for _, tc := range codeTestCases {
 		t.Run(fmt.Sprintf("KeyCode %s", tc.input), func() {
-			config := RuleTargetConfigAxis{Device: "test"}
+			config := configparser.RuleTargetConfigAxis{Device: "test"}
 			config.Axis = tc.input
-			rule, err := makeRuleTargetAxis(config, t.devs)
+			rule, err := NewRuleTargetAxisFromConfig(config, t.devs)
 			t.Nil(err)
 			t.EqualValues(tc.output, rule.Axis)
 
@@ -113,18 +116,18 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 	}
 
 	t.Run("Invalid code", func() {
-		config := RuleTargetConfigAxis{Device: "test"}
+		config := configparser.RuleTargetConfigAxis{Device: "test"}
 		config.Axis = "foo"
-		_, err := makeRuleTargetAxis(config, t.devs)
+		_, err := NewRuleTargetAxisFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
 
 	t.Run("Invalid deadzone", func() {
-		config := RuleTargetConfigAxis{Device: "test"}
+		config := configparser.RuleTargetConfigAxis{Device: "test"}
 		config.Axis = "x"
 		config.DeadzoneEnd = 100
 		config.DeadzoneStart = 1000
-		_, err := makeRuleTargetAxis(config, t.devs)
+		_, err := NewRuleTargetAxisFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
 
@@ -141,13 +144,13 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 
 	for _, tc := range relDeadzoneTestCases {
 		t.Run(fmt.Sprintf("Relative Deadzone %d +- %d", tc.inCenter, tc.inSize), func() {
-			config := RuleTargetConfigAxis{
+			config := configparser.RuleTargetConfigAxis{
 				Device:         "test",
 				Axis:           "x",
 				DeadzoneCenter: tc.inCenter,
 				DeadzoneSize:   tc.inSize,
 			}
-			rule, err := makeRuleTargetAxis(config, t.devs)
+			rule, err := NewRuleTargetAxisFromConfig(config, t.devs)
 
 			t.Nil(err)
 			t.Equal(tc.outStart, rule.DeadzoneStart)
@@ -156,13 +159,13 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 	}
 
 	t.Run("Deadzone center/size invalid center", func() {
-		config := RuleTargetConfigAxis{
+		config := configparser.RuleTargetConfigAxis{
 			Device:         "test",
 			Axis:           "x",
 			DeadzoneCenter: 20000,
 			DeadzoneSize:   500,
 		}
-		_, err := makeRuleTargetAxis(config, t.devs)
+		_, err := NewRuleTargetAxisFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
 
@@ -179,13 +182,13 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 
 	for _, tc := range relDeadzonePercentTestCases {
 		t.Run(fmt.Sprintf("Relative percent deadzone %d +- %d%%", tc.inCenter, tc.inSizePercent), func() {
-			config := RuleTargetConfigAxis{
+			config := configparser.RuleTargetConfigAxis{
 				Device:              "test",
 				Axis:                "x",
 				DeadzoneCenter:      tc.inCenter,
 				DeadzoneSizePercent: tc.inSizePercent,
 			}
-			rule, err := makeRuleTargetAxis(config, t.devs)
+			rule, err := NewRuleTargetAxisFromConfig(config, t.devs)
 
 			t.Nil(err)
 			t.Equal(tc.outStart, rule.DeadzoneStart)
@@ -194,50 +197,50 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 	}
 
 	t.Run("Deadzone center/percent invalid center", func() {
-		config := RuleTargetConfigAxis{
+		config := configparser.RuleTargetConfigAxis{
 			Device:              "test",
 			Axis:                "x",
 			DeadzoneCenter:      20000,
 			DeadzoneSizePercent: 10,
 		}
-		_, err := makeRuleTargetAxis(config, t.devs)
+		_, err := NewRuleTargetAxisFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
 }
 
 func (t *MakeRuleTargetsTests) TestMakeRuleTargetRelaxis() {
-	config := RuleTargetConfigRelaxis{Device: "test"}
+	config := configparser.RuleTargetConfigRelaxis{Device: "test"}
 
 	t.Run("Standard keycode", func() {
 		config.Axis = "REL_WHEEL"
-		rule, err := makeRuleTargetRelaxis(config, t.devs)
+		rule, err := NewRuleTargetRelaxisFromConfig(config, t.devs)
 		t.Nil(err)
 		t.EqualValues(evdev.REL_WHEEL, rule.Axis)
 	})
 
 	t.Run("Hex keycode", func() {
 		config.Axis = "0x00"
-		rule, err := makeRuleTargetRelaxis(config, t.devs)
+		rule, err := NewRuleTargetRelaxisFromConfig(config, t.devs)
 		t.Nil(err)
 		t.EqualValues(evdev.REL_X, rule.Axis)
 	})
 
 	t.Run("Un-prefixed keycode", func() {
 		config.Axis = "wheel"
-		rule, err := makeRuleTargetRelaxis(config, t.devs)
+		rule, err := NewRuleTargetRelaxisFromConfig(config, t.devs)
 		t.Nil(err)
 		t.EqualValues(evdev.REL_WHEEL, rule.Axis)
 	})
 
 	t.Run("Invalid keycode", func() {
 		config.Axis = "foo"
-		_, err := makeRuleTargetRelaxis(config, t.devs)
+		_, err := NewRuleTargetRelaxisFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
 
 	t.Run("Incorrect axis type", func() {
 		config.Axis = "ABS_X"
-		_, err := makeRuleTargetRelaxis(config, t.devs)
+		_, err := NewRuleTargetRelaxisFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
 }

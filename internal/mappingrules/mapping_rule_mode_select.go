@@ -1,6 +1,9 @@
 package mappingrules
 
-import "github.com/holoplot/go-evdev"
+import (
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
+	"github.com/holoplot/go-evdev"
+)
 
 type MappingRuleModeSelect struct {
 	MappingRuleBase
@@ -8,17 +11,26 @@ type MappingRuleModeSelect struct {
 	Output *RuleTargetModeSelect
 }
 
-func NewMappingRuleModeSelect(
-	base MappingRuleBase,
-	input *RuleTargetButton,
-	output *RuleTargetModeSelect,
-) *MappingRuleModeSelect {
+func NewMappingRuleModeSelect(ruleConfig configparser.RuleConfigModeSelect,
+	pDevs map[string]Device,
+	modes []string,
+	base MappingRuleBase) (*MappingRuleModeSelect, error) {
+
+	input, err := NewRuleTargetButtonFromConfig(ruleConfig.Input, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := NewRuleTargetModeSelectFromConfig(ruleConfig.Output, modes)
+	if err != nil {
+		return nil, err
+	}
 
 	return &MappingRuleModeSelect{
 		MappingRuleBase: base,
 		Input:           input,
 		Output:          output,
-	}
+	}, nil
 }
 
 func (rule *MappingRuleModeSelect) MatchEvent(

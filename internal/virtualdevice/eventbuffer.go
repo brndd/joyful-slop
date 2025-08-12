@@ -11,13 +11,7 @@ import (
 type EventBuffer struct {
 	events []*evdev.InputEvent
 	Device VirtualDevice
-}
-
-func NewEventBuffer(device VirtualDevice) *EventBuffer {
-	return &EventBuffer{
-		events: make([]*evdev.InputEvent, 0, 100),
-		Device: device,
-	}
+	Name   string
 }
 
 func (buffer *EventBuffer) AddEvent(event *evdev.InputEvent) {

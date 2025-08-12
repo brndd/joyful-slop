@@ -28,3 +28,16 @@ func Clamp[T Numeric](value, min, max T) T {
 	}
 	return value
 }
+
+func clampAndShift(start, end, min, max int32) (int32, int32) {
+	if start < min {
+		end += min - start
+		start = min
+	}
+	if end > max {
+		start -= end - max
+		end = max
+	}
+
+	return start, end
+}

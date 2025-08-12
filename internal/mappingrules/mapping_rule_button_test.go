@@ -28,7 +28,11 @@ func (t *MappingRuleButtonTests) SetupTest() {
 func (t *MappingRuleButtonTests) TestMatchEvent() {
 	inputButton, _ := NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, false)
 	outputButton, _ := NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false)
-	testRule := NewMappingRuleButton(t.base, inputButton, outputButton)
+	testRule := &MappingRuleButton{
+		MappingRuleBase: t.base,
+		Input:           inputButton,
+		Output:          outputButton,
+	}
 
 	// A matching input event should produce an output event
 	expected := &evdev.InputEvent{
@@ -58,7 +62,11 @@ func (t *MappingRuleButtonTests) TestMatchEvent() {
 func (t *MappingRuleButtonTests) TestMatchEventInverted() {
 	inputButton, _ := NewRuleTargetButton("", t.inputDevice, evdev.BTN_TRIGGER, true)
 	outputButton, _ := NewRuleTargetButton("", t.outputDevice, evdev.BTN_TRIGGER, false)
-	testRule := NewMappingRuleButton(t.base, inputButton, outputButton)
+	testRule := &MappingRuleButton{
+		MappingRuleBase: t.base,
+		Input:           inputButton,
+		Output:          outputButton,
+	}
 
 	// A matching input event should produce an output event
 	expected := &evdev.InputEvent{

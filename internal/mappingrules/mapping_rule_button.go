@@ -1,6 +1,9 @@
 package mappingrules
 
-import "github.com/holoplot/go-evdev"
+import (
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
+	"github.com/holoplot/go-evdev"
+)
 
 // A Simple Mapping Rule can map a button to a button or an axis to an axis.
 type MappingRuleButton struct {
@@ -9,16 +12,26 @@ type MappingRuleButton struct {
 	Output *RuleTargetButton
 }
 
-func NewMappingRuleButton(
-	base MappingRuleBase,
-	input *RuleTargetButton,
-	output *RuleTargetButton) *MappingRuleButton {
+func NewMappingRuleButton(ruleConfig configparser.RuleConfigButton,
+	pDevs map[string]Device,
+	vDevs map[string]Device,
+	base MappingRuleBase) (*MappingRuleButton, error) {
+
+	input, err := NewRuleTargetButtonFromConfig(ruleConfig.Input, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := NewRuleTargetButtonFromConfig(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
 
 	return &MappingRuleButton{
 		MappingRuleBase: base,
 		Input:           input,
 		Output:          output,
-	}
+	}, nil
 }
 
 func (rule *MappingRuleButton) MatchEvent(device Device, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {

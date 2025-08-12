@@ -1,4 +1,4 @@
-package config
+package virtualdevice
 
 import (
 	"testing"
@@ -7,15 +7,15 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type DevicesConfigTests struct {
+type InitTests struct {
 	suite.Suite
 }
 
-func TestRunnerDevicesConfig(t *testing.T) {
-	suite.Run(t, new(DevicesConfigTests))
+func TestRunnerInit(t *testing.T) {
+	suite.Run(t, new(InitTests))
 }
 
-func (t *DevicesConfigTests) TestMakeButtons() {
+func (t *InitTests) TestMakeButtons() {
 	t.Run("Maximum buttons", func() {
 		buttons := makeButtons(VirtualDeviceMaxButtons, []string{})
 		t.Equal(VirtualDeviceMaxButtons, len(buttons))
@@ -44,7 +44,7 @@ func (t *DevicesConfigTests) TestMakeButtons() {
 	})
 }
 
-func (t *DevicesConfigTests) TestMakeAxes() {
+func (t *InitTests) TestMakeAxes() {
 	t.Run("8 axes", func() {
 		axes := makeAxes(8, []string{})
 		t.Equal(8, len(axes))
@@ -81,7 +81,7 @@ func (t *DevicesConfigTests) TestMakeAxes() {
 	})
 }
 
-func (t *DevicesConfigTests) TestMakeRelativeAxes() {
+func (t *InitTests) TestMakeRelativeAxes() {
 	t.Run("10 axes", func() {
 		axes := makeRelativeAxes(10, []string{})
 		t.Equal(10, len(axes))

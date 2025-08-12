@@ -1,0 +1,79 @@
+package mappingrules
+
+import (
+	"errors"
+	"fmt"
+	"slices"
+	"strings"
+
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
+	"git.annabunches.net/annabunches/joyful/internal/logger"
+	"github.com/holoplot/go-evdev"
+)
+
+func ConvertDeviceMap(inputDevs map[string]*evdev.InputDevice) map[string]Device {
+	// Golang can't inspect the concrete map type to determine interface conformance,
+	// so we handle that here.
+	devices := make(map[string]Device)
+	for name, dev := range inputDevs {
+		devices[name] = dev
+	}
+	return devices
+}
+
+// NewRule parses a RuleConfig struct and creates and returns the appropriate rule type.
+// You can remap a map[string]*evdev.InputDevice to our interface type with ConvertDeviceMap
+func NewRule(config configparser.RuleConfig, pDevs map[string]Device, vDevs map[string]Device, modes []string) (MappingRule, error) {
+	var newRule MappingRule
+	var err error
+
+	if !validateModes(config.Modes, modes) {
+		return nil, errors.New("mode list specifies undefined mode")
+	}
+
+	base := NewMappingRuleBase(config.Name, config.Modes)
+
+	switch strings.ToLower(config.Type) {
+	case RuleTypeButton:
+		newRule, err = NewMappingRuleButton(config.Config.(configparser.RuleConfigButton), pDevs, vDevs, base)
+	case RuleTypeButtonCombo:
+		newRule, err = NewMappingRuleButtonCombo(config.Config.(configparser.RuleConfigButtonCombo), pDevs, vDevs, base)
+	case RuleTypeButtonLatched:
+		newRule, err = NewMappingRuleButtonLatched(config.Config.(configparser.RuleConfigButtonLatched), pDevs, vDevs, base)
+	case RuleTypeAxis:
+		newRule, err = NewMappingRuleAxis(config.Config.(configparser.RuleConfigAxis), pDevs, vDevs, base)
+	case RuleTypeAxisCombined:
+		newRule, err = NewMappingRuleAxisCombined(config.Config.(configparser.RuleConfigAxisCombined), pDevs, vDevs, base)
+	case RuleTypeAxisToButton:
+		newRule, err = NewMappingRuleAxisToButton(config.Config.(configparser.RuleConfigAxisToButton), pDevs, vDevs, base)
+	case RuleTypeAxisToRelaxis:
+		newRule, err = NewMappingRuleAxisToRelaxis(config.Config.(configparser.RuleConfigAxisToRelaxis), pDevs, vDevs, base)
+	case RuleTypeModeSelect:
+		newRule, err = NewMappingRuleModeSelect(config.Config.(configparser.RuleConfigModeSelect), pDevs, modes, base)
+	default:
+		err = fmt.Errorf("bad rule type '%s' for rule '%s'", config.Type, config.Name)
+	}
+
+	if err != nil {
+		logger.LogErrorf(err, "Failed to build rule '%s'", config.Name)
+		return nil, err
+	}
+
+	return newRule, nil
+}
+
+// validateModes checks the provided modes against a larger subset of modes (usually all defined ones)
+// and returns false if any of the modes are not defined.
+func validateModes(modes []string, allModes []string) bool {
+	if len(modes) == 0 {
+		return true
+	}
+
+	for _, mode := range modes {
+		if !slices.Contains(allModes, mode) {
+			return false
+		}
+	}
+
+	return true
+}

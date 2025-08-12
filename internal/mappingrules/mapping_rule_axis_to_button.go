@@ -3,6 +3,7 @@ package mappingrules
 import (
 	"time"
 
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"github.com/holoplot/go-evdev"
 	"github.com/jonboulle/clockwork"
 )
@@ -23,20 +24,34 @@ type MappingRuleAxisToButton struct {
 	clock         clockwork.Clock
 }
 
-func NewMappingRuleAxisToButton(base MappingRuleBase, input *RuleTargetAxis, output *RuleTargetButton, repeatRateMin, repeatRateMax int) *MappingRuleAxisToButton {
+func NewMappingRuleAxisToButton(ruleConfig configparser.RuleConfigAxisToButton,
+	pDevs map[string]Device,
+	vDevs map[string]Device,
+	base MappingRuleBase) (*MappingRuleAxisToButton, error) {
+
+	input, err := NewRuleTargetAxisFromConfig(ruleConfig.Input, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := NewRuleTargetButtonFromConfig(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
+
 	return &MappingRuleAxisToButton{
 		MappingRuleBase: base,
 		Input:           input,
 		Output:          output,
-		RepeatRateMin:   repeatRateMin,
-		RepeatRateMax:   repeatRateMax,
+		RepeatRateMin:   ruleConfig.RepeatRateMin,
+		RepeatRateMax:   ruleConfig.RepeatRateMax,
 		lastEvent:       time.Now(),
 		nextEvent:       NoNextEvent,
-		repeat:          repeatRateMin != 0 && repeatRateMax != 0,
+		repeat:          ruleConfig.RepeatRateMin != 0 && ruleConfig.RepeatRateMax != 0,
 		pressed:         false,
 		active:          false,
 		clock:           clockwork.NewRealClock(),
-	}
+	}, nil
 }
 
 func (rule *MappingRuleAxisToButton) MatchEvent(device Device, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {

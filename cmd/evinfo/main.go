@@ -5,7 +5,8 @@ import (
 	"slices"
 
 	// TODO: using config here feels like bad coupling... ButtonFromIndex might need a refactor / move
-	"git.annabunches.net/annabunches/joyful/internal/config"
+
+	"git.annabunches.net/annabunches/joyful/internal/eventcodes"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"github.com/holoplot/go-evdev"
 	flag "github.com/spf13/pflag"
@@ -20,7 +21,7 @@ func isJoystickLike(device *evdev.InputDevice) bool {
 	if slices.Contains(types, evdev.EV_KEY) {
 		buttons := device.CapableEvents(evdev.EV_KEY)
 
-		for _, code := range config.ButtonFromIndex {
+		for _, code := range eventcodes.ButtonFromIndex {
 			if slices.Contains(buttons, code) {
 				return true
 			}

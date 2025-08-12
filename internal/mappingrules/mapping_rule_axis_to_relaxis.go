@@ -3,6 +3,7 @@ package mappingrules
 import (
 	"time"
 
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"github.com/holoplot/go-evdev"
 	"github.com/jonboulle/clockwork"
 )
@@ -23,23 +24,32 @@ type MappingRuleAxisToRelaxis struct {
 	clock         clockwork.Clock
 }
 
-func NewMappingRuleAxisToRelaxis(
-	base MappingRuleBase,
-	input *RuleTargetAxis,
-	output *RuleTargetRelaxis,
-	repeatRateMin, repeatRateMax, increment int) *MappingRuleAxisToRelaxis {
+func NewMappingRuleAxisToRelaxis(ruleConfig configparser.RuleConfigAxisToRelaxis,
+	pDevs map[string]Device,
+	vDevs map[string]Device,
+	base MappingRuleBase) (*MappingRuleAxisToRelaxis, error) {
+
+	input, err := NewRuleTargetAxisFromConfig(ruleConfig.Input, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := NewRuleTargetRelaxisFromConfig(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
 
 	return &MappingRuleAxisToRelaxis{
 		MappingRuleBase: base,
 		Input:           input,
 		Output:          output,
-		RepeatRateMin:   repeatRateMin,
-		RepeatRateMax:   repeatRateMax,
-		Increment:       int32(increment),
+		RepeatRateMin:   ruleConfig.RepeatRateMin,
+		RepeatRateMax:   ruleConfig.RepeatRateMax,
+		Increment:       int32(ruleConfig.Increment),
 		lastEvent:       time.Now(),
 		nextEvent:       NoNextEvent,
 		clock:           clockwork.NewRealClock(),
-	}
+	}, nil
 }
 
 func (rule *MappingRuleAxisToRelaxis) MatchEvent(

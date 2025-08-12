@@ -1,6 +1,9 @@
 package mappingrules
 
-import "github.com/holoplot/go-evdev"
+import (
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
+	"github.com/holoplot/go-evdev"
+)
 
 type MappingRuleButtonLatched struct {
 	MappingRuleBase
@@ -9,17 +12,27 @@ type MappingRuleButtonLatched struct {
 	State  bool
 }
 
-func NewMappingRuleButtonLatched(
-	base MappingRuleBase,
-	input *RuleTargetButton,
-	output *RuleTargetButton) *MappingRuleButtonLatched {
+func NewMappingRuleButtonLatched(ruleConfig configparser.RuleConfigButtonLatched,
+	pDevs map[string]Device,
+	vDevs map[string]Device,
+	base MappingRuleBase) (*MappingRuleButtonLatched, error) {
+
+	input, err := NewRuleTargetButtonFromConfig(ruleConfig.Input, pDevs)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := NewRuleTargetButtonFromConfig(ruleConfig.Output, vDevs)
+	if err != nil {
+		return nil, err
+	}
 
 	return &MappingRuleButtonLatched{
 		MappingRuleBase: base,
 		Input:           input,
 		Output:          output,
 		State:           false,
-	}
+	}, nil
 }
 
 func (rule *MappingRuleButtonLatched) MatchEvent(device Device, event *evdev.InputEvent, mode *string) (*evdev.InputDevice, *evdev.InputEvent) {

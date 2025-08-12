@@ -1,57 +1,20 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/holoplot/go-evdev"
 	flag "github.com/spf13/pflag"
 
-	"git.annabunches.net/annabunches/joyful/internal/config"
+	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
-	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
-	"git.annabunches.net/annabunches/joyful/internal/virtualdevice"
 )
 
 func getConfigDir(dir string) string {
 	configDir := strings.ReplaceAll(dir, "~", "${HOME}")
 	return os.ExpandEnv(configDir)
-}
-
-func readConfig(configDir string) *config.ConfigParser {
-	parser := &config.ConfigParser{}
-	err := parser.Parse(configDir)
-	logger.FatalIfError(err, "Failed to parse config")
-	return parser
-}
-
-func initVirtualBuffers(config *config.ConfigParser) (map[string]*evdev.InputDevice,
-	map[string]*virtualdevice.EventBuffer,
-	map[*evdev.InputDevice]*virtualdevice.EventBuffer) {
-
-	vDevices := config.InitVirtualDevices()
-	if len(vDevices) == 0 {
-		logger.Log("Warning: no virtual devices found in configuration. No rules will work.")
-	}
-
-	vBuffersByName := make(map[string]*virtualdevice.EventBuffer)
-	vBuffersByDevice := make(map[*evdev.InputDevice]*virtualdevice.EventBuffer)
-	for name, device := range vDevices {
-		vBuffersByName[name] = virtualdevice.NewEventBuffer(device)
-		vBuffersByDevice[device] = vBuffersByName[name]
-	}
-	return vDevices, vBuffersByName, vBuffersByDevice
-}
-
-func initPhysicalDevices(config *config.ConfigParser) map[string]*evdev.InputDevice {
-	pDeviceMap := config.InitPhysicalDevices()
-	if len(pDeviceMap) == 0 {
-		logger.Log("Warning: no physical devices found in configuration. No rules will work.")
-	}
-	return pDeviceMap
 }
 
 func main() {
@@ -64,7 +27,8 @@ func main() {
 
 	// parse configs
 	configDir := getConfigDir(configFlag)
-	config := readConfig(configDir)
+	config, err := configparser.ParseConfig(configDir)
+	logger.FatalIfError(err, "Failed to parse configuration")
 
 	// initialize TTS
 	tts, err := newTTS(ttsOps)
@@ -76,20 +40,26 @@ func main() {
 	// Initialize physical devices
 	pDevices := initPhysicalDevices(config)
 
-	// Load the rules
-	rules, eventChannel, cancel, wg := loadRules(config, pDevices, vDevicesByName)
+	// initialize the mode variables
+	var mode string
+	modes := config.Modes
+	if len(modes) == 0 {
+		mode = "*"
+	} else {
+		mode = config.Modes[0]
+	}
 
-	// initialize the mode variable
-	mode := config.GetModes()[0]
+	// Load the rules
+	rules, eventChannel, cancel, wg := loadRules(config, pDevices, vDevicesByName, modes)
 
 	// initialize TTS phrases for modes
-	for _, m := range config.GetModes() {
+	for _, m := range modes {
 		tts.AddMessage(m)
 		logger.LogDebugf("Added TTS message '%s'", m)
 	}
 
 	fmt.Println("Joyful Running! Press Ctrl+C to quit. Press Enter to reload rules.")
-	if len(config.GetModes()) > 1 {
+	if len(modes) > 0 {
 		logger.Logf("Initial mode set to '%s'", mode)
 	}
 
@@ -127,13 +97,18 @@ func main() {
 
 		case ChannelEventReload:
 			// stop existing channels
+			config, err := configparser.ParseConfig(configDir) // reload the config
+			if err != nil {
+				logger.LogError(err, "Failed to parse config, no changes made")
+				continue
+			}
+
 			fmt.Println("Reloading rules.")
 			cancel()
 			fmt.Println("Waiting for existing listeners to exit. Provide input from each of your devices.")
 			wg.Wait()
-			fmt.Println("Listeners exited. Parsing config.")
-			config := readConfig(configDir) // reload the config
-			rules, eventChannel, cancel, wg = loadRules(config, pDevices, vDevicesByName)
+			fmt.Println("Listeners exited. Loading new rules.")
+			rules, eventChannel, cancel, wg = loadRules(config, pDevices, vDevicesByName, modes)
 			fmt.Println("Config re-loaded. Only rule changes applied. Device and Mode changes require restart.")
 		}
 
@@ -141,38 +116,4 @@ func main() {
 			tts.Say(mode)
 		}
 	}
-}
-
-func loadRules(
-	config *config.ConfigParser,
-	pDevices map[string]*evdev.InputDevice,
-	vDevices map[string]*evdev.InputDevice) ([]mappingrules.MappingRule, <-chan ChannelEvent, func(), *sync.WaitGroup) {
-
-	var wg sync.WaitGroup
-	eventChannel := make(chan ChannelEvent, 1000)
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// Initialize rules
-	rules := config.InitRules(pDevices, vDevices)
-	logger.Logf("Created %d mapping rules.", len(rules))
-
-	// start listening for events on devices and timers
-	for _, device := range pDevices {
-		wg.Add(1)
-		go eventWatcher(device, eventChannel, ctx, &wg)
-	}
-
-	timerCount := 0
-	for _, rule := range rules {
-		if timedRule, ok := rule.(mappingrules.TimedEventEmitter); ok {
-			wg.Add(1)
-			go timerWatcher(timedRule, eventChannel, ctx, &wg)
-			timerCount++
-		}
-	}
-	logger.Logf("Registered %d timers.", timerCount)
-
-	go consoleWatcher(eventChannel)
-
-	return rules, eventChannel, cancel, &wg
 }

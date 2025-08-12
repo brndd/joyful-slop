@@ -1,4 +1,4 @@
-package config
+package eventcodes
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func TestRunnerEventCodeParserTests(t *testing.T) {
 
 func parseCodeTestCase(t *EventCodeParserTests, in string, out evdev.EvCode, prefix string) {
 	t.Run(fmt.Sprintf("%s: %s", prefix, in), func() {
-		code, err := parseCode(in, prefix)
+		code, err := ParseCode(in, prefix)
 		t.Nil(err)
 		t.EqualValues(out, code)
 	})
@@ -38,7 +38,7 @@ func (t *EventCodeParserTests) TestParseCodeButton() {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.in, func() {
-			code, err := parseCodeButton(testCase.in)
+			code, err := ParseCodeButton(testCase.in)
 			t.Nil(err)
 			t.EqualValues(code, testCase.out)
 		})
@@ -134,7 +134,7 @@ func (t *EventCodeParserTests) TestParseCode() {
 
 		for _, testCase := range testCases {
 			t.Run(fmt.Sprintf("%s - '%s'", testCase.prefix, testCase.in), func() {
-				_, err := parseCode(testCase.in, testCase.prefix)
+				_, err := ParseCode(testCase.in, testCase.prefix)
 				t.NotNil(err)
 			})
 		}

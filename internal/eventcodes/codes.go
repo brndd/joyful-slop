@@ -1,4 +1,4 @@
-package config
+package eventcodes
 
 import (
 	"fmt"
@@ -8,17 +8,17 @@ import (
 	"github.com/holoplot/go-evdev"
 )
 
-func parseCodeButton(code string) (evdev.EvCode, error) {
+func ParseCodeButton(code string) (evdev.EvCode, error) {
 	prefix := CodePrefixButton
 
 	if strings.HasPrefix(code, CodePrefixKey+"_") {
 		prefix = CodePrefixKey
 	}
 
-	return parseCode(code, prefix)
+	return ParseCode(code, prefix)
 }
 
-func parseCode(code, prefix string) (evdev.EvCode, error) {
+func ParseCode(code, prefix string) (evdev.EvCode, error) {
 	code = strings.ToUpper(code)
 
 	var codeLookup map[string]evdev.EvCode
@@ -69,4 +69,9 @@ func parseCode(code, prefix string) (evdev.EvCode, error) {
 		}
 		return eventCode, nil
 	}
+}
+
+// hasError exists solely to switch on errors in conditional and case statements
+func hasError(_ any, err error) bool {
+	return err != nil
 }
