@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"strings"
 
 	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
@@ -33,24 +32,25 @@ func NewRule(config configparser.RuleConfig, pDevs map[string]Device, vDevs map[
 
 	base := NewMappingRuleBase(config.Name, config.Modes)
 
-	switch strings.ToLower(config.Type) {
-	case RuleTypeButton:
+	switch config.Type {
+	case configparser.RuleTypeButton:
 		newRule, err = NewMappingRuleButton(config.Config.(configparser.RuleConfigButton), pDevs, vDevs, base)
-	case RuleTypeButtonCombo:
+	case configparser.RuleTypeButtonCombo:
 		newRule, err = NewMappingRuleButtonCombo(config.Config.(configparser.RuleConfigButtonCombo), pDevs, vDevs, base)
-	case RuleTypeButtonLatched:
+	case configparser.RuleTypeButtonLatched:
 		newRule, err = NewMappingRuleButtonLatched(config.Config.(configparser.RuleConfigButtonLatched), pDevs, vDevs, base)
-	case RuleTypeAxis:
+	case configparser.RuleTypeAxis:
 		newRule, err = NewMappingRuleAxis(config.Config.(configparser.RuleConfigAxis), pDevs, vDevs, base)
-	case RuleTypeAxisCombined:
+	case configparser.RuleTypeAxisCombined:
 		newRule, err = NewMappingRuleAxisCombined(config.Config.(configparser.RuleConfigAxisCombined), pDevs, vDevs, base)
-	case RuleTypeAxisToButton:
+	case configparser.RuleTypeAxisToButton:
 		newRule, err = NewMappingRuleAxisToButton(config.Config.(configparser.RuleConfigAxisToButton), pDevs, vDevs, base)
-	case RuleTypeAxisToRelaxis:
+	case configparser.RuleTypeAxisToRelaxis:
 		newRule, err = NewMappingRuleAxisToRelaxis(config.Config.(configparser.RuleConfigAxisToRelaxis), pDevs, vDevs, base)
-	case RuleTypeModeSelect:
+	case configparser.RuleTypeModeSelect:
 		newRule, err = NewMappingRuleModeSelect(config.Config.(configparser.RuleConfigModeSelect), pDevs, modes, base)
 	default:
+		// Shouldn't actually be possible to get here...
 		err = fmt.Errorf("bad rule type '%s' for rule '%s'", config.Type, config.Name)
 	}
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"strings"
 	"sync"
 
 	"git.annabunches.net/annabunches/joyful/internal/configparser"
@@ -16,7 +15,7 @@ func initPhysicalDevices(conf *configparser.Config) map[string]*evdev.InputDevic
 	pDeviceMap := make(map[string]*evdev.InputDevice)
 
 	for _, devConfig := range conf.Devices {
-		if strings.ToLower(devConfig.Type) != configparser.DeviceTypePhysical {
+		if devConfig.Type != configparser.DeviceTypePhysical {
 			continue
 		}
 
@@ -71,7 +70,7 @@ func initVirtualBuffers(config *configparser.Config) (map[string]*evdev.InputDev
 	vBuffersByDevice := make(map[*evdev.InputDevice]*virtualdevice.EventBuffer)
 
 	for _, devConfig := range config.Devices {
-		if strings.ToLower(devConfig.Type) != configparser.DeviceTypeVirtual {
+		if devConfig.Type != configparser.DeviceTypeVirtual {
 			continue
 		}
 
