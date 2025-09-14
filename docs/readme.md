@@ -73,13 +73,17 @@ evtest | grep BTN_
 
 **NOTE: For most axis mappings, you probably don't want to specify a deadzone!** Use deadzone configurations in your target game instead. Joyful-configured deadzones are intended to be used in conjunction with the `axis-to-button` and `axis-to-relaxis` input types, or when splitting an axis into multiple outputs. Using them with standard `axis` mappings may result in a loss of fidelity and "stuck" inputs.
 
-There are three ways to specify deadzones:
+Axis inputs can define a list of deadzones. Each deadzone can be specified a few ways:
 
-* Define `deadzone_start` and `deadzone_end` to explicitly set the deadzone bounds.
-* Define `deadzone_center` and `deadzone_size`; this will create a deadzone of the indicated size centered at the given axis position.
-* Define `deadzone_center` and `deadzone_size_percent` to use a percentage of the total axis size.
+* Define `start` and `end` to explicitly set the deadzone bounds.
+* Define `center` and `size`; this will create a deadzone of the indicated size centered at the given axis position.
+* Define `center` and `size_percent` to use a percentage of the total axis size.
 
-See <examples/ruletypes.yml> for usage examples.
+In addition, deadzones can set `emit` to `true` and `emit_value` to a value that should be emitted when inside the deadzone.
+
+**Note**: The `emit_value` is the final output value and should be between -32,768 and 32,767.
+
+See the <examples/> directory for usage examples.
 
 ## Modes
 

@@ -10,16 +10,15 @@ import (
 )
 
 type RuleTargetAxis struct {
-	DeviceName    string
-	Device        Device
-	Axis          evdev.EvCode
-	Inverted      bool
-	DeadzoneStart int32
-	DeadzoneEnd   int32
-	OutputMin     int32
-	OutputMax     int32
-	axisSize      int32
-	deadzoneSize  int32
+	DeviceName   string
+	Device       Device
+	Axis         evdev.EvCode
+	Inverted     bool
+	Deadzones    []Deadzone
+	OutputMin    int32
+	OutputMax    int32
+	axisSize     int32
+	deadzoneSize int32
 }
 
 func NewRuleTargetAxisFromConfig(targetConfig configparser.RuleTargetConfigAxis, devs map[string]Device) (*RuleTargetAxis, error) {
@@ -28,18 +27,18 @@ func NewRuleTargetAxisFromConfig(targetConfig configparser.RuleTargetConfigAxis,
 		return nil, fmt.Errorf("non-existent device '%s'", targetConfig.Device)
 	}
 
-	if targetConfig.DeadzoneEnd < targetConfig.DeadzoneStart {
-		return nil, errors.New("deadzone_end must be greater than deadzone_start")
-	}
-
 	eventCode, err := eventcodes.ParseCode(targetConfig.Axis, eventcodes.CodePrefixAxis)
 	if err != nil {
 		return nil, err
 	}
 
-	deadzoneStart, deadzoneEnd, err := calculateDeadzones(targetConfig, device, eventCode)
-	if err != nil {
-		return nil, err
+	deadzones := make([]Deadzone, 0)
+	for _, dzConfig := range targetConfig.Deadzones {
+		dz, err := NewDeadzoneFromConfig(dzConfig, device, eventCode)
+		if err != nil {
+			return nil, err
+		}
+		deadzones = append(deadzones, dz)
 	}
 
 	return NewRuleTargetAxis(
@@ -47,58 +46,15 @@ func NewRuleTargetAxisFromConfig(targetConfig configparser.RuleTargetConfigAxis,
 		device,
 		eventCode,
 		targetConfig.Inverted,
-		deadzoneStart,
-		deadzoneEnd,
+		deadzones,
 	)
-}
-
-// calculateDeadzones produces the deadzone start and end values in absolute terms
-func calculateDeadzones(targetConfig configparser.RuleTargetConfigAxis, device Device, axis evdev.EvCode) (int32, int32, error) {
-
-	var deadzoneStart, deadzoneEnd int32
-	deadzoneStart = 0
-	deadzoneEnd = 0
-
-	if targetConfig.DeadzoneStart != 0 || targetConfig.DeadzoneEnd != 0 {
-		return targetConfig.DeadzoneStart, targetConfig.DeadzoneEnd, nil
-	}
-
-	var min, max int32
-	absInfoMap, err := device.AbsInfos()
-
-	if err != nil {
-		min = AxisValueMin
-		max = AxisValueMax
-	} else {
-		absInfo := absInfoMap[axis]
-		min = absInfo.Minimum
-		max = absInfo.Maximum
-	}
-
-	if targetConfig.DeadzoneCenter < min || targetConfig.DeadzoneCenter > max {
-		return 0, 0, fmt.Errorf("deadzone_center '%d' is out of bounds", targetConfig.DeadzoneCenter)
-	}
-
-	switch {
-	case targetConfig.DeadzoneSize != 0:
-		deadzoneStart = targetConfig.DeadzoneCenter - targetConfig.DeadzoneSize/2
-		deadzoneEnd = targetConfig.DeadzoneCenter + targetConfig.DeadzoneSize/2
-	case targetConfig.DeadzoneSizePercent != 0:
-		deadzoneSize := (max - min) / targetConfig.DeadzoneSizePercent
-		deadzoneStart = targetConfig.DeadzoneCenter - deadzoneSize/2
-		deadzoneEnd = targetConfig.DeadzoneCenter + deadzoneSize/2
-	}
-
-	deadzoneStart, deadzoneEnd = clampAndShift(deadzoneStart, deadzoneEnd, min, max)
-	return deadzoneStart, deadzoneEnd, nil
 }
 
 func NewRuleTargetAxis(device_name string,
 	device Device,
 	axis evdev.EvCode,
 	inverted bool,
-	deadzoneStart int32,
-	deadzoneEnd int32) (*RuleTargetAxis, error) {
+	deadzones []Deadzone) (*RuleTargetAxis, error) {
 
 	info, err := device.AbsInfos()
 
@@ -117,11 +73,7 @@ func NewRuleTargetAxis(device_name string,
 		return nil, fmt.Errorf("device does not support axis %v", axis)
 	}
 
-	if deadzoneStart > deadzoneEnd {
-		return nil, errors.New("deadzone_end must be a higher value than deadzone_start")
-	}
-
-	deadzoneSize := Abs(deadzoneEnd - deadzoneStart)
+	deadzoneSize := CalculateDeadzoneSize(deadzones)
 
 	// Our output range is limited to 16 bits, but we represent values internally with 32 bits.
 	// As a result, we shouldn't need to worry about integer overruns
@@ -132,16 +84,15 @@ func NewRuleTargetAxis(device_name string,
 	}
 
 	return &RuleTargetAxis{
-		DeviceName:    device_name,
-		Device:        device,
-		Axis:          axis,
-		Inverted:      inverted,
-		OutputMin:     AxisValueMin,
-		OutputMax:     AxisValueMax,
-		DeadzoneStart: deadzoneStart,
-		DeadzoneEnd:   deadzoneEnd,
-		deadzoneSize:  deadzoneSize,
-		axisSize:      axisSize,
+		DeviceName:   device_name,
+		Device:       device,
+		Axis:         axis,
+		Inverted:     inverted,
+		OutputMin:    AxisValueMin,
+		OutputMax:    AxisValueMax,
+		Deadzones:    deadzones,
+		deadzoneSize: deadzoneSize,
+		axisSize:     axisSize,
 	}, nil
 }
 
@@ -150,14 +101,23 @@ func NewRuleTargetAxis(device_name string,
 // Axis inputs are normalized to the full signed int32 range to match the virtual device's axis
 // characteristics.
 //
+// If the raw value is inside the deadzone, we either emit no event, or we emit the deadzoneValue.
 // Typically this function is called after RuleTargetAxis.MatchEvent, which checks whether we are
 // in the deadzone, among other things.
 func (target *RuleTargetAxis) NormalizeValue(value int32) int32 {
+	for _, dz := range target.Deadzones {
+		state, dzValue := dz.Match(value)
+		if state == DeadzoneEmit {
+			return Clamp(dzValue, target.OutputMin, target.OutputMax)
+		}
+	}
+
 	axisStrength := target.GetAxisStrength(value)
 	return LerpInt(target.OutputMin, target.OutputMax, axisStrength)
 }
 
 func (target *RuleTargetAxis) CreateEvent(value int32, mode *string) *evdev.InputEvent {
+	fmt.Println("DEBUG: Emitting event")
 	value = Clamp(value, AxisValueMin, AxisValueMax)
 	return &evdev.InputEvent{
 		Type:  evdev.EV_ABS,
@@ -178,19 +138,30 @@ func (target *RuleTargetAxis) MatchEventDeviceAndCode(device Device, event *evde
 		event.Code == target.Axis
 }
 
+// InDeadZone checks each deadzone for whether the target value falls within it.
+// If *any* non-emitting deadzone matches, we return true.
 // TODO: Add tests
 func (target *RuleTargetAxis) InDeadZone(value int32) bool {
-	return target.deadzoneSize > 0 && value >= target.DeadzoneStart && value <= target.DeadzoneEnd
+	for _, dz := range target.Deadzones {
+		state, _ := dz.Match(value)
+		if state == DeadzoneNoEmit {
+			return true
+		}
+	}
+	return false
 }
 
 // GetAxisStrength returns a float between 0.0 and 1.0, representing the proportional
 // position along the axis' full range. (after factoring in deadzones)
 // Calling this function with `value` inside the deadzone range will produce undefined behavior
 func (target *RuleTargetAxis) GetAxisStrength(value int32) float64 {
-	if value > target.DeadzoneEnd {
-		value -= target.deadzoneSize
+	adjValue := value
+	for _, dz := range target.Deadzones {
+		if value > dz.End {
+			adjValue -= dz.Size
+		}
 	}
-	strength := float64(value) / float64(target.axisSize)
+	strength := float64(adjValue) / float64(target.axisSize)
 	if target.Inverted {
 		strength = 1.0 - strength
 	}

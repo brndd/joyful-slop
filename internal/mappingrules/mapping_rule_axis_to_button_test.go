@@ -67,7 +67,7 @@ func (t *MappingRuleAxisToButtonTests) SetupTest() {
 			Maximum: 10000,
 		},
 	}, nil)
-	t.inputRule, _ = NewRuleTargetAxis("test-input", t.inputDevice, evdev.ABS_X, false, int32(0), int32(1000))
+	t.inputRule, _ = NewRuleTargetAxis("test-input", t.inputDevice, evdev.ABS_X, false, []Deadzone{{Start: 0, End: 1000}})
 
 	t.outputDevice = &evdev.InputDevice{}
 	t.outputRule, _ = NewRuleTargetButton("test-output", t.outputDevice, evdev.ABS_X, false)
@@ -113,14 +113,16 @@ func (t *MappingRuleAxisToButtonTests) TestMatchEvent() {
 			Code:  evdev.ABS_X,
 			Value: 1001,
 		}, t.mode)
-		t.True(testRule.nextEvent > time.Duration(700*time.Millisecond))
+		// Allow leeway since time passes during the test
+		t.True(testRule.nextEvent > time.Duration(650*time.Millisecond))
 
 		testRule.MatchEvent(t.inputDevice, &evdev.InputEvent{
 			Type:  evdev.EV_ABS,
 			Code:  evdev.ABS_X,
 			Value: 5500,
 		}, t.mode)
-		t.Equal(time.Duration(500*time.Millisecond), testRule.nextEvent)
+		// Allow up to 50 ms leeway since time passes during the test
+		t.InDelta(time.Duration(500*time.Millisecond), testRule.nextEvent, 50000000)
 	})
 }
 

@@ -65,29 +65,3 @@ type RuleConfigModeSelect struct {
 	Input  RuleTargetConfigButton
 	Output RuleTargetConfigModeSelect
 }
-
-type RuleTargetConfigButton struct {
-	Device   string
-	Button   string
-	Inverted bool
-}
-
-type RuleTargetConfigAxis struct {
-	Device              string
-	Axis                string
-	DeadzoneCenter      int32 `yaml:"deadzone_center,omitempty"`
-	DeadzoneSize        int32 `yaml:"deadzone_size,omitempty"`
-	DeadzoneSizePercent int32 `yaml:"deadzone_size_percent,omitempty"`
-	DeadzoneStart       int32 `yaml:"deadzone_start,omitempty"`
-	DeadzoneEnd         int32 `yaml:"deadzone_end,omitempty"`
-	Inverted            bool
-}
-
-type RuleTargetConfigRelaxis struct {
-	Device string
-	Axis   string
-}
-
-type RuleTargetConfigModeSelect struct {
-	Modes []string
-}

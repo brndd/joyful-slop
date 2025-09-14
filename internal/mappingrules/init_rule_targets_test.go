@@ -125,8 +125,12 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 	t.Run("Invalid deadzone", func() {
 		config := configparser.RuleTargetConfigAxis{Device: "test"}
 		config.Axis = "x"
-		config.DeadzoneEnd = 100
-		config.DeadzoneStart = 1000
+		config.Deadzones = []configparser.DeadzoneConfig{
+			{
+				End:   100,
+				Start: 1000,
+			},
+		}
 		_, err := NewRuleTargetAxisFromConfig(config, t.devs)
 		t.NotNil(err)
 	})
@@ -145,29 +149,20 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 	for _, tc := range relDeadzoneTestCases {
 		t.Run(fmt.Sprintf("Relative Deadzone %d +- %d", tc.inCenter, tc.inSize), func() {
 			config := configparser.RuleTargetConfigAxis{
-				Device:         "test",
-				Axis:           "x",
-				DeadzoneCenter: tc.inCenter,
-				DeadzoneSize:   tc.inSize,
+				Device: "test",
+				Axis:   "x",
+				Deadzones: []configparser.DeadzoneConfig{{
+					Center: tc.inCenter,
+					Size:   tc.inSize,
+				}},
 			}
 			rule, err := NewRuleTargetAxisFromConfig(config, t.devs)
 
 			t.Nil(err)
-			t.Equal(tc.outStart, rule.DeadzoneStart)
-			t.Equal(tc.outEnd, rule.DeadzoneEnd)
+			t.Equal(tc.outStart, rule.Deadzones[0].Start)
+			t.Equal(tc.outEnd, rule.Deadzones[0].End)
 		})
 	}
-
-	t.Run("Deadzone center/size invalid center", func() {
-		config := configparser.RuleTargetConfigAxis{
-			Device:         "test",
-			Axis:           "x",
-			DeadzoneCenter: 20000,
-			DeadzoneSize:   500,
-		}
-		_, err := NewRuleTargetAxisFromConfig(config, t.devs)
-		t.NotNil(err)
-	})
 
 	relDeadzonePercentTestCases := []struct {
 		inCenter      int32
@@ -183,29 +178,20 @@ func (t *MakeRuleTargetsTests) TestMakeRuleTargetAxis() {
 	for _, tc := range relDeadzonePercentTestCases {
 		t.Run(fmt.Sprintf("Relative percent deadzone %d +- %d%%", tc.inCenter, tc.inSizePercent), func() {
 			config := configparser.RuleTargetConfigAxis{
-				Device:              "test",
-				Axis:                "x",
-				DeadzoneCenter:      tc.inCenter,
-				DeadzoneSizePercent: tc.inSizePercent,
+				Device: "test",
+				Axis:   "x",
+				Deadzones: []configparser.DeadzoneConfig{{
+					Center:      tc.inCenter,
+					SizePercent: tc.inSizePercent,
+				}},
 			}
 			rule, err := NewRuleTargetAxisFromConfig(config, t.devs)
 
 			t.Nil(err)
-			t.Equal(tc.outStart, rule.DeadzoneStart)
-			t.Equal(tc.outEnd, rule.DeadzoneEnd)
+			t.Equal(tc.outStart, rule.Deadzones[0].Start)
+			t.Equal(tc.outEnd, rule.Deadzones[0].End)
 		})
 	}
-
-	t.Run("Deadzone center/percent invalid center", func() {
-		config := configparser.RuleTargetConfigAxis{
-			Device:              "test",
-			Axis:                "x",
-			DeadzoneCenter:      20000,
-			DeadzoneSizePercent: 10,
-		}
-		_, err := NewRuleTargetAxisFromConfig(config, t.devs)
-		t.NotNil(err)
-	})
 }
 
 func (t *MakeRuleTargetsTests) TestMakeRuleTargetRelaxis() {

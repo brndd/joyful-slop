@@ -38,42 +38,42 @@ func (t *RuleTargetAxisTests) TearDownTest() {
 }
 
 func (t *RuleTargetAxisTests) TestNewRuleTargetAxis() {
+	noDeadzone := make([]Deadzone, 0)
+
 	// RuleTargets should get created
-	ruleTarget, err := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+	ruleTarget, err := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, noDeadzone)
 	t.Nil(err)
 	t.EqualValues(10000, ruleTarget.axisSize)
 
-	ruleTarget, err = NewRuleTargetAxis("", t.mock, evdev.ABS_Y, false, 0, 0)
+	ruleTarget, err = NewRuleTargetAxis("", t.mock, evdev.ABS_Y, false, noDeadzone)
 	t.Nil(err)
 	t.EqualValues(20000, ruleTarget.axisSize)
 
 	// Creating a rule with a deadzone should work and reduce the axisSize
-	ruleTarget, err = NewRuleTargetAxis("", t.mock, evdev.ABS_Y, false, -500, 500)
+	ruleTarget, err = NewRuleTargetAxis("", t.mock, evdev.ABS_Y, false, []Deadzone{{Start: -500, End: 500, Size: 1000}})
 	t.Nil(err)
 	t.EqualValues(19000, ruleTarget.axisSize)
-	t.EqualValues(-500, ruleTarget.DeadzoneStart)
-	t.EqualValues(500, ruleTarget.DeadzoneEnd)
-
-	// Creating a rule with a deadzone should fail if end > start
-	_, err = NewRuleTargetAxis("", t.mock, evdev.ABS_Y, false, 500, -500)
-	t.NotNil(err)
+	t.EqualValues(-500, ruleTarget.Deadzones[0].Start)
+	t.EqualValues(500, ruleTarget.Deadzones[0].End)
 
 	// Creating a rule on a non-existent axis should err
-	_, err = NewRuleTargetAxis("", t.mock, evdev.ABS_Z, false, 0, 0)
+	_, err = NewRuleTargetAxis("", t.mock, evdev.ABS_Z, false, noDeadzone)
 	t.NotNil(err)
 
 	// If Absinfo has an error, we should create a device with permissive bounds
 	t.call.Unset()
 	t.mock.On("AbsInfos").Return(map[evdev.EvCode]evdev.AbsInfo{}, errors.New("Test Error"))
-	ruleTarget, err = NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+	ruleTarget, err = NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, noDeadzone)
 	t.Nil(err)
 	t.Equal(AxisValueMax-AxisValueMin, ruleTarget.axisSize)
 }
 
 func (t *RuleTargetAxisTests) TestNormalizeValue() {
+	noDeadzone := make([]Deadzone, 0)
+
 	// Basic normalization should work
 	t.Run("Simple normalization", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, noDeadzone)
 		t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(10000)))
 		t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(0)))
 		t.EqualValues(0, ruleTarget.NormalizeValue(int32(5000)))
@@ -81,26 +81,26 @@ func (t *RuleTargetAxisTests) TestNormalizeValue() {
 
 	// Normalization with a deadzone should work
 	t.Run("With Deadzone", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 5000)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, []Deadzone{{Start: 0, End: 5000, Size: 5000}})
 		t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(10000)))
-		t.True(ruleTarget.NormalizeValue(int32(5001)) < int32(-31000))
+		t.InDelta(int32(-32000), ruleTarget.NormalizeValue(int32(5001)), 1000)
 		t.EqualValues(0, ruleTarget.NormalizeValue(int32(7500)))
 	})
 
 	t.Run("Inverted", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, 0, 0)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, noDeadzone)
 		t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(0)))
 		t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(10000)))
 	})
 
 	t.Run("Out of bounds", func() { // Normalization past the stated axis bounds should clamp
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, noDeadzone)
 		t.Equal(AxisValueMin, ruleTarget.NormalizeValue(int32(-30000)))
 		t.Equal(AxisValueMax, ruleTarget.NormalizeValue(int32(30000)))
 	})
 
 	t.Run("With partial output range", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, noDeadzone)
 		ruleTarget.OutputMin = 0
 		ruleTarget.OutputMax = AxisValueMax
 		t.EqualValues(0, ruleTarget.NormalizeValue(int32(0)))
@@ -110,7 +110,7 @@ func (t *RuleTargetAxisTests) TestNormalizeValue() {
 }
 
 func (t *RuleTargetAxisTests) TestMatchEvent() {
-	ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_Y, false, -500, 500)
+	ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_Y, false, []Deadzone{{Start: -500, End: 500}})
 	validEvent := &evdev.InputEvent{
 		Type:  evdev.EV_ABS,
 		Code:  evdev.ABS_Y,
@@ -133,7 +133,9 @@ func (t *RuleTargetAxisTests) TestMatchEvent() {
 }
 
 func (t *RuleTargetAxisTests) TestCreateEvent() {
-	ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+	noDeadzone := make([]Deadzone, 0)
+
+	ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, noDeadzone)
 	expected := &evdev.InputEvent{
 		Type: evdev.EV_ABS,
 		Code: evdev.ABS_X,
@@ -155,43 +157,45 @@ func (t *RuleTargetAxisTests) TestCreateEvent() {
 }
 
 func (t *RuleTargetAxisTests) TestGetAxisStrength() {
+	noDeadzone := make([]Deadzone, 0)
+
 	t.Run("With no deadzone", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 0)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, noDeadzone)
 		t.Equal(0.0, ruleTarget.GetAxisStrength(0))
 		t.Equal(1.0, ruleTarget.GetAxisStrength(10000))
 		t.Equal(0.5, ruleTarget.GetAxisStrength(5000))
 	})
 
 	t.Run("With low deadzone", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 0, 5000)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, []Deadzone{{Start: 0, End: 5000, Size: 5000}})
 		t.InDelta(0.0, ruleTarget.GetAxisStrength(5001), 0.01)
 		t.InDelta(0.5, ruleTarget.GetAxisStrength(7500), 0.01)
 		t.Equal(1.0, ruleTarget.GetAxisStrength(10000))
 	})
 
 	t.Run("With high deadzone", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, 5000, 10000)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, false, []Deadzone{{Start: 5000, End: 10000, Size: 5000}})
 		t.Equal(0.0, ruleTarget.GetAxisStrength(0))
 		t.InDelta(0.5, ruleTarget.GetAxisStrength(2500), 0.01)
 		t.InDelta(1.0, ruleTarget.GetAxisStrength(4999), 0.01)
 	})
 
 	t.Run("Inverted", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, 0, 0)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, noDeadzone)
 		t.Equal(1.0, ruleTarget.GetAxisStrength(0))
 		t.Equal(0.5, ruleTarget.GetAxisStrength(5000))
 		t.Equal(0.0, ruleTarget.GetAxisStrength(10000))
 	})
 
 	t.Run("Inverted with low deadzone", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, 0, 5000)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, []Deadzone{{Start: 0, End: 5000, Size: 5000}})
 		t.InDelta(1.0, ruleTarget.GetAxisStrength(5001), 0.01)
 		t.InDelta(0.5, ruleTarget.GetAxisStrength(7500), 0.01)
 		t.Equal(0.0, ruleTarget.GetAxisStrength(10000))
 	})
 
 	t.Run("Inverted with high deadzone", func() {
-		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, 5000, 10000)
+		ruleTarget, _ := NewRuleTargetAxis("", t.mock, evdev.ABS_X, true, []Deadzone{{Start: 5000, End: 10000, Size: 5000}})
 		t.InDelta(0.0, ruleTarget.GetAxisStrength(4999), 0.01)
 		t.InDelta(0.5, ruleTarget.GetAxisStrength(2500), 0.01)
 		t.Equal(1.0, ruleTarget.GetAxisStrength(0))

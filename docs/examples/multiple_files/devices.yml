@@ -1,6 +1,6 @@
 devices:
   - name: primary
-    type: virtual
+    type: Virtual
     preset: joystick
   - name: secondary
     type: virtual

@@ -92,8 +92,9 @@ rules:
     input:
       device: left-stick
       axis: RY
-      deadzone_start: 0
-      deadzone_end: 30500
+      deadzones:
+        - start: 0
+          end: 30500
     output:
       device: mouse
       axis: REL_WHEEL
@@ -108,8 +109,9 @@ rules:
     input:
       device: left-stick
       axis: RY
-      deadzone_start: 29500
-      deadzone_end: 64000
+      deadzones:
+        - start: 29500
+          end: 64000
       inverted: true
     output:
       device: mouse

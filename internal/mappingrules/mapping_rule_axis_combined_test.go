@@ -28,6 +28,7 @@ func TestRunnerMappingRuleAxisCombined(t *testing.T) {
 }
 
 func (t *MappingRuleAxisCombinedTests) SetupTest() {
+	noDeadzone := make([]Deadzone, 0)
 	mode := "*"
 	t.mode = &mode
 
@@ -37,13 +38,13 @@ func (t *MappingRuleAxisCombinedTests) SetupTest() {
 		evdev.ABS_Y: {Minimum: 0, Maximum: 10000},
 	}, nil)
 
-	t.inputTargetLower, _ = NewRuleTargetAxis("test-input", t.inputDevice, evdev.ABS_X, true, 0, 0)
+	t.inputTargetLower, _ = NewRuleTargetAxis("test-input", t.inputDevice, evdev.ABS_X, true, noDeadzone)
 	t.inputTargetLower.OutputMax = 0
-	t.inputTargetUpper, _ = NewRuleTargetAxis("test-input", t.inputDevice, evdev.ABS_Y, false, 0, 0)
+	t.inputTargetUpper, _ = NewRuleTargetAxis("test-input", t.inputDevice, evdev.ABS_Y, false, noDeadzone)
 	t.inputTargetUpper.OutputMin = 0
 
 	t.outputDevice = &evdev.InputDevice{}
-	t.outputTarget, _ = NewRuleTargetAxis("test-output", t.outputDevice, evdev.ABS_X, false, 0, 0)
+	t.outputTarget, _ = NewRuleTargetAxis("test-output", t.outputDevice, evdev.ABS_X, false, noDeadzone)
 
 	t.base = NewMappingRuleBase("", []string{"*"})
 
@@ -67,10 +68,10 @@ func (t *MappingRuleAxisCombinedTests) TestNewMappingRuleAxisCombined() {
 	}, nil)
 
 	rule := &MappingRuleAxisCombined{
-		MappingRuleBase: t.base,
-		InputLower:      t.inputTargetLower,
-		InputUpper:      t.inputTargetUpper,
-		Output:          t.outputTarget,
+		// MappingRuleBase: t.base,
+		InputLower: t.inputTargetLower,
+		InputUpper: t.inputTargetUpper,
+		// Output:          t.outputTarget,
 	}
 	t.EqualValues(0, rule.InputLower.OutputMax)
 	t.EqualValues(0, rule.InputUpper.OutputMin)
