@@ -117,7 +117,6 @@ func (target *RuleTargetAxis) NormalizeValue(value int32) int32 {
 }
 
 func (target *RuleTargetAxis) CreateEvent(value int32, mode *string) *evdev.InputEvent {
-	fmt.Println("DEBUG: Emitting event")
 	value = Clamp(value, AxisValueMin, AxisValueMax)
 	return &evdev.InputEvent{
 		Type:  evdev.EV_ABS,

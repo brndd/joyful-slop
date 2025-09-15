@@ -35,7 +35,6 @@ func NewDeadzoneFromConfig(dzConfig configparser.DeadzoneConfig, device Device, 
 	dz := Deadzone{}
 	dz.Emit = dzConfig.Emit
 	dz.EmitValue = dzConfig.Value
-	fmt.Printf("DEBUG: %d, %d\n", dzConfig.Value, dz.EmitValue)
 
 	var min, max int32
 	absInfoMap, err := device.AbsInfos()
