@@ -40,6 +40,11 @@ type RuleConfigAxis struct {
 	Output RuleTargetConfigAxis
 }
 
+type RuleConfigHat struct {
+	Input  RuleTargetConfigHat
+	Output RuleTargetConfigHat
+}
+
 type RuleConfigAxisCombined struct {
 	InputLower RuleTargetConfigAxis `yaml:"input_lower,omitempty"`
 	InputUpper RuleTargetConfigAxis `yaml:"input_upper,omitempty"`

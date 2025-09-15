@@ -31,3 +31,9 @@ type RuleTargetConfigRelaxis struct {
 type RuleTargetConfigModeSelect struct {
 	Modes []string
 }
+
+type RuleTargetConfigHat struct {
+	Device   string
+	Hat      string
+	Inverted bool
+}

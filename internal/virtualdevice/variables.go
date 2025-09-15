@@ -49,6 +49,15 @@ var (
 			evdev.ABS_RZ,
 			evdev.ABS_THROTTLE, // Also called "Slider" or "Slider1"
 			evdev.ABS_RUDDER,   // Also called "Dial", "Slider2", or "RSlider"
+			// Hats
+			evdev.ABS_HAT0X,
+			evdev.ABS_HAT0Y,
+			evdev.ABS_HAT1X,
+			evdev.ABS_HAT1Y,
+			evdev.ABS_HAT2X,
+			evdev.ABS_HAT2Y,
+			evdev.ABS_HAT3X,
+			evdev.ABS_HAT3Y,
 		},
 		evdev.EV_KEY: {
 			evdev.BTN_TRIGGER,

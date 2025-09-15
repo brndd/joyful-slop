@@ -10,13 +10,13 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 
 ### Current Features
 
-* Create virtual devices with up to 8 axes and 74 buttons.
+* Create virtual devices with up to 8 axes, 4 hats, and 74 buttons.
 * Flexible rule system that allows several different types of rules, including:
-    * Simple 1:1 mappings of buttons and axes: Button1 -> VirtualButtonA
+    * Simple 1:1 mappings of buttons, axes, and hats: Button1 -> VirtualButtonA
     * Combination mappings: Button1 + Button2 -> VirtualButtonA
     * "Split" axis mapping: map sections of an axis to different outputs using deadzones.
     * "Combined" axis mapping: map two physical axes to one virtual axis.
-    * Axis -> button mapping with optional "proportional" repeat speed (i.e. repeat faster as the axis is engaged further)
+    * Axis -> Button mapping with optional "proportional" repeat speed (i.e. repeat faster as the axis is engaged further)
     * Axis -> Relative Axis mapping, for converting a joystick axis to mouse movement and scrollwheel events.
 * Define keyboard, mouse, and gamepad outputs in addition to joysticks.
 * Configure per-rule configurable deadzones for axes, with multiple ways to specify deadzones.
@@ -27,10 +27,10 @@ Joyful is ideal for Linux gamers who enjoy space and flight sims and miss the fe
 
 * Macros - have a single input produce a sequence of button presses with configurable pauses.
 * Sequence combos - Button1, Button2, Button3 -> VirtualButtonA
-* Hat support
-* HIDRAW support for more button options.
+* Hat -> Button and Button -> Hat support.
+* HIDRAW support for more button options
 * Sensitivity Curves?
-* Packaged builds non-Arch distributions.
+* Packaged builds for non-Arch distributions.
 
 ## Configure
 

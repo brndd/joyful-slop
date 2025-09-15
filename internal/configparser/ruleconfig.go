@@ -54,6 +54,10 @@ func (dc *RuleConfig) UnmarshalYAML(unmarshal func(data interface{}) error) erro
 		config := RuleConfigModeSelect{}
 		err = unmarshal(&config)
 		dc.Config = config
+	case RuleTypeHat:
+		config := RuleConfigHat{}
+		err = unmarshal(&config)
+		dc.Config = config
 	}
 
 	return err

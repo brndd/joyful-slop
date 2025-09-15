@@ -70,6 +70,17 @@ rules:
       device: main
       axis: RZ
 
+  # Hat mapping. Hats are technically an axis, but only output -1, 0, or 1, so we don't normalize
+  # them to an output range, we just pass them through mostly unmodified
+  - type: hat
+    input:
+      device: flightstick
+      inverted: true # hats do support inversion. As with other rule types, this only has an effect on *inputs*.
+      hat: hat0x # a typical joystick hat actually has 2 hat axes: x and y
+    output:
+      device: main
+      hat: hat0x
+
   # Straightforward button mapping
   - type: button
     input:
@@ -111,8 +122,9 @@ rules:
     input:
       device: flightstick
       axis: ABS_RY # This axis commonly represents thumbsticks
-      deadzone_start: 0
-      deadzone_end: 30000
+      deadzones:
+        - start: 0
+          end: 30000
     output:
       device: main
       button: BTN_BASE4
@@ -129,8 +141,9 @@ rules:
     input:
       device: flightstick
       axis: ABS_Z
-      deadzone_start: 0
-      deadzone_end: 500
+      deadzones:
+        - start: 0
+          end: 500
     output:
       device: mouse
       button: REL_WHEEL

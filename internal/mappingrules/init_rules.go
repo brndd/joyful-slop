@@ -49,6 +49,8 @@ func NewRule(config configparser.RuleConfig, pDevs map[string]Device, vDevs map[
 		newRule, err = NewMappingRuleAxisToRelaxis(config.Config.(configparser.RuleConfigAxisToRelaxis), pDevs, vDevs, base)
 	case configparser.RuleTypeModeSelect:
 		newRule, err = NewMappingRuleModeSelect(config.Config.(configparser.RuleConfigModeSelect), pDevs, modes, base)
+	case configparser.RuleTypeHat:
+		newRule, err = NewMappingRuleHat(config.Config.(configparser.RuleConfigHat), pDevs, vDevs, base)
 	default:
 		// Shouldn't actually be possible to get here...
 		err = fmt.Errorf("bad rule type '%s' for rule '%s'", config.Type, config.Name)

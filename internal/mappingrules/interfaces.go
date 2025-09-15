@@ -22,9 +22,6 @@ type RuleTarget interface {
 	// (e.g., inverting the value if Inverted == true)
 	NormalizeValue(int32) int32
 
-	// MatchEvent returns true if the provided device and input event are a match for this rule target
-	ValidateEvent(*evdev.InputDevice, *evdev.InputEvent) bool
-
 	// CreateEvent creates an event that can be emitted on a virtual device.
 	// For RuleTargetModeSelect, this method modifies the active mode and returns nil.
 	//
@@ -35,6 +32,7 @@ type RuleTarget interface {
 	// for most implementations.
 	CreateEvent(int32, *string) *evdev.InputEvent
 
+	// MatchEvent returns true if the provided device and input event are a match for this rule target
 	MatchEvent(device Device, event *evdev.InputEvent) bool
 }
 

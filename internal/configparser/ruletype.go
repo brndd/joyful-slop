@@ -18,6 +18,7 @@ const (
 	RuleTypeAxisToButton  RuleType = "axis-to-button"
 	RuleTypeAxisToRelaxis RuleType = "axis-to-relaxis"
 	RuleTypeModeSelect    RuleType = "mode-select"
+	RuleTypeHat           RuleType = "hat"
 )
 
 var (
@@ -30,6 +31,7 @@ var (
 		"axis-to-button":  RuleTypeAxisToButton,
 		"axis-to-relaxis": RuleTypeAxisToRelaxis,
 		"mode-select":     RuleTypeModeSelect,
+		"hat":             RuleTypeHat,
 	}
 )
 
