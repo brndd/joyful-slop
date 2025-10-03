@@ -63,7 +63,7 @@ rules:
       device: flightstick
       axis: X
       inverted: true # the lower half of the axis will often need to be inverted
-    input_uppper:
+    input_upper:
       device: flightstick
       axis: RX
     output:
