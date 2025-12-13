@@ -53,9 +53,11 @@ func main() {
 	rules, eventChannel, cancel, wg := loadRules(config, pDevices, vDevicesByName, modes)
 
 	// initialize TTS phrases for modes
-	for _, m := range modes {
-		tts.AddMessage(m)
-		logger.LogDebugf("Added TTS message '%s'", m)
+	if !ttsOps.Disabled {
+		for _, m := range modes {
+			tts.AddMessage(m)
+			logger.LogDebugf("Added TTS message '%s'", m)
+		}
 	}
 
 	fmt.Println("Joyful Running! Press Ctrl+C to quit. Press Enter to reload rules.")
