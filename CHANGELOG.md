@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ### Added
 - Add `hold` parameter for button-to-axis mappings.
 - Add ability to set VendorId and ProductId on virtual devices. (thanks [evilu](https://codeberg.org/evilu))
