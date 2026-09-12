@@ -119,6 +119,9 @@ rules:
     # and a button press every 10 milliseconds at the axis' maximum value.
     repeat_rate_min: 1000
     repeat_rate_max: 10
+    # If hold is set to true, when the rule is triggered the button will be active until the rule is no longer triggered.
+    # Repeat rate settings are ignored when hold is true.
+    hold: false
     input:
       device: flightstick
       axis: ABS_RY # This axis commonly represents thumbsticks

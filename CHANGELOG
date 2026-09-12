@@ -1,0 +1,7 @@
+# Changelog
+
+### Added
+- Add `hold` parameter for button-to-axis mappings.
+
+### Fixed
+- Fixed possible crash when TTS is disabled. (thanks [Tsudico](https://codeberg.org/Tsudico))

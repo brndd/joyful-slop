@@ -52,6 +52,7 @@ type RuleConfigAxisCombined struct {
 }
 
 type RuleConfigAxisToButton struct {
+	Hold          bool
 	RepeatRateMin int `yaml:"repeat_rate_min,omitempty"`
 	RepeatRateMax int `yaml:"repeat_rate_max,omitempty"`
 	Input         RuleTargetConfigAxis

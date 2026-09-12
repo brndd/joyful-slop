@@ -14,6 +14,7 @@ type MappingRuleAxisToButton struct {
 	MappingRuleBase
 	Input         *RuleTargetAxis
 	Output        *RuleTargetButton
+	Hold          bool
 	RepeatRateMin int
 	RepeatRateMax int
 	nextEvent     time.Duration
@@ -43,6 +44,7 @@ func NewMappingRuleAxisToButton(ruleConfig configparser.RuleConfigAxisToButton,
 		MappingRuleBase: base,
 		Input:           input,
 		Output:          output,
+		Hold:            ruleConfig.Hold,
 		RepeatRateMin:   ruleConfig.RepeatRateMin,
 		RepeatRateMax:   ruleConfig.RepeatRateMax,
 		lastEvent:       time.Now(),
@@ -59,6 +61,10 @@ func (rule *MappingRuleAxisToButton) MatchEvent(device Device, event *evdev.Inpu
 	if !rule.MappingRuleBase.modeCheck(mode) ||
 		!rule.Input.MatchEventDeviceAndCode(device, event) {
 		return nil, nil
+	}
+
+	if rule.Hold {
+		return rule.matchHoldMode(device, event)
 	}
 
 	// If we're inside the deadzone, unset the next event
@@ -86,9 +92,31 @@ func (rule *MappingRuleAxisToButton) MatchEvent(device Device, event *evdev.Inpu
 	return nil, nil
 }
 
+func (rule *MappingRuleAxisToButton) matchHoldMode(device Device, event *evdev.InputEvent) (*evdev.InputDevice, *evdev.InputEvent) {
+	if rule.Input.InDeadZone(event.Value) {
+		if !rule.pressed {
+			return nil, nil
+		}
+		rule.pressed = false
+		return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(0, nil)
+	}
+
+	if rule.pressed {
+		return nil, nil
+	}
+
+	rule.pressed = true
+	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(1, nil)
+}
+
 // TimerEvent returns an event when enough time has passed (compared to the last recorded axis value)
 // to emit an event.
 func (rule *MappingRuleAxisToButton) TimerEvent() *evdev.InputEvent {
+	// If Hold is true, we want to act like a rule with no timer component
+	if rule.Hold {
+		return nil
+	}
+
 	// If we pressed the button last tick, release it before doing anything else
 	if rule.pressed {
 		rule.pressed = false
