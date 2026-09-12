@@ -7,10 +7,11 @@ const (
 	DevicePresetGamepad  = "gamepad"
 	DevicePresetJoystick = "joystick"
 	DevicePresetMouse    = "mouse"
-	
-	VirtualDeviceVendorId = 0x4711
-	VirtualDeviceDeviceId = 0x0816
-	VirtualDeviceMaxButtons = 74
+
+	// These defaults are taken or inferred from the go-evdev library
+	VirtualDeviceDefaultVendorId = 0x4711
+	VirtualDeviceDefaultDeviceId = 0x0816
+	VirtualDeviceMaxButtons      = 74
 )
 
 // Device Presets

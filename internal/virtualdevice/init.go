@@ -3,22 +3,23 @@ package virtualdevice
 import (
 	"fmt"
 
+	"strconv"
+
 	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"git.annabunches.net/annabunches/joyful/internal/eventcodes"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
 	"github.com/holoplot/go-evdev"
-	"strconv"
 )
 
 func ParseUInt16(s string, def uint16) uint16 {
-    if s == "" {
-        return def
-    }
-    v, err := strconv.ParseUint(s, 0, 16)
-    if err != nil {
-        return def
-    }
-    return uint16(v)
+	if s == "" {
+		return def
+	}
+	v, err := strconv.ParseUint(s, 0, 16)
+	if err != nil {
+		return def
+	}
+	return uint16(v)
 }
 
 // NewEventBuffer takes a virtual device config specification, creates the underlying
@@ -50,11 +51,11 @@ func NewEventBuffer(config configparser.DeviceConfigVirtual) (*EventBuffer, erro
 
 	device, err := evdev.CreateDevice(
 		name,
-		// TODO: placeholders. BusType = differentiate between input bus (3 = usb), Vendor = uint16 vendor id, Product: uint16 devoce id, Version = device version (differentiate between differing versions of exact same device)
 		evdev.InputID{
+			// 3 specifies USB bus type
 			BusType: 0x03,
-			Vendor:  ParseUInt16(config.VendorId, VirtualDeviceVendorId),
-			Product: ParseUInt16(config.DeviceId, VirtualDeviceDeviceId),
+			Vendor:  ParseUInt16(config.VendorId, VirtualDeviceDefaultVendorId),
+			Product: ParseUInt16(config.DeviceId, VirtualDeviceDefaultDeviceId),
 			Version: 1,
 		},
 		capabilities,
