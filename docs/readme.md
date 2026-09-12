@@ -48,6 +48,7 @@ All `rules` must have a `type` parameter. Valid values for this parameter are:
 * `axis-combined` - a mapping that combines 2 input axes into a single output axis.
 * `axis-to-button` - causes an axis input to produce a button output. This can be repeated with variable speed proportional to the axis' input value
 * `axis-to-relaxis` - like axis-to-button, but produces a "relative axis" output value. This is useful for simulating mouse scrollwheel and movement events.
+* `mode-select` - selects the next mode. See the section on modes.
 * `hat` - a special type of axis with ternary output. Each joystick hat will typically be 2 hat axes named `ABS_HAT0X` / `ABS_HAT0Y`, where the `0` is an index between 0 - 3. So for a typical hat you would define 2 `hat` rules.
 
 Configuration options for each rule type vary. See [examples/ruletypes.yml](examples/ruletypes.yml) for an example of each type with all options specified.
@@ -115,3 +116,5 @@ rules:
       - mode3
     # define the rest of the rule here...
 ```
+
+Modes can be selected by using the `mode-select` rule, see rules configuration, and rule `ButtonBoxModeShift` [examples/multiple_files/buttons.yml](examples/multiple_files/buttons.yml) for an example.
