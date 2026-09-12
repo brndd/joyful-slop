@@ -11,6 +11,8 @@ type Config struct {
 // TODO: configure custom unmarshaling so we can overload Buttons, Axes, and RelativeAxes...
 type DeviceConfigVirtual struct {
 	Name            string
+	VendorId				string `yaml:"vendor_id,omitempty"`
+	DeviceId				string `yaml:"device_id,omitempty"`
 	Preset          string
 	NumButtons      int `yaml:"num_buttons,omitempty"`
 	NumAxes         int `yaml:"num_axes,omitempty"`
