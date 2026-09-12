@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2] - Unreleased
+## [0.2] - 2026-09-12
 
 ### Added
 - Add `hold` parameter for button-to-axis mappings.
