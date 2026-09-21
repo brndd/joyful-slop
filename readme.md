@@ -1,4 +1,13 @@
-# Joyful - joystick remapper for Linux
+# Joyful Slop - vibecoded personal fork of Joyful, the Linux joystick remapper
+
+This is a slop fork of [Joyful](https://codeberg.org/annabunches/joyful) with some quick slop commits that adds:
+- Modifier buttons
+- "Hold" buttons (tapping and holding down produce different virtual button outputs)
+- Some smaller fixes
+
+Original readme follows.
+
+---
 
 Joyful is a Linux tool for mapping inputs from various joystick-like devices to "virtual" output devices. This is useful when playing games that don't support multiple joysticks, or for games that don't gracefully handle devices changing order (e.g., Star Citizen).
 
