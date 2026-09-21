@@ -33,6 +33,11 @@ type MappingRuleButtonTempo struct {
 	pendingReleaseAt time.Time
 }
 
+func (*MappingRuleButtonTempo) ChangesMode() {}
+func (rule *MappingRuleButtonTempo) ModeChangeActive() bool {
+	return rule.active
+}
+
 func NewMappingRuleButtonTempo(ruleConfig configparser.RuleConfigButtonTempo, pDevs, vDevs map[string]Device, modes []string, base MappingRuleBase) (*MappingRuleButtonTempo, error) {
 	if ruleConfig.ThresholdMs <= 0 {
 		return nil, errors.New("button-tempo threshold_ms must be positive")
@@ -137,5 +142,30 @@ func branchEvents(branch buttonTempoBranch, value int32, mode *string) []OutputE
 		*mode = branch.mode
 		logger.Logf("Mode changed to '%s'", *mode)
 	}
+	return events
+}
+
+func (rule *MappingRuleButtonTempo) ModeChanged(newMode string, initiated bool) []OutputEvent {
+	if initiated || rule.MappingRuleBase.modeMatches(newMode) {
+		return nil
+	}
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleButtonTempo) Reset(_ *string) []OutputEvent {
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleButtonTempo) deactivate() []OutputEvent {
+	var events []OutputEvent
+	if rule.held {
+		events = append(events, branchEvents(rule.hold, 0, nil)...)
+	}
+	if rule.pendingRelease {
+		events = append(events, branchEvents(rule.pendingBranch, 0, nil)...)
+	}
+	rule.active = false
+	rule.held = false
+	rule.pendingRelease = false
 	return events
 }

@@ -11,6 +11,11 @@ type MappingRuleModeSelect struct {
 	Output *RuleTargetModeSelect
 }
 
+func (*MappingRuleModeSelect) ChangesMode() {}
+func (*MappingRuleModeSelect) ModeChangeActive() bool {
+	return false
+}
+
 func NewMappingRuleModeSelect(ruleConfig configparser.RuleConfigModeSelect,
 	pDevs map[string]Device,
 	modes []string,

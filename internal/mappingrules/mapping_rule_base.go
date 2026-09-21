@@ -22,8 +22,12 @@ func NewMappingRuleBase(
 }
 
 func (rule *MappingRuleBase) modeCheck(mode *string) bool {
+	return rule.modeMatches(*mode)
+}
+
+func (rule *MappingRuleBase) modeMatches(mode string) bool {
 	if rule.Modes[0] == "*" {
 		return true
 	}
-	return slices.Contains(rule.Modes, *mode)
+	return slices.Contains(rule.Modes, mode)
 }

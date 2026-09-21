@@ -158,3 +158,24 @@ func (rule *MappingRuleAxisToButton) TimerEvents(_ *string) []OutputEvent {
 	}
 	return []OutputEvent{{Device: rule.GetOutputDevice(), Event: event}}
 }
+
+func (rule *MappingRuleAxisToButton) ModeChanged(newMode string, initiated bool) []OutputEvent {
+	if initiated || rule.MappingRuleBase.modeMatches(newMode) {
+		return nil
+	}
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleAxisToButton) Reset(_ *string) []OutputEvent {
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleAxisToButton) deactivate() []OutputEvent {
+	rule.nextEvent = NoNextEvent
+	rule.active = false
+	if !rule.pressed {
+		return nil
+	}
+	rule.pressed = false
+	return []OutputEvent{{Device: rule.GetOutputDevice(), Event: rule.Output.CreateEvent(0, nil)}}
+}

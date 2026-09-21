@@ -28,6 +28,26 @@ type SilentModeChangeRule interface {
 	SilentModeChange()
 }
 
+// ModeChangingRule identifies rules that can request a mode change. Only one
+// such rule may handle a single input event.
+type ModeChangingRule interface {
+	MappingRule
+	ChangesMode()
+	ModeChangeActive() bool
+}
+
+// ModeTransitionRule lets stateful rules release outputs and cancel work when
+// they are no longer active in a newly selected mode. initiated is true for
+// the rule that requested the mode change.
+type ModeTransitionRule interface {
+	ModeChanged(newMode string, initiated bool) []OutputEvent
+}
+
+// ResettableRule releases output and clears state before rules are discarded.
+type ResettableRule interface {
+	Reset(*string) []OutputEvent
+}
+
 type TimedEventEmitter interface {
 	TimerEvent() *evdev.InputEvent
 	GetOutputDevice() *evdev.InputDevice

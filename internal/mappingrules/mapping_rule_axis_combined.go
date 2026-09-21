@@ -11,6 +11,7 @@ type MappingRuleAxisCombined struct {
 	InputLower *RuleTargetAxis
 	InputUpper *RuleTargetAxis
 	Output     *RuleTargetAxis
+	active     bool
 }
 
 func NewMappingRuleAxisCombined(ruleConfig configparser.RuleConfigAxisCombined,
@@ -56,8 +57,28 @@ func (rule *MappingRuleAxisCombined) MatchEvent(device Device, event *evdev.Inpu
 	var value int32
 	value += getValueFromAbs(rule.InputLower)
 	value += getValueFromAbs(rule.InputUpper)
+	rule.active = value != 0
 
 	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(value, mode)
+}
+
+func (rule *MappingRuleAxisCombined) ModeChanged(newMode string, initiated bool) []OutputEvent {
+	if initiated || rule.MappingRuleBase.modeMatches(newMode) {
+		return nil
+	}
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleAxisCombined) Reset(_ *string) []OutputEvent {
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleAxisCombined) deactivate() []OutputEvent {
+	if !rule.active {
+		return nil
+	}
+	rule.active = false
+	return []OutputEvent{{Device: rule.Output.Device.(*evdev.InputDevice), Event: rule.Output.CreateEvent(0, nil)}}
 }
 
 func getValueFromAbs(ruleTarget *RuleTargetAxis) int32 {

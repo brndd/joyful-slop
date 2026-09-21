@@ -104,6 +104,8 @@ The first mode that Joyful reads will be the mode that Joyful starts up in. For 
 
 Once modes are defined, each rule may specify a `modes` parameter. That rule will only be processed if a matching mode is active. If a rule omits the `modes` parameter, it will be processed in all modes.
 
+When a mode is exited, active outputs owned by rules that do not apply to the new mode are released or centered immediately, and repeating outputs are stopped. A physical control that remains held does not activate its mapping in the new mode; release and actuate it again. Reloading rules clears active outputs and restores the startup mode.
+
 For example:
 
 ```

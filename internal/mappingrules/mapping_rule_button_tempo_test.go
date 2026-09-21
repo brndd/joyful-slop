@@ -100,3 +100,20 @@ func TestButtonTempoNewPressDrainsPendingRelease(t *testing.T) {
 	require.Len(t, events, 2)
 	require.Equal(t, []int32{0, 0}, []int32{events[0].Event.Value, events[1].Event.Value})
 }
+
+func TestButtonTempoExternalModeChangeReleasesHeldOutputs(t *testing.T) {
+	rule, clock, inputDevice, mode := newButtonTempoTestRule(t)
+	rule.MappingRuleBase = NewMappingRuleBase("", []string{"base"})
+	rule.MatchEvents(inputDevice, buttonInput(1), mode)
+	clock.Advance(500 * time.Millisecond)
+
+	presses := rule.TimerEvents(mode)
+	require.Len(t, presses, 2)
+	require.Empty(t, rule.ModeChanged(*mode, true), "the initiating transition must preserve the hold")
+
+	releases := rule.ModeChanged("other", false)
+	require.Len(t, releases, 2)
+	require.Equal(t, []int32{0, 0}, []int32{releases[0].Event.Value, releases[1].Event.Value})
+	require.False(t, rule.active)
+	require.False(t, rule.held)
+}

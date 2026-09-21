@@ -57,3 +57,22 @@ func (rule *MappingRuleButtonLatched) MatchEvent(device Device, event *evdev.Inp
 
 	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(value, mode)
 }
+
+func (rule *MappingRuleButtonLatched) ModeChanged(newMode string, initiated bool) []OutputEvent {
+	if initiated || rule.MappingRuleBase.modeMatches(newMode) {
+		return nil
+	}
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleButtonLatched) Reset(_ *string) []OutputEvent {
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleButtonLatched) deactivate() []OutputEvent {
+	if !rule.State {
+		return nil
+	}
+	rule.State = false
+	return []OutputEvent{{Device: rule.Output.Device.(*evdev.InputDevice), Event: rule.Output.CreateEvent(0, nil)}}
+}

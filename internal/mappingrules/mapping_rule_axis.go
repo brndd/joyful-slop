@@ -10,6 +10,7 @@ type MappingRuleAxis struct {
 	MappingRuleBase
 	Input  *RuleTargetAxis
 	Output *RuleTargetAxis
+	active bool
 }
 
 func NewMappingRuleAxis(ruleConfig configparser.RuleConfigAxis,
@@ -40,6 +41,27 @@ func (rule *MappingRuleAxis) MatchEvent(device Device, event *evdev.InputEvent, 
 		return nil, nil
 	}
 
+	value := rule.Input.NormalizeValue(event.Value)
+	rule.active = value != 0
 	// The cast here is safe because the interface is only ever different for unit tests
-	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(rule.Input.NormalizeValue(event.Value), mode)
+	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(value, mode)
+}
+
+func (rule *MappingRuleAxis) ModeChanged(newMode string, initiated bool) []OutputEvent {
+	if initiated || rule.MappingRuleBase.modeMatches(newMode) {
+		return nil
+	}
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleAxis) Reset(_ *string) []OutputEvent {
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleAxis) deactivate() []OutputEvent {
+	if !rule.active {
+		return nil
+	}
+	rule.active = false
+	return []OutputEvent{{Device: rule.Output.Device.(*evdev.InputDevice), Event: rule.Output.CreateEvent(0, nil)}}
 }

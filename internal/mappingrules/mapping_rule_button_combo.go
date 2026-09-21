@@ -77,3 +77,23 @@ func (rule *MappingRuleButtonCombo) MatchEvent(device Device, event *evdev.Input
 	}
 	return nil, nil
 }
+
+func (rule *MappingRuleButtonCombo) ModeChanged(newMode string, initiated bool) []OutputEvent {
+	if initiated || rule.MappingRuleBase.modeMatches(newMode) {
+		return nil
+	}
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleButtonCombo) Reset(_ *string) []OutputEvent {
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleButtonCombo) deactivate() []OutputEvent {
+	wasPressed := rule.State == len(rule.Inputs)
+	rule.State = 0
+	if !wasPressed {
+		return nil
+	}
+	return []OutputEvent{{Device: rule.Output.Device.(*evdev.InputDevice), Event: rule.Output.CreateEvent(0, nil)}}
+}

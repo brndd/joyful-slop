@@ -17,6 +17,10 @@ type MappingRuleModeShift struct {
 }
 
 func (*MappingRuleModeShift) SilentModeChange() {}
+func (*MappingRuleModeShift) ChangesMode()      {}
+func (rule *MappingRuleModeShift) ModeChangeActive() bool {
+	return rule.active
+}
 
 func NewMappingRuleModeShift(ruleConfig configparser.RuleConfigModeShift, pDevs map[string]Device, modes []string, base MappingRuleBase) (*MappingRuleModeShift, error) {
 	if !validateModes([]string{ruleConfig.Mode}, modes) {
@@ -48,4 +52,13 @@ func (rule *MappingRuleModeShift) MatchEvent(device Device, event *evdev.InputEv
 		logger.Logf("Mode changed to '%s'", *mode)
 	}
 	return nil, nil
+}
+
+func (rule *MappingRuleModeShift) Reset(mode *string) []OutputEvent {
+	if rule.active {
+		*mode = rule.previousMode
+	}
+	rule.active = false
+	rule.previousMode = ""
+	return nil
 }

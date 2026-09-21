@@ -110,3 +110,16 @@ func (rule *MappingRuleAxisToRelaxis) TimerEvents(_ *string) []OutputEvent {
 	}
 	return []OutputEvent{{Device: rule.GetOutputDevice(), Event: event}}
 }
+
+func (rule *MappingRuleAxisToRelaxis) ModeChanged(newMode string, initiated bool) []OutputEvent {
+	if initiated || rule.MappingRuleBase.modeMatches(newMode) {
+		return nil
+	}
+	rule.nextEvent = NoNextEvent
+	return nil
+}
+
+func (rule *MappingRuleAxisToRelaxis) Reset(_ *string) []OutputEvent {
+	rule.nextEvent = NoNextEvent
+	return nil
+}

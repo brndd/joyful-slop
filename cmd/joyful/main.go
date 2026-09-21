@@ -49,6 +49,7 @@ func main() {
 	} else {
 		mode = config.Modes[0]
 	}
+	initialMode := mode
 
 	// Load the rules
 	rules, eventChannel, cancel, wg := loadRules(config, pDevices, vDevicesByName, modes)
@@ -83,26 +84,19 @@ func main() {
 				}
 
 			case evdev.EV_KEY, evdev.EV_ABS:
-				// We have a matchable event type. Check all the events
-				for _, rule := range rules {
-					modeBeforeRule := mode
-					if multiRule, ok := rule.(mappingrules.MultiEventMappingRule); ok {
-						for _, output := range multiRule.MatchEvents(channelEvent.Device, channelEvent.Event, &mode) {
-							vBuffersByDevice[output.Device].AddEvent(output.Event)
-						}
-						if modeBeforeRule != mode {
-							_, suppressModeAnnouncement = rule.(mappingrules.SilentModeChangeRule)
-						}
-						continue
+				// All rules see the mode that was active when this input arrived.
+				// A requested mode change is applied after dispatch so rule order
+				// cannot split one event across two modes.
+				outputs, requestedMode, modeChangeRule := matchRules(rules, channelEvent.Device, channelEvent.Event, mode)
+				for _, output := range outputs {
+					vBuffersByDevice[output.Device].AddEvent(output.Event)
+				}
+				if modeChangeRule != nil {
+					mode = requestedMode
+					_, suppressModeAnnouncement = modeChangeRule.(mappingrules.SilentModeChangeRule)
+					for _, output := range modeTransitionEvents(rules, mode, modeChangeRule) {
+						vBuffersByDevice[output.Device].AddEvent(output.Event)
 					}
-					device, outputEvent := rule.MatchEvent(channelEvent.Device, channelEvent.Event, &mode)
-					if modeBeforeRule != mode {
-						_, suppressModeAnnouncement = rule.(mappingrules.SilentModeChangeRule)
-					}
-					if device == nil || outputEvent == nil {
-						continue
-					}
-					vBuffersByDevice[device].AddEvent(outputEvent)
 				}
 			}
 
@@ -110,9 +104,20 @@ func main() {
 			// Evaluate timed rules here, never in the timer goroutine. This keeps mode
 			// and rule state changes serialized with physical input processing.
 			changedBuffers := make(map[*evdev.InputDevice]struct{})
-			for _, output := range channelEvent.Rule.TimerEvents(&mode) {
+			timerMode := mode
+			for _, output := range channelEvent.Rule.TimerEvents(&timerMode) {
 				vBuffersByDevice[output.Device].AddEvent(output.Event)
 				changedBuffers[output.Device] = struct{}{}
+			}
+			if timerMode != mode {
+				mode = timerMode
+				if rule, ok := channelEvent.Rule.(mappingrules.MappingRule); ok {
+					_, suppressModeAnnouncement = rule.(mappingrules.SilentModeChangeRule)
+					for _, output := range modeTransitionEvents(rules, mode, rule) {
+						vBuffersByDevice[output.Device].AddEvent(output.Event)
+						changedBuffers[output.Device] = struct{}{}
+					}
+				}
 			}
 			for device := range changedBuffers {
 				vBuffersByDevice[device].SendEvents()
@@ -127,12 +132,18 @@ func main() {
 			}
 
 			fmt.Println("Reloading rules.")
+			for _, output := range resetRuleEvents(rules, &mode, initialMode) {
+				vBuffersByDevice[output.Device].AddEvent(output.Event)
+			}
+			for _, buffer := range vBuffersByName {
+				buffer.SendEvents()
+			}
 			cancel()
 			fmt.Println("Waiting for existing listeners to exit. Provide input from each of your devices.")
 			wg.Wait()
 			fmt.Println("Listeners exited. Loading new rules.")
 			rules, eventChannel, cancel, wg = loadRules(config, pDevices, vDevicesByName, modes)
-			fmt.Println("Config re-loaded. Only rule changes applied. Device and Mode changes require restart.")
+			fmt.Println("Config re-loaded. Active outputs cleared and startup mode restored. Device and Mode configuration changes require restart.")
 		}
 
 		if shouldAnnounceModeChange(lastMode, mode, suppressModeAnnouncement) && tts != nil {
@@ -143,4 +154,52 @@ func main() {
 
 func shouldAnnounceModeChange(previous, current string, suppressed bool) bool {
 	return previous != current && !suppressed
+}
+
+func matchRules(rules []mappingrules.MappingRule, device mappingrules.Device, event *evdev.InputEvent, mode string) ([]mappingrules.OutputEvent, string, mappingrules.MappingRule) {
+	var outputs []mappingrules.OutputEvent
+	requestedMode := mode
+	var modeChangeRule mappingrules.MappingRule
+	for _, rule := range rules {
+		if modeChangeRule != nil {
+			if modeRule, changesMode := rule.(mappingrules.ModeChangingRule); changesMode && !modeRule.ModeChangeActive() {
+				continue
+			}
+		}
+		ruleMode := mode
+		if multiRule, ok := rule.(mappingrules.MultiEventMappingRule); ok {
+			outputs = append(outputs, multiRule.MatchEvents(device, event, &ruleMode)...)
+		} else {
+			outputDevice, outputEvent := rule.MatchEvent(device, event, &ruleMode)
+			if outputDevice != nil && outputEvent != nil {
+				outputs = append(outputs, mappingrules.OutputEvent{Device: outputDevice, Event: outputEvent})
+			}
+		}
+		if modeChangeRule == nil && ruleMode != mode {
+			requestedMode = ruleMode
+			modeChangeRule = rule
+		}
+	}
+	return outputs, requestedMode, modeChangeRule
+}
+
+func modeTransitionEvents(rules []mappingrules.MappingRule, newMode string, initiator mappingrules.MappingRule) []mappingrules.OutputEvent {
+	var events []mappingrules.OutputEvent
+	for _, rule := range rules {
+		if transitionRule, ok := rule.(mappingrules.ModeTransitionRule); ok {
+			events = append(events, transitionRule.ModeChanged(newMode, rule == initiator)...)
+		}
+	}
+	return events
+}
+
+func resetRuleEvents(rules []mappingrules.MappingRule, mode *string, initialMode string) []mappingrules.OutputEvent {
+	var events []mappingrules.OutputEvent
+	for _, rule := range rules {
+		if resettableRule, ok := rule.(mappingrules.ResettableRule); ok {
+			events = append(events, resettableRule.Reset(mode)...)
+		}
+	}
+	*mode = initialMode
+	return events
 }

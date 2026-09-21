@@ -10,6 +10,7 @@ type MappingRuleButton struct {
 	MappingRuleBase
 	Input  *RuleTargetButton
 	Output *RuleTargetButton
+	active bool
 }
 
 func NewMappingRuleButton(ruleConfig configparser.RuleConfigButton,
@@ -44,5 +45,26 @@ func (rule *MappingRuleButton) MatchEvent(device Device, event *evdev.InputEvent
 		return nil, nil
 	}
 
-	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(rule.Input.NormalizeValue(event.Value), mode)
+	value := rule.Input.NormalizeValue(event.Value)
+	rule.active = value != 0
+	return rule.Output.Device.(*evdev.InputDevice), rule.Output.CreateEvent(value, mode)
+}
+
+func (rule *MappingRuleButton) ModeChanged(newMode string, initiated bool) []OutputEvent {
+	if initiated || rule.MappingRuleBase.modeMatches(newMode) {
+		return nil
+	}
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleButton) Reset(_ *string) []OutputEvent {
+	return rule.deactivate()
+}
+
+func (rule *MappingRuleButton) deactivate() []OutputEvent {
+	if !rule.active {
+		return nil
+	}
+	rule.active = false
+	return []OutputEvent{{Device: rule.Output.Device.(*evdev.InputDevice), Event: rule.Output.CreateEvent(0, nil)}}
 }
