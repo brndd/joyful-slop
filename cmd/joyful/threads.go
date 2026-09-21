@@ -80,7 +80,7 @@ func consoleWatcher(channel chan<- ChannelEvent) {
 		_, err := stdin.ReadString('\n')
 		if err != nil {
 			logger.LogErrorf(err, "Error in console input thread")
-			continue
+			return
 		}
 
 		channel <- ChannelEvent{
