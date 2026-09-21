@@ -102,3 +102,11 @@ func (rule *MappingRuleAxisToRelaxis) TimerEvent() *evdev.InputEvent {
 func (rule *MappingRuleAxisToRelaxis) GetOutputDevice() *evdev.InputDevice {
 	return rule.Output.Device.(*evdev.InputDevice)
 }
+
+func (rule *MappingRuleAxisToRelaxis) TimerEvents(_ *string) []OutputEvent {
+	event := rule.TimerEvent()
+	if event == nil {
+		return nil
+	}
+	return []OutputEvent{{Device: rule.GetOutputDevice(), Event: event}}
+}

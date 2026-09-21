@@ -34,6 +34,10 @@ func (dc *RuleConfig) UnmarshalYAML(unmarshal func(data interface{}) error) erro
 		config := RuleConfigButtonLatched{}
 		err = unmarshal(&config)
 		dc.Config = config
+	case RuleTypeButtonTempo:
+		config := RuleConfigButtonTempo{}
+		err = unmarshal(&config)
+		dc.Config = config
 	case RuleTypeAxis:
 		config := RuleConfigAxis{}
 		err = unmarshal(&config)
@@ -52,6 +56,10 @@ func (dc *RuleConfig) UnmarshalYAML(unmarshal func(data interface{}) error) erro
 		dc.Config = config
 	case RuleTypeModeSelect:
 		config := RuleConfigModeSelect{}
+		err = unmarshal(&config)
+		dc.Config = config
+	case RuleTypeModeShift:
+		config := RuleConfigModeShift{}
 		err = unmarshal(&config)
 		dc.Config = config
 	case RuleTypeHat:

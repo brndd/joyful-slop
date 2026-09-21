@@ -48,7 +48,7 @@ func eventWatcher(
 }
 
 func timerWatcher(
-	rule mappingrules.TimedEventEmitter,
+	rule mappingrules.MainLoopTimedEventEmitter,
 	channel chan<- ChannelEvent,
 	ctx context.Context,
 	wg *sync.WaitGroup) {
@@ -63,13 +63,10 @@ func timerWatcher(
 			// Proceed
 		}
 
-		event := rule.TimerEvent()
-		if event != nil {
-			channel <- ChannelEvent{
-				Device: rule.GetOutputDevice(),
-				Event:  event,
-				Type:   ChannelEventTimer,
-			}
+		select {
+		case channel <- ChannelEvent{Rule: rule, Type: ChannelEventTimer}:
+		case <-ctx.Done():
+			return
 		}
 		time.Sleep(TimerCheckIntervalMs * time.Millisecond)
 	}

@@ -10,9 +10,33 @@ type MappingRule interface {
 	MatchEvent(Device, *evdev.InputEvent, *string) (*evdev.InputDevice, *evdev.InputEvent)
 }
 
+type OutputEvent struct {
+	Device *evdev.InputDevice
+	Event  *evdev.InputEvent
+}
+
+// MultiEventMappingRule is used by rules that can produce several events for one input.
+type MultiEventMappingRule interface {
+	MappingRule
+	MatchEvents(Device, *evdev.InputEvent, *string) []OutputEvent
+}
+
+// SilentModeChangeRule marks momentary layer changes that should not be
+// announced as persistent user-selected modes.
+type SilentModeChangeRule interface {
+	MappingRule
+	SilentModeChange()
+}
+
 type TimedEventEmitter interface {
 	TimerEvent() *evdev.InputEvent
 	GetOutputDevice() *evdev.InputDevice
+}
+
+// MainLoopTimedEventEmitter is polled by a timer goroutine, but evaluated by the
+// main event loop so rule state and the active mode are changed in one place.
+type MainLoopTimedEventEmitter interface {
+	TimerEvents(*string) []OutputEvent
 }
 
 // RuleTargets represent either a device input to match on, or an output to produce.

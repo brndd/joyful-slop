@@ -1,6 +1,9 @@
 package main
 
-import "github.com/holoplot/go-evdev"
+import (
+	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
+	"github.com/holoplot/go-evdev"
+)
 
 type ChannelEventType int
 
@@ -14,4 +17,5 @@ type ChannelEvent struct {
 	Type   ChannelEventType
 	Device *evdev.InputDevice
 	Event  *evdev.InputEvent
+	Rule   mappingrules.MainLoopTimedEventEmitter
 }

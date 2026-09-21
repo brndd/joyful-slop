@@ -13,11 +13,13 @@ const (
 	RuleTypeButton        RuleType = "button"
 	RuleTypeButtonCombo   RuleType = "button-combo"
 	RuleTypeButtonLatched RuleType = "button-latched"
+	RuleTypeButtonTempo   RuleType = "button-tempo"
 	RuleTypeAxis          RuleType = "axis"
 	RuleTypeAxisCombined  RuleType = "axis-combined"
 	RuleTypeAxisToButton  RuleType = "axis-to-button"
 	RuleTypeAxisToRelaxis RuleType = "axis-to-relaxis"
 	RuleTypeModeSelect    RuleType = "mode-select"
+	RuleTypeModeShift     RuleType = "mode-shift"
 	RuleTypeHat           RuleType = "hat"
 )
 
@@ -26,11 +28,13 @@ var (
 		"button":          RuleTypeButton,
 		"button-combo":    RuleTypeButtonCombo,
 		"button-latched":  RuleTypeButtonLatched,
+		"button-tempo":    RuleTypeButtonTempo,
 		"axis":            RuleTypeAxis,
 		"axis-combined":   RuleTypeAxisCombined,
 		"axis-to-button":  RuleTypeAxisToButton,
 		"axis-to-relaxis": RuleTypeAxisToRelaxis,
 		"mode-select":     RuleTypeModeSelect,
+		"mode-shift":      RuleTypeModeShift,
 		"hat":             RuleTypeHat,
 	}
 )

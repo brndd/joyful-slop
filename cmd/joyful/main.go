@@ -10,6 +10,7 @@ import (
 
 	"git.annabunches.net/annabunches/joyful/internal/configparser"
 	"git.annabunches.net/annabunches/joyful/internal/logger"
+	"git.annabunches.net/annabunches/joyful/internal/mappingrules"
 )
 
 func getConfigDir(dir string) string {
@@ -67,6 +68,7 @@ func main() {
 
 	for {
 		lastMode := mode
+		suppressModeAnnouncement := false
 		// Get an event (blocks if necessary)
 		channelEvent := <-eventChannel
 
@@ -83,7 +85,20 @@ func main() {
 			case evdev.EV_KEY, evdev.EV_ABS:
 				// We have a matchable event type. Check all the events
 				for _, rule := range rules {
+					modeBeforeRule := mode
+					if multiRule, ok := rule.(mappingrules.MultiEventMappingRule); ok {
+						for _, output := range multiRule.MatchEvents(channelEvent.Device, channelEvent.Event, &mode) {
+							vBuffersByDevice[output.Device].AddEvent(output.Event)
+						}
+						if modeBeforeRule != mode {
+							_, suppressModeAnnouncement = rule.(mappingrules.SilentModeChangeRule)
+						}
+						continue
+					}
 					device, outputEvent := rule.MatchEvent(channelEvent.Device, channelEvent.Event, &mode)
+					if modeBeforeRule != mode {
+						_, suppressModeAnnouncement = rule.(mappingrules.SilentModeChangeRule)
+					}
 					if device == nil || outputEvent == nil {
 						continue
 					}
@@ -92,10 +107,16 @@ func main() {
 			}
 
 		case ChannelEventTimer:
-			// Timer events give us the device and event to use directly
-			vBuffersByDevice[channelEvent.Device].AddEvent(channelEvent.Event)
-			// If we get a timer event, flush the output device buffer immediately
-			vBuffersByDevice[channelEvent.Device].SendEvents()
+			// Evaluate timed rules here, never in the timer goroutine. This keeps mode
+			// and rule state changes serialized with physical input processing.
+			changedBuffers := make(map[*evdev.InputDevice]struct{})
+			for _, output := range channelEvent.Rule.TimerEvents(&mode) {
+				vBuffersByDevice[output.Device].AddEvent(output.Event)
+				changedBuffers[output.Device] = struct{}{}
+			}
+			for device := range changedBuffers {
+				vBuffersByDevice[device].SendEvents()
+			}
 
 		case ChannelEventReload:
 			// stop existing channels
@@ -114,8 +135,12 @@ func main() {
 			fmt.Println("Config re-loaded. Only rule changes applied. Device and Mode changes require restart.")
 		}
 
-		if lastMode != mode && tts != nil {
+		if shouldAnnounceModeChange(lastMode, mode, suppressModeAnnouncement) && tts != nil {
 			tts.Say(mode)
 		}
 	}
+}
+
+func shouldAnnounceModeChange(previous, current string, suppressed bool) bool {
+	return previous != current && !suppressed
 }

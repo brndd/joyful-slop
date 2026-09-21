@@ -39,6 +39,8 @@ func NewRule(config configparser.RuleConfig, pDevs map[string]Device, vDevs map[
 		newRule, err = NewMappingRuleButtonCombo(config.Config.(configparser.RuleConfigButtonCombo), pDevs, vDevs, base)
 	case configparser.RuleTypeButtonLatched:
 		newRule, err = NewMappingRuleButtonLatched(config.Config.(configparser.RuleConfigButtonLatched), pDevs, vDevs, base)
+	case configparser.RuleTypeButtonTempo:
+		newRule, err = NewMappingRuleButtonTempo(config.Config.(configparser.RuleConfigButtonTempo), pDevs, vDevs, modes, base)
 	case configparser.RuleTypeAxis:
 		newRule, err = NewMappingRuleAxis(config.Config.(configparser.RuleConfigAxis), pDevs, vDevs, base)
 	case configparser.RuleTypeAxisCombined:
@@ -49,6 +51,8 @@ func NewRule(config configparser.RuleConfig, pDevs map[string]Device, vDevs map[
 		newRule, err = NewMappingRuleAxisToRelaxis(config.Config.(configparser.RuleConfigAxisToRelaxis), pDevs, vDevs, base)
 	case configparser.RuleTypeModeSelect:
 		newRule, err = NewMappingRuleModeSelect(config.Config.(configparser.RuleConfigModeSelect), pDevs, modes, base)
+	case configparser.RuleTypeModeShift:
+		newRule, err = NewMappingRuleModeShift(config.Config.(configparser.RuleConfigModeShift), pDevs, modes, base)
 	case configparser.RuleTypeHat:
 		newRule, err = NewMappingRuleHat(config.Config.(configparser.RuleConfigHat), pDevs, vDevs, base)
 	default:

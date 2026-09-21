@@ -150,3 +150,11 @@ func (rule *MappingRuleAxisToButton) TimerEvent() *evdev.InputEvent {
 func (rule *MappingRuleAxisToButton) GetOutputDevice() *evdev.InputDevice {
 	return rule.Output.Device.(*evdev.InputDevice)
 }
+
+func (rule *MappingRuleAxisToButton) TimerEvents(_ *string) []OutputEvent {
+	event := rule.TimerEvent()
+	if event == nil {
+		return nil
+	}
+	return []OutputEvent{{Device: rule.GetOutputDevice(), Event: event}}
+}

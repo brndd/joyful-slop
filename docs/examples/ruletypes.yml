@@ -12,6 +12,10 @@ devices:
     relative_axes:
       - REL_WHEEL
 
+modes:
+  - mode1
+  - mode2
+
 rules:
   # Straightforward axis mapping
   - type: axis
@@ -111,6 +115,32 @@ rules:
     output:
       device: main
       button: BTN_BASE3
+
+  # Tap emits a complete press/release pulse. Holding for 500ms presses all hold
+  # outputs once and keeps them pressed until the physical button is released.
+  - type: button-tempo
+    threshold_ms: 500
+    input:
+      device: flightstick
+      button: BTN_BASE4
+    tap:
+      outputs:
+        - device: main
+          button: BTN_BASE5
+    hold:
+      outputs:
+        - device: main
+          button: BTN_BASE6
+        - device: main
+          button: BTN_BASE7
+      mode: mode2 # optional; directly selects this mode when the branch fires
+
+  # Temporarily use mode2, restoring whichever mode was active on release.
+  - type: mode-shift
+    input:
+      device: flightstick
+      button: BTN_PINKIE
+    mode: mode2
 
   # The specified axis will output button presses, and repeat them faster the more the axis is engaged.
   - type: axis-to-button

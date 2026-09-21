@@ -75,3 +75,20 @@ type RuleConfigModeSelect struct {
 	Input  RuleTargetConfigButton
 	Output RuleTargetConfigModeSelect
 }
+
+type RuleConfigButtonTempoBranch struct {
+	Outputs []RuleTargetConfigButton
+	Mode    string `yaml:"mode,omitempty"`
+}
+
+type RuleConfigButtonTempo struct {
+	ThresholdMs int `yaml:"threshold_ms"`
+	Input       RuleTargetConfigButton
+	Tap         RuleConfigButtonTempoBranch
+	Hold        RuleConfigButtonTempoBranch
+}
+
+type RuleConfigModeShift struct {
+	Input RuleTargetConfigButton
+	Mode  string
+}

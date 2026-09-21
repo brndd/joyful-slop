@@ -132,7 +132,7 @@ func loadRules(
 
 	timerCount := 0
 	for _, rule := range rules {
-		if timedRule, ok := rule.(mappingrules.TimedEventEmitter); ok {
+		if timedRule, ok := rule.(mappingrules.MainLoopTimedEventEmitter); ok {
 			wg.Add(1)
 			go timerWatcher(timedRule, eventChannel, ctx, &wg)
 			timerCount++
