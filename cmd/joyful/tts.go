@@ -38,9 +38,9 @@ func addTTSFlags() *TTSOptions {
 	flag.BoolVar(&ops.Disabled, "no-tts", false, "Disable text-to-speech.")
 	flag.StringVar(&ops.Voice, "tts-voice", "en", "Which voice to use for TTS; see 'espeak --voices' for a full list of options.")
 	flag.IntVar(&ops.Volume, "tts-volume", 100, "Text to speech volume")
-	flag.IntVar(&ops.Pitch, "tts-pitch", 50, "Text to speech volume")
-	flag.IntVar(&ops.Range, "tts-range", 50, "Text to speech volume")
-	flag.IntVar(&ops.Range, "tts-speed", 175, "Text to speech speaking speed (in words per minute)")
+	flag.IntVar(&ops.Pitch, "tts-pitch", 50, "Text to speech pitch")
+	flag.IntVar(&ops.Range, "tts-range", 50, "Text to speech pitch range")
+	flag.IntVar(&ops.Speed, "tts-speed", 175, "Text to speech speaking speed (in words per minute)")
 
 	return ops
 }
