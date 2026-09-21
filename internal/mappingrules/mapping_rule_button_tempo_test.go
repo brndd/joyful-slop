@@ -36,16 +36,23 @@ func buttonInput(value int32) *evdev.InputEvent {
 	return &evdev.InputEvent{Type: evdev.EV_KEY, Code: evdev.BTN_TRIGGER, Value: value}
 }
 
-func TestButtonTempoTapEmitsCompleteMultiButtonPulse(t *testing.T) {
+func TestButtonTempoTapSeparatesPressAndRelease(t *testing.T) {
 	rule, clock, inputDevice, mode := newButtonTempoTestRule(t)
 	require.Empty(t, rule.MatchEvents(inputDevice, buttonInput(1), mode))
 	clock.Advance(499 * time.Millisecond)
 	require.Empty(t, rule.TimerEvents(mode))
 
 	events := rule.MatchEvents(inputDevice, buttonInput(0), mode)
-	require.Len(t, events, 4)
-	require.Equal(t, []int32{1, 1, 0, 0}, []int32{events[0].Event.Value, events[1].Event.Value, events[2].Event.Value, events[3].Event.Value})
+	require.Len(t, events, 2)
+	require.Equal(t, []int32{1, 1}, []int32{events[0].Event.Value, events[1].Event.Value})
 	require.Equal(t, "tap-mode", *mode)
+
+	clock.Advance(buttonTempoPulseDuration - time.Millisecond)
+	require.Empty(t, rule.TimerEvents(mode))
+	clock.Advance(time.Millisecond)
+	events = rule.TimerEvents(mode)
+	require.Len(t, events, 2)
+	require.Equal(t, []int32{0, 0}, []int32{events[0].Event.Value, events[1].Event.Value})
 }
 
 func TestButtonTempoHoldFiresOnceAndReleasesOnInputRelease(t *testing.T) {
@@ -72,8 +79,24 @@ func TestButtonTempoReleaseAtThresholdIsHold(t *testing.T) {
 	clock.Advance(500 * time.Millisecond)
 
 	events := rule.MatchEvents(inputDevice, buttonInput(0), mode)
-	require.Len(t, events, 4)
-	require.Equal(t, []int32{1, 1, 0, 0}, []int32{events[0].Event.Value, events[1].Event.Value, events[2].Event.Value, events[3].Event.Value})
+	require.Len(t, events, 2)
+	require.Equal(t, []int32{1, 1}, []int32{events[0].Event.Value, events[1].Event.Value})
 	require.Equal(t, "hold-mode", *mode)
-	require.Empty(t, rule.TimerEvents(mode))
+
+	clock.Advance(buttonTempoPulseDuration)
+	events = rule.TimerEvents(mode)
+	require.Len(t, events, 2)
+	require.Equal(t, []int32{0, 0}, []int32{events[0].Event.Value, events[1].Event.Value})
+}
+
+func TestButtonTempoNewPressDrainsPendingRelease(t *testing.T) {
+	rule, clock, inputDevice, mode := newButtonTempoTestRule(t)
+	rule.MatchEvents(inputDevice, buttonInput(1), mode)
+	clock.Advance(100 * time.Millisecond)
+	events := rule.MatchEvents(inputDevice, buttonInput(0), mode)
+	require.Len(t, events, 2)
+
+	events = rule.MatchEvents(inputDevice, buttonInput(1), mode)
+	require.Len(t, events, 2)
+	require.Equal(t, []int32{0, 0}, []int32{events[0].Event.Value, events[1].Event.Value})
 }

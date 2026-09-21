@@ -15,6 +15,8 @@ type buttonTempoBranch struct {
 	mode    string
 }
 
+const buttonTempoPulseDuration = 50 * time.Millisecond
+
 type MappingRuleButtonTempo struct {
 	MappingRuleBase
 	Input     *RuleTargetButton
@@ -25,6 +27,10 @@ type MappingRuleButtonTempo struct {
 	pressedAt time.Time
 	active    bool
 	held      bool
+
+	pendingRelease   bool
+	pendingBranch    buttonTempoBranch
+	pendingReleaseAt time.Time
 }
 
 func NewMappingRuleButtonTempo(ruleConfig configparser.RuleConfigButtonTempo, pDevs, vDevs map[string]Device, modes []string, base MappingRuleBase) (*MappingRuleButtonTempo, error) {
@@ -76,13 +82,18 @@ func (rule *MappingRuleButtonTempo) MatchEvents(device Device, event *evdev.Inpu
 	}
 	value := rule.Input.NormalizeValue(event.Value)
 	if value != 0 {
+		var events []OutputEvent
+		if rule.pendingRelease {
+			events = branchEvents(rule.pendingBranch, 0, mode)
+			rule.pendingRelease = false
+		}
 		if rule.active || !rule.MappingRuleBase.modeCheck(mode) {
-			return nil
+			return events
 		}
 		rule.active = true
 		rule.held = false
 		rule.pressedAt = rule.clock.Now()
-		return nil
+		return events
 	}
 	if !rule.active {
 		return nil
@@ -93,19 +104,28 @@ func (rule *MappingRuleButtonTempo) MatchEvents(device Device, event *evdev.Inpu
 		return branchEvents(rule.hold, 0, mode)
 	}
 	if !rule.clock.Now().Before(rule.pressedAt.Add(rule.Threshold)) {
-		events := branchEvents(rule.hold, 1, mode)
-		return append(events, branchEvents(rule.hold, 0, mode)...)
+		return rule.startPulse(rule.hold, mode)
 	}
-	events := branchEvents(rule.tap, 1, mode)
-	return append(events, branchEvents(rule.tap, 0, mode)...)
+	return rule.startPulse(rule.tap, mode)
 }
 
 func (rule *MappingRuleButtonTempo) TimerEvents(mode *string) []OutputEvent {
+	if rule.pendingRelease && !rule.clock.Now().Before(rule.pendingReleaseAt) {
+		rule.pendingRelease = false
+		return branchEvents(rule.pendingBranch, 0, mode)
+	}
 	if !rule.active || rule.held || rule.clock.Now().Before(rule.pressedAt.Add(rule.Threshold)) {
 		return nil
 	}
 	rule.held = true
 	return branchEvents(rule.hold, 1, mode)
+}
+
+func (rule *MappingRuleButtonTempo) startPulse(branch buttonTempoBranch, mode *string) []OutputEvent {
+	rule.pendingBranch = branch
+	rule.pendingRelease = true
+	rule.pendingReleaseAt = rule.clock.Now().Add(buttonTempoPulseDuration)
+	return branchEvents(branch, 1, mode)
 }
 
 func branchEvents(branch buttonTempoBranch, value int32, mode *string) []OutputEvent {

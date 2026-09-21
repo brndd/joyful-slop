@@ -44,7 +44,7 @@ All `rules` must have a `type` parameter. Valid values for this parameter are:
 * `button` - a single button mapping
 * `button-combo` - multiple input buttons mapped to a single output. The output event will trigger when all the input conditions are met.
 * `button-latched` - a single button mapped to a single output, but each time the input is pressed, the output will toggle.
-* `button-tempo` - distinguishes a short tap from a held button and can emit several buttons or select a mode for either branch.
+* `button-tempo` - distinguishes a short tap from a held button and can emit several buttons or select a mode for either branch. Tap outputs are emitted as 50ms button pulses.
 * `axis` - a simple axis mapping
 * `axis-combined` - a mapping that combines 2 input axes into a single output axis.
 * `axis-to-button` - causes an axis input to produce a button output. This can be repeated with variable speed proportional to the axis' input value

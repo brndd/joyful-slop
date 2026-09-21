@@ -116,7 +116,7 @@ rules:
       device: main
       button: BTN_BASE3
 
-  # Tap emits a complete press/release pulse. Holding for 500ms presses all hold
+  # Tap emits a 50ms press/release pulse. Holding for 500ms presses all hold
   # outputs once and keeps them pressed until the physical button is released.
   - type: button-tempo
     threshold_ms: 500
