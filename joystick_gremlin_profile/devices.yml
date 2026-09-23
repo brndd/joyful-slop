@@ -1,0 +1,17 @@
+devices:
+  - name: left
+    type: physical
+    device_path: "/dev/input/by-id/usb-VKB-Sim__C__Alex_Oz_2023_VKBsim_Gladiator_EVO_OT_L-event-joystick"
+  - name: right
+    type: physical
+    device_path: "/dev/input/by-id/usb-VKB-Sim__C__Alex_Oz_2023_VKBsim_Gladiator_EVO_R-event-joystick"
+  - name: left-vjoy
+    type: virtual
+    preset: joystick
+    vendor_id: "0x4711"
+    device_id: "0x0817"
+  - name: right-vjoy
+    type: virtual
+    preset: joystick
+    vendor_id: "0x4711"
+    device_id: "0x0818"

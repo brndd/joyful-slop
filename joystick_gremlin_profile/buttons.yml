@@ -1,0 +1,1440 @@
+rules:
+  - type: button
+    name: "MAIN-TRIG-L.stage-1"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 0
+    output:
+      device: "left-vjoy"
+      button: 0
+  - type: button
+    name: "MAIN-TRIG-L.stage-1"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 0
+    output:
+      device: "left-vjoy"
+      button: 30
+  - type: button
+    name: "MAIN-TRIG-L.stage-2"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 1
+    output:
+      device: "left-vjoy"
+      button: 1
+  - type: button
+    name: "MAIN-TRIG-L.stage-2"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 1
+    output:
+      device: "left-vjoy"
+      button: 31
+  - type: button
+    name: "L-A2"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 2
+    output:
+      device: "left-vjoy"
+      button: 32
+  - type: button-tempo
+    name: "L-A2"
+    modes:
+      - "Auxiliary Mode"
+    threshold_ms: 500
+    input:
+      device: "left"
+      button: 2
+    tap:
+      outputs:
+        - device: "left-vjoy"
+          button: 2
+    hold:
+      outputs:
+        - device: "left-vjoy"
+          button: 60
+        - device: "left-vjoy"
+          button: 63
+      mode: "SCM Mode"
+  - type: button-tempo
+    name: "L-A2"
+    modes:
+      - "SCM Mode"
+    threshold_ms: 500
+    input:
+      device: "left"
+      button: 2
+    tap:
+      outputs:
+        - device: "left-vjoy"
+          button: 2
+    hold:
+      outputs:
+        - device: "left-vjoy"
+          button: 62
+      mode: "Nav Mode"
+  - type: button-tempo
+    name: "L-A2"
+    modes:
+      - "Nav Mode"
+    threshold_ms: 500
+    input:
+      device: "left"
+      button: 2
+    tap:
+      outputs:
+        - device: "left-vjoy"
+          button: 2
+    hold:
+      outputs:
+        - device: "left-vjoy"
+          button: 63
+      mode: "SCM Mode"
+  - type: button
+    name: "L-B1"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 3
+    output:
+      device: "left-vjoy"
+      button: 3
+  - type: button
+    name: "L-B1"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 3
+    output:
+      device: "left-vjoy"
+      button: 33
+  - type: mode-shift
+    name: "L-D1 \"Modifier | Modifier\" Hold-only Modifier mode (chord layer). Reverts on release."
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 4
+    mode: "Modifier"
+  - type: button
+    name: "L-A3.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 5
+    output:
+      device: "left-vjoy"
+      button: 10
+  - type: button
+    name: "L-A3.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 5
+    output:
+      device: "left-vjoy"
+      button: 40
+  - type: button
+    name: "L-A3.right"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 6
+    output:
+      device: "left-vjoy"
+      button: 11
+  - type: button
+    name: "L-A3.right"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 6
+    output:
+      device: "left-vjoy"
+      button: 41
+  - type: button
+    name: "L-A3.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 7
+    output:
+      device: "left-vjoy"
+      button: 12
+  - type: button
+    name: "L-A3.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 7
+    output:
+      device: "left-vjoy"
+      button: 42
+  - type: button
+    name: "L-A3.left"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 8
+    output:
+      device: "left-vjoy"
+      button: 13
+  - type: button
+    name: "L-A3.left"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 8
+    output:
+      device: "left-vjoy"
+      button: 43
+  - type: button
+    name: "L-A3.press-in"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 9
+    output:
+      device: "left-vjoy"
+      button: 14
+  - type: button
+    name: "L-A3.press-in"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 9
+    output:
+      device: "left-vjoy"
+      button: 44
+  - type: button
+    name: "L-A4.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 10
+    output:
+      device: "left-vjoy"
+      button: 35
+  - type: button
+    name: "L-A4.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 10
+    output:
+      device: "left-vjoy"
+      button: 5
+  - type: button
+    name: "L-A4.right"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 11
+    output:
+      device: "left-vjoy"
+      button: 36
+  - type: button
+    name: "L-A4.right"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 11
+    output:
+      device: "left-vjoy"
+      button: 6
+  - type: button
+    name: "L-A4.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 12
+    output:
+      device: "left-vjoy"
+      button: 37
+  - type: button
+    name: "L-A4.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 12
+    output:
+      device: "left-vjoy"
+      button: 7
+  - type: button
+    name: "L-A4.left"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 13
+    output:
+      device: "left-vjoy"
+      button: 38
+  - type: button
+    name: "L-A4.left"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 13
+    output:
+      device: "left-vjoy"
+      button: 8
+  - type: button
+    name: "L-A4.press-in"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 14
+    output:
+      device: "left-vjoy"
+      button: 39
+  - type: button-tempo
+    name: "L-A4.press-in"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    threshold_ms: 500
+    input:
+      device: "left"
+      button: 14
+    tap:
+      outputs:
+        - device: "left-vjoy"
+          button: 9
+    hold:
+      outputs: []
+  - type: button
+    name: "L-C1.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 15
+    output:
+      device: "left-vjoy"
+      button: 20
+  - type: button
+    name: "L-C1.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 15
+    output:
+      device: "left-vjoy"
+      button: 50
+  - type: button
+    name: "L-C1.right"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 16
+    output:
+      device: "left-vjoy"
+      button: 21
+  - type: button
+    name: "L-C1.right"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 16
+    output:
+      device: "left-vjoy"
+      button: 51
+  - type: button
+    name: "L-C1.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 17
+    output:
+      device: "left-vjoy"
+      button: 22
+  - type: button
+    name: "L-C1.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 17
+    output:
+      device: "left-vjoy"
+      button: 52
+  - type: button
+    name: "L-C1.left"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 18
+    output:
+      device: "left-vjoy"
+      button: 23
+  - type: button
+    name: "L-C1.left"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 18
+    output:
+      device: "left-vjoy"
+      button: 53
+  - type: button
+    name: "L-C1.press-in"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 19
+    output:
+      device: "left-vjoy"
+      button: 24
+  - type: button
+    name: "L-C1.press-in"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 19
+    output:
+      device: "left-vjoy"
+      button: 54
+  - type: button
+    name: "RAPID-TRIG-L.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 20
+    output:
+      device: "left-vjoy"
+      button: 55
+  - type: button-tempo
+    name: "RAPID-TRIG-L.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    threshold_ms: 500
+    input:
+      device: "left"
+      button: 20
+    tap:
+      outputs:
+        - device: "left-vjoy"
+          button: 25
+    hold:
+      outputs: []
+  - type: button
+    name: "RAPID-TRIG-L.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 21
+    output:
+      device: "left-vjoy"
+      button: 26
+  - type: button
+    name: "RAPID-TRIG-L.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 21
+    output:
+      device: "left-vjoy"
+      button: 56
+  - type: button
+    name: "L-EN1.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 22
+    output:
+      device: "left-vjoy"
+      button: 27
+  - type: button
+    name: "L-EN1.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 22
+    output:
+      device: "left-vjoy"
+      button: 57
+  - type: button
+    name: "L-EN1.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 23
+    output:
+      device: "left-vjoy"
+      button: 28
+  - type: button
+    name: "L-EN1.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 23
+    output:
+      device: "left-vjoy"
+      button: 58
+  - type: button
+    name: "L-SW1.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 24
+    output:
+      device: "left-vjoy"
+      button: 18
+  - type: button
+    name: "L-SW1.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 24
+    output:
+      device: "left-vjoy"
+      button: 48
+  - type: button
+    name: "L-SW1.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 25
+    output:
+      device: "left-vjoy"
+      button: 19
+  - type: button
+    name: "L-SW1.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 25
+    output:
+      device: "left-vjoy"
+      button: 49
+  - type: button
+    name: "L-F1"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 26
+    output:
+      device: "left-vjoy"
+      button: 15
+  - type: button
+    name: "L-F1"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 26
+    output:
+      device: "left-vjoy"
+      button: 45
+  - type: button
+    name: "L-F2"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 27
+    output:
+      device: "left-vjoy"
+      button: 16
+  - type: button
+    name: "L-F2"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 27
+    output:
+      device: "left-vjoy"
+      button: 46
+  - type: button
+    name: "L-F3"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      button: 28
+    output:
+      device: "left-vjoy"
+      button: 17
+  - type: button
+    name: "L-F3"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      button: 28
+    output:
+      device: "left-vjoy"
+      button: 47
+  - type: hat
+    name: "L-A1 X"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      hat: HAT0X
+    output:
+      device: "left-vjoy"
+      hat: HAT0X
+  - type: hat
+    name: "L-A1 X"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      hat: HAT0X
+    output:
+      device: "left-vjoy"
+      hat: HAT1X
+  - type: hat
+    name: "L-A1 Y"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "left"
+      hat: HAT0Y
+    output:
+      device: "left-vjoy"
+      hat: HAT0Y
+  - type: hat
+    name: "L-A1 Y"
+    modes:
+      - "Modifier"
+    input:
+      device: "left"
+      hat: HAT0Y
+    output:
+      device: "left-vjoy"
+      hat: HAT1Y
+  - type: button
+    name: "MAIN-TRIG-R.stage-1"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 0
+    output:
+      device: "right-vjoy"
+      button: 0
+  - type: button
+    name: "MAIN-TRIG-R.stage-1"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 0
+    output:
+      device: "right-vjoy"
+      button: 30
+  - type: button
+    name: "MAIN-TRIG-R.stage-2"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 1
+    output:
+      device: "right-vjoy"
+      button: 1
+  - type: button
+    name: "MAIN-TRIG-R.stage-2"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 1
+    output:
+      device: "right-vjoy"
+      button: 31
+  - type: button
+    name: "R-A2"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 2
+    output:
+      device: "right-vjoy"
+      button: 32
+  - type: button-tempo
+    name: "R-A2"
+    modes:
+      - "Auxiliary Mode"
+    threshold_ms: 500
+    input:
+      device: "right"
+      button: 2
+    tap:
+      outputs:
+        - device: "right-vjoy"
+          button: 2
+    hold:
+      outputs:
+        - device: "left-vjoy"
+          button: 59
+  - type: button-tempo
+    name: "R-A2"
+    modes:
+      - "Nav Mode"
+    threshold_ms: 500
+    input:
+      device: "right"
+      button: 2
+    tap:
+      outputs:
+        - device: "right-vjoy"
+          button: 2
+    hold:
+      outputs:
+        - device: "left-vjoy"
+          button: 60
+      mode: "Auxiliary Mode"
+  - type: button-tempo
+    name: "R-A2"
+    modes:
+      - "SCM Mode"
+    threshold_ms: 500
+    input:
+      device: "right"
+      button: 2
+    tap:
+      outputs:
+        - device: "right-vjoy"
+          button: 2
+    hold:
+      outputs:
+        - device: "right-vjoy"
+          button: 61
+      mode: "Auxiliary Mode"
+  - type: button
+    name: "R-B1"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 3
+    output:
+      device: "right-vjoy"
+      button: 3
+  - type: button
+    name: "R-B1"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 3
+    output:
+      device: "right-vjoy"
+      button: 33
+  - type: button
+    name: "R-D1"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 4
+    output:
+      device: "right-vjoy"
+      button: 34
+  - type: button
+    name: "R-D1"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 4
+    output:
+      device: "right-vjoy"
+      button: 4
+  - type: button
+    name: "R-A3.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 5
+    output:
+      device: "right-vjoy"
+      button: 10
+  - type: button
+    name: "R-A3.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 5
+    output:
+      device: "right-vjoy"
+      button: 40
+  - type: button
+    name: "R-A3.right"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 6
+    output:
+      device: "right-vjoy"
+      button: 11
+  - type: button
+    name: "R-A3.right"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 6
+    output:
+      device: "right-vjoy"
+      button: 41
+  - type: button
+    name: "R-A3.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 7
+    output:
+      device: "right-vjoy"
+      button: 12
+  - type: button
+    name: "R-A3.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 7
+    output:
+      device: "right-vjoy"
+      button: 42
+  - type: button
+    name: "R-A3.left"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 8
+    output:
+      device: "right-vjoy"
+      button: 13
+  - type: button
+    name: "R-A3.left"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 8
+    output:
+      device: "right-vjoy"
+      button: 43
+  - type: button
+    name: "R-A3.press-in"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 9
+    output:
+      device: "right-vjoy"
+      button: 14
+  - type: button
+    name: "R-A3.press-in"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 9
+    output:
+      device: "right-vjoy"
+      button: 44
+  - type: button
+    name: "R-A4.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 10
+    output:
+      device: "right-vjoy"
+      button: 35
+  - type: button
+    name: "R-A4.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 10
+    output:
+      device: "right-vjoy"
+      button: 5
+  - type: button
+    name: "R-A4.right"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 11
+    output:
+      device: "right-vjoy"
+      button: 36
+  - type: button
+    name: "R-A4.right"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 11
+    output:
+      device: "right-vjoy"
+      button: 6
+  - type: button
+    name: "R-A4.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 12
+    output:
+      device: "right-vjoy"
+      button: 37
+  - type: button
+    name: "R-A4.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 12
+    output:
+      device: "right-vjoy"
+      button: 7
+  - type: button
+    name: "R-A4.left"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 13
+    output:
+      device: "right-vjoy"
+      button: 38
+  - type: button
+    name: "R-A4.left"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 13
+    output:
+      device: "right-vjoy"
+      button: 8
+  - type: button
+    name: "R-A4.press-in"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 14
+    output:
+      device: "right-vjoy"
+      button: 39
+  - type: button
+    name: "R-A4.press-in"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 14
+    output:
+      device: "right-vjoy"
+      button: 9
+  - type: button
+    name: "R-C1.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 15
+    output:
+      device: "right-vjoy"
+      button: 20
+  - type: button
+    name: "R-C1.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 15
+    output:
+      device: "right-vjoy"
+      button: 50
+  - type: button
+    name: "R-C1.right"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 16
+    output:
+      device: "right-vjoy"
+      button: 21
+  - type: button
+    name: "R-C1.right"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 16
+    output:
+      device: "right-vjoy"
+      button: 51
+  - type: button
+    name: "R-C1.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 17
+    output:
+      device: "right-vjoy"
+      button: 22
+  - type: button
+    name: "R-C1.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 17
+    output:
+      device: "right-vjoy"
+      button: 52
+  - type: button
+    name: "R-C1.left"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 18
+    output:
+      device: "right-vjoy"
+      button: 23
+  - type: button
+    name: "R-C1.left"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 18
+    output:
+      device: "right-vjoy"
+      button: 53
+  - type: button
+    name: "R-C1.press-in"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 19
+    output:
+      device: "right-vjoy"
+      button: 24
+  - type: button
+    name: "R-C1.press-in"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 19
+    output:
+      device: "right-vjoy"
+      button: 54
+  - type: button
+    name: "RAPID-TRIG-R.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 20
+    output:
+      device: "right-vjoy"
+      button: 25
+  - type: button
+    name: "RAPID-TRIG-R.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 20
+    output:
+      device: "right-vjoy"
+      button: 55
+  - type: button
+    name: "RAPID-TRIG-R.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 21
+    output:
+      device: "right-vjoy"
+      button: 26
+  - type: button
+    name: "RAPID-TRIG-R.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 21
+    output:
+      device: "right-vjoy"
+      button: 56
+  - type: button
+    name: "R-EN1.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 22
+    output:
+      device: "right-vjoy"
+      button: 27
+  - type: button
+    name: "R-EN1.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 22
+    output:
+      device: "right-vjoy"
+      button: 57
+  - type: button
+    name: "R-EN1.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 23
+    output:
+      device: "right-vjoy"
+      button: 28
+  - type: button
+    name: "R-EN1.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 23
+    output:
+      device: "right-vjoy"
+      button: 58
+  - type: button
+    name: "R-SW1.up"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 24
+    output:
+      device: "right-vjoy"
+      button: 18
+  - type: button
+    name: "R-SW1.up"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 24
+    output:
+      device: "right-vjoy"
+      button: 48
+  - type: button
+    name: "R-SW1.down"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 25
+    output:
+      device: "right-vjoy"
+      button: 19
+  - type: button
+    name: "R-SW1.down"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 25
+    output:
+      device: "right-vjoy"
+      button: 49
+  - type: button
+    name: "R-F1"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 26
+    output:
+      device: "right-vjoy"
+      button: 15
+  - type: button
+    name: "R-F1"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 26
+    output:
+      device: "right-vjoy"
+      button: 45
+  - type: button
+    name: "R-F2"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 27
+    output:
+      device: "right-vjoy"
+      button: 16
+  - type: button
+    name: "R-F2"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 27
+    output:
+      device: "right-vjoy"
+      button: 46
+  - type: button
+    name: "R-F3"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      button: 28
+    output:
+      device: "right-vjoy"
+      button: 17
+  - type: button
+    name: "R-F3"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      button: 28
+    output:
+      device: "right-vjoy"
+      button: 47
+  - type: hat
+    name: "R-A1 X"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      hat: HAT0X
+    output:
+      device: "right-vjoy"
+      hat: HAT0X
+  - type: hat
+    name: "R-A1 X"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      hat: HAT0X
+    output:
+      device: "right-vjoy"
+      hat: HAT1X
+  - type: hat
+    name: "R-A1 Y"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Nav Mode"
+    input:
+      device: "right"
+      hat: HAT0Y
+    output:
+      device: "right-vjoy"
+      hat: HAT0Y
+  - type: hat
+    name: "R-A1 Y"
+    modes:
+      - "Modifier"
+    input:
+      device: "right"
+      hat: HAT0Y
+    output:
+      device: "right-vjoy"
+      hat: HAT1Y

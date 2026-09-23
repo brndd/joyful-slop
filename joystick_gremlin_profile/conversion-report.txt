@@ -1,0 +1,26 @@
+Joystick Gremlin v14 to Joyful conversion report
+
+Rule counts:
+  axis: 12
+  button: 110
+  button-tempo: 8
+  hat: 8
+  mode-shift: 1
+  total: 139
+
+Warnings (15):
+  - collapsed the Modifier-to-SCM temporary action into the momentary Modifier mode-shift restore behavior
+  - converted Gremlin mouse Motion direction 0 to virtual joystick axis Z and omitted its mouse acceleration curve
+  - converted Gremlin mouse Motion direction 90 to virtual joystick axis RX and omitted its mouse acceleration curve
+  - omitted macro action 053b3d6c-eacf-44e4-a9eb-2aee9ef823e0 from tempo hold branch; other branch actions were preserved
+  - omitted macro action 6f043473-0ade-403a-98fd-fc6cd05f93c6 from tempo hold branch; other branch actions were preserved
+  - omitted unsupported physical left button 125 (the connected Linux device exposes buttons 1..79)
+  - omitted unsupported physical left button 126 (the connected Linux device exposes buttons 1..79)
+  - omitted unsupported physical left button 127 (the connected Linux device exposes buttons 1..79)
+  - omitted unsupported physical left button 128 (the connected Linux device exposes buttons 1..79)
+  - remapped vJoy button 124 to Joyful index 59 (vJoy-style button 60)
+  - remapped vJoy button 125 to Joyful index 60 (vJoy-style button 61)
+  - remapped vJoy button 126 to Joyful index 61 (vJoy-style button 62)
+  - remapped vJoy button 127 to Joyful index 62 (vJoy-style button 63)
+  - remapped vJoy button 128 to Joyful index 63 (vJoy-style button 64)
+  - tempo activate-on=press is represented by button-tempo's release/threshold state machine; output press/release behavior is externally equivalent, but exact dispatch timing may differ

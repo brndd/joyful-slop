@@ -1,0 +1,161 @@
+rules:
+  - type: axis
+    name: "Left mini-stick X"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "left"
+      axis: RX
+    output:
+      device: "left-vjoy"
+      axis: Z
+  - type: axis
+    name: "Left mini-stick Y"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "left"
+      axis: RY
+      inverted: true
+    output:
+      device: "left-vjoy"
+      axis: RX
+  - type: axis
+    name: "Left twist"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "left"
+      axis: RZ
+      inverted: true
+    output:
+      device: "left-vjoy"
+      axis: RY
+  - type: axis
+    name: "L-X-Axis"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "left"
+      axis: X
+    output:
+      device: "left-vjoy"
+      axis: X
+  - type: axis
+    name: "L-Y-Axis"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "left"
+      axis: Y
+    output:
+      device: "left-vjoy"
+      axis: Y
+  - type: axis
+    name: "L-Z-Axis"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "left"
+      axis: Z
+    output:
+      device: "left-vjoy"
+      axis: RZ
+  - type: axis
+    name: "Right mini-stick X"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "right"
+      axis: RX
+    output:
+      device: "right-vjoy"
+      axis: Z
+  - type: axis
+    name: "Right mini-stick Y"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "right"
+      axis: RY
+      inverted: true
+    output:
+      device: "right-vjoy"
+      axis: RX
+  - type: axis
+    name: "Right twist"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "right"
+      axis: RZ
+      inverted: true
+    output:
+      device: "right-vjoy"
+      axis: RY
+  - type: axis
+    name: "R-X-Axis"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "right"
+      axis: X
+    output:
+      device: "right-vjoy"
+      axis: X
+  - type: axis
+    name: "R-Y-Axis"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "right"
+      axis: Y
+    output:
+      device: "right-vjoy"
+      axis: Y
+  - type: axis
+    name: "R-Z-Axis"
+    modes:
+      - "SCM Mode"
+      - "Auxiliary Mode"
+      - "Modifier"
+      - "Nav Mode"
+    input:
+      device: "right"
+      axis: Z
+    output:
+      device: "right-vjoy"
+      axis: RZ
