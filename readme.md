@@ -4,6 +4,7 @@ This is a slop fork of [Joyful](https://codeberg.org/annabunches/joyful) with so
 - Modifier buttons
 - "Hold" buttons (tapping and holding down produce different virtual button outputs)
 - Some smaller fixes
+- Slopped up WIP Joystick Gremlin profile converter that's currently been built and tested exclusively against the [Subliminal VKB Gladiator profile for Star Citizen](https://subliminal.gg/bindings/vkb-gladiator-dual) with little regard for generic support (but it might work for other profiles too!)
 
 Original readme follows.
 
